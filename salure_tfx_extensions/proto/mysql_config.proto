@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package salure_tfx_extensions.components.mysql_example_gen;
+
+message MySQLConnConfig {
+    string host = 1;
+    uint32 port = 2;
+    string user = 3;
+    string password = 4;
+    string database = 5;
+}

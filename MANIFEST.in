@@ -1,0 +1,2 @@
+include README.md
+include salure_tfx_extensions/components/*.proto
