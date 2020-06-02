@@ -15,7 +15,7 @@ from tfx.components.example_gen import base_example_gen_executor
 from tfx.proto import example_gen_pb2
 from salure_tfx_extensions.proto import mysql_config_pb2
 from tfx.components.example_gen.utils import dict_to_example
-from beam_nuggets.io import relational_db
+# from beam_nuggets.io import relational_db
 
 _DEFAULT_ENCODING = 'utf-8'
 
