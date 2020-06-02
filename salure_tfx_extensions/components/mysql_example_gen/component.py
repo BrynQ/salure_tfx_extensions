@@ -13,37 +13,39 @@ from tfx.components.base import executor_spec
 import tfx.types as types
 from tfx.types import standard_artifacts
 from tfx.types.component_spec import ExecutionParameter, ChannelParameter
+from tfx.components.base.base_component import BaseComponent
 from tfx.proto import example_gen_pb2
 
 
-class MySQLExampleGenSpec(types.ComponentSpec):
-    """ComponentSpec for the MySQLExampleGen Component"""
-
-    PARAMETERS = {
-        'conn_config':
-            ExecutionParameter(type=mysql_config_pb2.MySQLConnConfig),
-        'query':
-            ExecutionParameter(type=Text),
-        'input_config':
-            ExecutionParameter(type=example_gen_pb2.Input, optional=True),
-        'output_config':
-            ExecutionParameter(type=example_gen_pb2.Output, optional=True),
-        'custom_config':
-            ExecutionParameter(type=example_gen_pb2.CustomConfig, optional=True),
-        'instance_name':
-            ExecutionParameter(type=Text, optional=True),
-    }
-    INPUTS = {}
-    OUTPUTS = {
-        'examples':
-            ChannelParameter(type=standard_artifacts.Examples),
-    }
+# class MySQLExampleGenSpec(types.ComponentSpec):
+#     """ComponentSpec for the MySQLExampleGen Component"""
+#
+#     PARAMETERS = {
+#         'conn_config':
+#             ExecutionParameter(type=mysql_config_pb2.MySQLConnConfig),
+#         'query':
+#             ExecutionParameter(type=Text),
+#         'input_config':
+#             ExecutionParameter(type=example_gen_pb2.Input, optional=True),
+#         'output_config':
+#             ExecutionParameter(type=example_gen_pb2.Output, optional=True),
+#         'custom_config':
+#             ExecutionParameter(type=example_gen_pb2.CustomConfig, optional=True),
+#         'instance_name':
+#             ExecutionParameter(type=Text, optional=True),
+#     }
+#     INPUTS = {}
+#     OUTPUTS = {
+#         'examples':
+#             ChannelParameter(type=standard_artifacts.Examples),
+#     }
 
 
 class MySQLExampleGen(component._QueryBasedExampleGen):
+    # class MySQLExampleGen(BaseComponent):
 
-    # SPEC_CLASS = QueryBasedExampleGenSpec
-    SPEC_CLASS = MySQLExampleGenSpec
+    SPEC_CLASS = QueryBasedExampleGenSpec
+    # SPEC_CLASS = MySQLExampleGenSpec
     EXECUTOR_SPEC = executor_spec.ExecutorClassSpec(executor.Executor)
 
     def __init__(self,
@@ -86,7 +88,17 @@ class MySQLExampleGen(component._QueryBasedExampleGen):
         output_config = output_config or utils.make_default_output_config(
             input_config)
 
+        # spec = MySQLExampleGenSpec(
+        #     conn_config=conn_config,
+        #     query=query,
+        #     input_config=input_config,
+        #     output_config=output_config,
+        #     custom_config=custom_config,
+        #     instance_name=instance_name
+        # )
+
         super(MySQLExampleGen, self).__init__(
+            # spec=spec,
             input_config=input_config,
             output_config=output_config,
             custom_config=custom_config,
