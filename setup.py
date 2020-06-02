@@ -10,8 +10,8 @@ setup(
     packages=find_packages(),
     package_data={'salure_tfx_extensions': ['proto/*.proto']},
     install_requires=[
-        'tfx>=0.14.0rc1,<0.15',
-        'tensorflow==1.14.0',
+        'tfx>=0.21.0',
+        'tensorflow>=1.15.0'
         # 'beam-nuggets>=0.15.1,<0.16',
         'PyMySQL>=0.9.3,<0.10'
     ],

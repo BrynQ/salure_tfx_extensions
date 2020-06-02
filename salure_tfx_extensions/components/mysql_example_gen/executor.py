@@ -104,7 +104,7 @@ class _ReadMySQLDoFn(beam.DoFn):
                         a[col_name] = field
                     # TODO: this not the right output (most likely, since examples arriving at transform are empty)
                     # TODO: change output to column_name -> value dict
-                    print(a)
+                    # print(a)
                     yield a
             except:
                 raise
@@ -126,7 +126,7 @@ def _MySQLToExample(
     mysql_config = mysql_config_pb2.MySQLConnConfig()
     conn_config.custom_config.Unpack(mysql_config)
 
-    print('Starting pipeline')
+    # print('Starting pipeline')
 
     return (pipeline
             | 'Query' >> beam.Create([split_pattern])

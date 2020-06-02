@@ -10,12 +10,40 @@ from salure_tfx_extensions.proto import mysql_config_pb2
 from tfx.components.example_gen import component
 from tfx.components.example_gen import utils
 from tfx.components.base import executor_spec
+import tfx.types as types
+from tfx.types import standard_artifacts
+from tfx.types.component_spec import ExecutionParameter, ChannelParameter
 from tfx.proto import example_gen_pb2
+
+
+class MySQLExampleGenSpec(types.ComponentSpec):
+    """ComponentSpec for the MySQLExampleGen Component"""
+
+    PARAMETERS = {
+        'conn_config':
+            ExecutionParameter(type=mysql_config_pb2.MySQLConnConfig),
+        'query':
+            ExecutionParameter(type=Text),
+        'input_config':
+            ExecutionParameter(type=example_gen_pb2.Input, optional=True),
+        'output_config':
+            ExecutionParameter(type=example_gen_pb2.Output, optional=True),
+        'custom_config':
+            ExecutionParameter(type=example_gen_pb2.CustomConfig, optional=True),
+        'instance_name':
+            ExecutionParameter(type=Text, optional=True),
+    }
+    INPUTS = {}
+    OUTPUTS = {
+        'examples':
+            ChannelParameter(type=standard_artifacts.Examples),
+    }
 
 
 class MySQLExampleGen(component._QueryBasedExampleGen):
 
-    SPEC_CLASS = QueryBasedExampleGenSpec
+    # SPEC_CLASS = QueryBasedExampleGenSpec
+    SPEC_CLASS = MySQLExampleGenSpec
     EXECUTOR_SPEC = executor_spec.ExecutorClassSpec(executor.Executor)
 
     def __init__(self,
