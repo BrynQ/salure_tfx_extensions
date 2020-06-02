@@ -12,7 +12,7 @@ setup(
     install_requires=[
         'tfx>=0.14.0rc1,<0.15',
         'tensorflow==1.14.0',
-        'beam-nuggets>=0.15.1,<0.16',
+        # 'beam-nuggets>=0.15.1,<0.16',
         'PyMySQL>=0.9.3,<0.10'
     ],
     zip_safe=False
