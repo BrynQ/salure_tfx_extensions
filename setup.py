@@ -7,7 +7,7 @@ def read_key_value_pairs_from_file(filename):
         for line in f:
             if line[0] != '#':
                 key, _, value = line.partition('=')
-                result[key] = value
+                result[key.strip()] = value.strip()
     return result
 
 
