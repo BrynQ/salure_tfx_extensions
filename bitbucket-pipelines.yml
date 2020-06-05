@@ -36,6 +36,8 @@ pipelines:
             - docker build -t $IMAGE_NAME_FULL .
             - docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
             - docker tag $IMAGE_NAME_FULL $IMAGE_NAME_MINOR
+            - docker tag $IMAGE_NAME_FULL $IMAGE_NAME:latest
             - docker push $IMAGE_NAME_FULL
             # Second time image will be cached at docker hub
             - docker push $IMAGE_NAME_MINOR
+            - docker push $IMAGE_NAME:latest
