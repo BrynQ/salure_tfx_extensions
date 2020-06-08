@@ -72,7 +72,7 @@ class MySQLExampleGen(component._QueryBasedExampleGen):
           name: Optional unique name. Necessary if multiple PrestoExampleGen
             components are declared in the same pipeline.
         Raises:
-          RuntimeError: Only one of query and input_config should be set. Or
+          ValueError: Only one of query and input_config should be set. Or
           required host field in connection_config should be set.
         """
         if bool(query) == bool(input_config):
