@@ -106,8 +106,8 @@ class _ReadMySQLDoFn(beam.DoFn):
                     # TODO: change output to column_name -> value dict
                     # print(a)
                     yield a
-            except:
-                raise
+            # except:
+            #     raise
             finally:
                 cursor.close()
                 client.close()
