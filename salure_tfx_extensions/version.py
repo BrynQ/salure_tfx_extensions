@@ -1,0 +1,5 @@
+DOCKER_IMAGE_NAME = 'kubeflow_tfx_extensions'
+VERSION_MAJOR = '0'
+VERSION_MINOR = '0'
+VERSION_PATCH = '40'
+TFX_VERSION = "0.21.4"
