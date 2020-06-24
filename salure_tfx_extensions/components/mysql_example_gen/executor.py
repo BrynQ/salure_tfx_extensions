@@ -104,10 +104,10 @@ class _ReadMySQLDoFn(beam.DoFn):
                         a[col_name] = field
                     # TODO: this not the right output (most likely, since examples arriving at transform are empty)
                     # TODO: change output to column_name -> value dict
-                    print(a)
+                    # print(a)
                     yield a
-            except:
-                raise
+            # except:
+            #     raise
             finally:
                 cursor.close()
                 client.close()
