@@ -13,6 +13,6 @@ class BaseSpec(ComponentSpec):
         'examples': ChannelParameter(type=standard_artifacts.Examples)
     }
     OUTPUTS = {
-        'examples': ChannelParameter(type=standard_artifacts.Examples)
+        'output_examples': ChannelParameter(type=standard_artifacts.Examples)
     }
 
