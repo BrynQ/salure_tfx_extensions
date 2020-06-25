@@ -43,6 +43,14 @@ class Executor(base_executor.BaseExecutor):
             raise ValueError('\'{}\' is missing from input_dict'.format(EXAMPLES_KEY))
 
         split_uris = []
+        output_examples_artifacts = output_dict[OUTPUT_EXAMPLES_KEY]
+
+        # Assumed input_dict['examples'] and output_dict['output_examples'] contain only one Artifact
+        if not (1 == len(output_examples_artifacts) == len(input_dict[EXAMPLES_KEY])):
+            raise ValueError('input_dict[{}] and output_dict[{}] should have length 1'.format(
+                EXAMPLES_KEY,
+                OUTPUT_EXAMPLES_KEY))
+
         for artifact in input_dict[EXAMPLES_KEY]:
             for split in artifact_utils.decode_split_names(artifact.split_names):
                 uri = os.path.join(artifact.uri, split)
@@ -62,8 +70,9 @@ class Executor(base_executor.BaseExecutor):
                 absl.logging.info('split: {}'.format(split))
                 absl.logging.info('uri: {}'.format(uri))
 
-                output_path = artifact_utils.get_split_uri(output_dict[OUTPUT_EXAMPLES_KEY],
-                                                           split)
+                # output_path = artifact_utils.get_split_uri(output_dict[OUTPUT_EXAMPLES_KEY],
+                #                                            split)
+                output_path = os.path.join(output_examples_artifacts[0].uri, split)
 
                 # loading the data and displaying
                 data = pipeline | 'TFXIORead[{}]'.format(split) >> input_tfxio.BeamSource()
