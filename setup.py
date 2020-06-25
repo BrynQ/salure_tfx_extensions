@@ -1,6 +1,11 @@
 from setuptools import setup, find_packages
 from salure_tfx_extensions import version
 
+# IMPORTANT: ALSO UPDATE IN 'VERSION' FILE FOR CI DOCKER BUILD
+VERSION_MAJOR = '0'
+VERSION_MINOR = '0'
+VERSION_PATCH = '40'
+
 
 with open('README.md') as f:
     long_description = f.read()
@@ -8,9 +13,9 @@ with open('README.md') as f:
 setup(
     name='salure_tfx_extensions',
     version='{}.{}.{}'.format(
-        version.VERSION_MAJOR,
-        version.VERSION_MINOR,
-        version.VERSION_PATCH),
+        VERSION_MAJOR,
+        VERSION_MINOR,
+        VERSION_PATCH),
     description='TFX components, helper functions and pipeline definition, developed by Salure',
     long_description=long_description,
     long_description_content_type='text/markdown',
