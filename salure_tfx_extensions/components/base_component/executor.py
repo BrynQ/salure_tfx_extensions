@@ -31,7 +31,7 @@ class Executor(base_executor.BaseExecutor):
       input_dict: Input dict from input key to a list of Artifacts.
         - examples: Tensorflow Examples
       output_dict: Output dict from output key to a list of Artifacts.
-        - examples: Tensorflow Examples
+        - output_examples: Tensorflow Examples
       exec_properties: A dict of execution properties.
         In this case there are no items in exec_properties, as stated by BaseComponentSpec
     Returns:
@@ -56,6 +56,12 @@ class Executor(base_executor.BaseExecutor):
                     file_pattern=input_uri,
                     telemetry_descriptors=_TELEMETRY_DESCRIPTORS
                 )
+
+                absl.logging.info(input_dict)
+                absl.logging.info(output_dict)
+                absl.logging.info('split: {}'.format(split))
+                absl.logging.info('uri: {}'.format(uri))
+
                 output_path = artifact_utils.get_split_uri(output_dict[OUTPUT_EXAMPLES_KEY],
                                                            split)
 
