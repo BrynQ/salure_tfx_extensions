@@ -56,7 +56,7 @@ class Executor(base_executor.BaseExecutor):
                     telemetry_descriptors=_TELEMETRY_DESCRIPTORS
                 )
                 output_path = artifact_utils.get_split_uri(output_dict[EXAMPLES_KEY],
-                                                          split)
+                                                           split)
 
                 # loading the data and displaying
                 data = pipeline | 'TFXIORead[{}]'.format(split) >> input_tfxio.BeamSource()
@@ -76,4 +76,3 @@ def _WriteSplit(example_split: beam.pvalue.PCollection,
             | 'Write' >> beam.io.WriteToTFRecord(
                 os.path.join(output_split_path, DEFAULT_FILE_NAME),
                 file_name_suffix='.gz'))
-
