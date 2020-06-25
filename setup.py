@@ -1,5 +1,4 @@
 from setuptools import setup, find_packages
-from salure_tfx_extensions import version
 
 # IMPORTANT: ALSO UPDATE IN 'VERSION' FILE FOR CI DOCKER BUILD
 VERSION_MAJOR = '0'
