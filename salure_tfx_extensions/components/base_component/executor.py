@@ -14,6 +14,7 @@ from tfx.utils import path_utils
 from tfx_bsl.tfxio import tf_example_record
 
 EXAMPLES_KEY = 'examples'
+OUTPUT_EXAMPLES_KEY = 'output_examples'
 _TELEMETRY_DESCRIPTORS = ['BaseComponent']
 DEFAULT_FILE_NAME = 'data_tfrecord'
 
@@ -55,7 +56,7 @@ class Executor(base_executor.BaseExecutor):
                     file_pattern=input_uri,
                     telemetry_descriptors=_TELEMETRY_DESCRIPTORS
                 )
-                output_path = artifact_utils.get_split_uri(output_dict[EXAMPLES_KEY],
+                output_path = artifact_utils.get_split_uri(output_dict[OUTPUT_EXAMPLES_KEY],
                                                            split)
 
                 # loading the data and displaying
