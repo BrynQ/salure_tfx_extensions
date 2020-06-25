@@ -23,7 +23,7 @@ class BaseComponent(base_component.BaseComponent):
 
     def __init__(self,
                  examples: types.Channel,
-                 input_config: Optional[Union[example_gen_pb2.Input, Dict[Text, Any]]],
+                 input_config: Optional[Union[example_gen_pb2.Input, Dict[Text, Any]]] = None,
                  instance_name: Optional[Text] = None):
         """
         This code gets run, when you define the component in the pipeline definition
