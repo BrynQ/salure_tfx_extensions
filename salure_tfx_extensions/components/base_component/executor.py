@@ -76,7 +76,7 @@ class Executor(base_executor.BaseExecutor):
 
                 # loading the data and displaying
                 # data = pipeline | 'TFXIORead[{}]'.format(split) >> input_tfxio.BeamSource()
-                data = pipeline | 'ReadExamplesFromTFRecord' >> beam.io.ReadFromTFRecord(
+                data = pipeline | 'ReadBaseComponentExamplesFromTFRecord' >> beam.io.ReadFromTFRecord(
                     file_pattern=input_uri
                 )
                 data | 'Printing data from {}'.format(split) >> beam.Map(absl.logging.info)
