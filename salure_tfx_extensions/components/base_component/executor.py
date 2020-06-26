@@ -60,10 +60,10 @@ class Executor(base_executor.BaseExecutor):
             for split, uri in split_uris:
                 absl.logging.info('Loading examples for split {}'.format(split))
                 input_uri = io_utils.all_files_pattern(uri)
-                input_tfxio = tf_example_record.TFExampleRecord(
-                    file_pattern=input_uri,
-                    telemetry_descriptors=_TELEMETRY_DESCRIPTORS
-                )
+                # input_tfxio = tf_example_record.TFExampleRecord(
+                #     file_pattern=input_uri,
+                #     telemetry_descriptors=_TELEMETRY_DESCRIPTORS
+                # )
 
                 absl.logging.info(input_dict)
                 absl.logging.info(output_dict)
@@ -75,7 +75,10 @@ class Executor(base_executor.BaseExecutor):
                 output_path = os.path.join(output_examples_artifacts[0].uri, split)
 
                 # loading the data and displaying
-                data = pipeline | 'TFXIORead[{}]'.format(split) >> input_tfxio.BeamSource()
+                # data = pipeline | 'TFXIORead[{}]'.format(split) >> input_tfxio.BeamSource()
+                data = pipeline | 'ReadFromTFRecord' >> beam.io.ReadFromTFRecord(
+                    file_pattern=input_uri
+                )
                 data | 'Printing data from {}'.format(split) >> beam.Map(absl.logging.info)
 
                 data | 'WriteSplit[{}]'.format(split) >> _WriteSplit(output_path)
