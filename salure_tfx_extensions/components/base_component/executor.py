@@ -76,12 +76,19 @@ class Executor(base_executor.BaseExecutor):
 
                 # loading the data and displaying
                 # data = pipeline | 'TFXIORead[{}]'.format(split) >> input_tfxio.BeamSource()
-                data = pipeline | 'ReadExamplesFromTFRecord[{}]'.format(split) >> beam.io.ReadFromTFRecord(
-                    file_pattern=input_uri
-                )
-                data | 'Printing data from {}'.format(split) >> beam.Map(absl.logging.info)
+                data = (pipeline
+                        | 'ReadExamplesFromTFRecord[{}]'.format(split) >> beam.io.ReadFromTFRecord(
+                            file_pattern=input_uri)
+                        | 'ParseExamples[{}]'.format(split) >> beam.Map(tf.train.Example.FromString))
 
-                data | 'WriteSplit[{}]'.format(split) >> _WriteSplit(output_path)
+                # logging the rows, and writing them back to file
+                # this is of course not as efficient as copying the input files
+                # but this is meant as a boilerplate component to work from
+                (data
+                 | 'Printing data from {}'.format(split) >> beam.Map(absl.logging.info)
+                 | 'Serializing Examples [{}]'.format(split) >> beam.Map(
+                        lambda x: x.SerializeToString(deterministic=True))
+                 | 'WriteSplit[{}]'.format(split) >> _WriteSplit(output_path))
 
 
 @beam.ptransform_fn
