@@ -84,8 +84,8 @@ class Executor(base_executor.BaseExecutor):
                 # logging the rows, and writing them back to file
                 # this is of course not as efficient as copying the input files
                 # but this is meant as a boilerplate component to work from
+                data | 'Printing data from {}'.format(split) >> beam.Map(absl.logging.info)
                 (data
-                 | 'Printing data from {}'.format(split) >> beam.Map(absl.logging.info)
                  | 'Serializing Examples [{}]'.format(split) >> beam.Map(
                         lambda x: x.SerializeToString(deterministic=True))
                  | 'WriteSplit[{}]'.format(split) >> _WriteSplit(output_path))
