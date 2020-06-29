@@ -39,7 +39,6 @@ class BaseComponent(base_component.BaseComponent):
         )
         example_artifacts = channel_utils.as_channel([artifact])
 
-
         spec = BaseSpec(
             input_config=input_config,
             output_config=output_config,

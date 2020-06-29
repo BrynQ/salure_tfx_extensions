@@ -11,7 +11,7 @@ from tfx.components.base import base_executor
 from tfx.types import artifact_utils
 from tfx.utils import io_utils
 from tfx.utils import path_utils
-from tfx_bsl.tfxio import tf_example_record
+# from tfx_bsl.tfxio import tf_example_record
 
 EXAMPLES_KEY = 'examples'
 OUTPUT_EXAMPLES_KEY = 'output_examples'
@@ -21,7 +21,8 @@ DEFAULT_FILE_NAME = 'data_tfrecord'
 
 class Executor(base_executor.BaseExecutor):
     """Executor for the BaseComponent boilerplate.
-    Will read in Examples, convert them rows, and then back writing them to file as examples"""
+    Will read in Examples, convert them rows, and then back writing them to file as examples
+    """
 
     def Do(self, input_dict: Dict[Text, List[types.Artifact]],
            output_dict: Dict[Text, List[types.Artifact]],

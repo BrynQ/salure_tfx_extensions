@@ -1,8 +1,11 @@
 """Standard Component specs for the salure_tfx_extensions library"""
 
+from typing import Text
+
 from tfx.types import ComponentSpec
 from tfx.types.component_spec import ChannelParameter, ExecutionParameter
 from tfx.types import standard_artifacts
+from salure_tfx_extensions.types import standard_artifacts as stfxe_artifacts
 from tfx.proto import example_gen_pb2
 
 
@@ -18,5 +21,19 @@ class BaseSpec(ComponentSpec):
     }
     OUTPUTS = {
         'output_examples': ChannelParameter(type=standard_artifacts.Examples)
+    }
+
+
+class SKLearnTrainerSpec(ComponentSpec):
+    """Salure_tfx_extensions SKLearnTrainer spec"""
+
+    PARAMETERS = {
+        'module_file': ExecutionParameter(type=(str, Text)),
+    }
+    INPUTS = {
+        'examples': ChannelParameter(type=standard_artifacts.Examples),
+    }
+    OUTPUTS = {
+        'model': ChannelParameter(type=stfxe_artifacts.SKLearnModel)
     }
 
