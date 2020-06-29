@@ -6,6 +6,7 @@ from tfx import types
 from tfx.components.base import base_component
 from tfx.components.base import executor_spec
 from tfx.types import standard_artifacts
+from salure_tfx_extensions.types import standard_artifacts as stfxe_artifacts
 from tfx.types import artifact_utils
 from tfx.proto import example_gen_pb2
 from tfx.components.example_gen import utils
@@ -22,6 +23,29 @@ class SKLearnTrainer(base_component.BaseComponent):
 
     def __init__(self,
                  examples: types.Channel,
-                 module_file: Text):
+                 # module_file: Text,
+                 model_pickle: Text,
+                 instance_name: Optional[Text] = None,
+                 enable_cache: Optional[bool] = None):
+        """
 
-        pass
+        :param examples: A TFX Channel of type 'Examples'
+        :param module_file: A path to a module file containing the model
+        """
+
+        # TODO: Allow for transformed inputs, and transformation input graph
+
+        output = types.Channel(
+            type=stfxe_artifacts.SKLearnModel, artifacts=[stfxe_artifacts.SKLearnModel()]
+        )
+
+        spec = SKLearnTrainerSpec(
+            examples=examples,
+            model_pickle=model_pickle
+        )
+
+        super(SKLearnTrainer, self).__init__(
+            spec=spec,
+            instance_name=instance_name,
+            enable_cache=enable_cache
+        )

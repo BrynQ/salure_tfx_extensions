@@ -28,7 +28,7 @@ class SKLearnTrainerSpec(ComponentSpec):
     """Salure_tfx_extensions SKLearnTrainer spec"""
 
     PARAMETERS = {
-        'module_file': ExecutionParameter(type=(str, Text)),
+        'model_pickle': ExecutionParameter(type=(str, Text)),
     }
     INPUTS = {
         'examples': ChannelParameter(type=standard_artifacts.Examples),

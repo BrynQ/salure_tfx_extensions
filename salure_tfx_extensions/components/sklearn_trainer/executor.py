@@ -24,5 +24,24 @@ class Executor(base_executor.BaseExecutor):
     """
 
     # TODO
-    def Do(self):
-        pass
+    def Do(self, input_dict: Dict[Text, List[types.Artifact]],
+           output_dict: Dict[Text, List[types.Artifact]],
+           exec_properties: Dict[Text, Any]) -> None:
+        """
+        Args:
+          input_dict:
+            - examples: Examples used for training, must include 'train' and 'eval' splits
+          output_dict:
+            - model: The SKLearnModel
+          exec_properties:
+            - module_pickle: A bytestring contain a pickled SKLearn model
+
+        """
+        self._log_startup(input_dict, output_dict, exec_properties)
+
+        if 'examples' not in input_dict:
+            raise ValueError('\'examples\' is missing in input dict')
+        if 'module_file' not in exec_properties:
+            raise ValueError('\'module_file\' is missing in exec_properties')
+
+
