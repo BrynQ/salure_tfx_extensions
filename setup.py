@@ -28,7 +28,8 @@ setup(
         'tfx>=0.22.0,<0.23.0',
         # 'tensorflow>=1.15.0',
         # 'beam-nuggets>=0.15.1,<0.16',
-        'PyMySQL>=0.9.3,<0.10'
+        'PyMySQL>=0.9.3,<0.10',
+        'scikit-learn==0.23.1',
     ],
     zip_safe=False
 )
