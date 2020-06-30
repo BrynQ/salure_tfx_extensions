@@ -29,7 +29,7 @@ setup(
         # 'tensorflow>=1.15.0',
         # 'beam-nuggets>=0.15.1,<0.16',
         'PyMySQL>=0.9.3,<0.10',
-        'scikit-learn==0.23.1',
+        'scikit-learn>=0.23,<0.24',
     ],
     zip_safe=False
 )
