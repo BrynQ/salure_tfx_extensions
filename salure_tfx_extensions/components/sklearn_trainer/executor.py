@@ -11,6 +11,7 @@ from tfx.components.base import base_executor
 from tfx.types import artifact_utils
 from tfx.utils import io_utils
 from tfx.utils import path_utils
+from salure_tfx_extensions.utils import example_parsing_utils
 # from tfx_bsl.tfxio import tf_example_record
 
 EXAMPLES_KEY = 'examples'
@@ -73,6 +74,10 @@ class Executor(base_executor.BaseExecutor):
                              | 'ReadTrainingExamplesFromTFRecord' >> beam.io.ReadFromTFRecord(
                                 file_pattern=train_uri)
                              | 'ParseTrianingExamples' >> beam.Map(tf.train.Example.FromString))
+
+            # training_data_rows is PCollection of List[Any]
+            training_data_rows = training_data | 'Training Example to rows' >> beam.Map(
+                example_parsing_utils.example_to_list)
 
             # TODO: Support label key in the tf.examples
             # TODO: Make it possible to train unsupervised models

@@ -1,5 +1,4 @@
-# TODO: fill in, to which base type it gets converted
-"""Base executor, reads Examples, converts them to <fill in>, **writes them to logs** and back to Example"""
+"""Base executor, reads Examples, **writes them to logs** and back to Example"""
 
 import os
 import absl
