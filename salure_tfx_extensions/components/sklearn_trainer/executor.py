@@ -2,6 +2,7 @@
 
 import os
 import pickle
+import joblib
 import absl
 import apache_beam as beam
 import tensorflow as tf
@@ -19,6 +20,7 @@ from sklearn.base import BaseEstimator
 EXAMPLES_KEY = 'examples'
 MODEL_KEY = 'model'
 _TELEMETRY_DESCRIPTORS = ['SKLearnTrainer']
+_DEFAULT_MODEL_NAME = 'model.joblib'
 
 
 def _get_train_and_eval_uris(artifact: types.Artifact, splits: List[Text]) -> Tuple[Text, Text]:
@@ -57,6 +59,8 @@ class Executor(base_executor.BaseExecutor):
             raise ValueError('\'model_pickle\' is missing in exec_properties')
         if 'supervised' not in exec_properties:
             raise ValueError('\'supervised\' is missing in exec_properties')
+        if 'model' not in output_dict:
+            raise ValueError('\'model\' is missing in output_dict')
 
         model = pickle.loads(exec_properties['model_pickle'])
         is_supervised = exec_properties['supervised']
@@ -92,7 +96,8 @@ class Executor(base_executor.BaseExecutor):
             model_pcoll = (
                 training_data_rows
                 | 'Rows To Numpy' >> beam.Map(example_parsing_utils.to_numpy_ndarray)
-                | 'Train SKLearnModel' >> TrainSklearnModel(model))
+                | 'Train SKLearnModel' >> beam.ParDo(TrainSKLearnModel(model))
+                | 'Write Model to file' >> WriteSKLearnModelToFile(output_dict['model']))
 
             # TODO: Support label key in the tf.examples
             # TODO: Make it possible to train unsupervised models
@@ -100,13 +105,21 @@ class Executor(base_executor.BaseExecutor):
                 # tip: parse tf.Example to python list using stfxe.utils.example_parsing
 
 
-class TrainSklearnModel(beam.PTransform):
+class TrainSKLearnModel(beam.DoFn):
     def __init__(self, model: BaseEstimator):
         self.model = model
-        super(TrainSklearnModel, self).__init__()
+        super(TrainSKLearnModel, self).__init__()
 
-    def expand(self, matrix):
+    def process(self, matrix, *args, **kwargs):
         self.model.fit(matrix)
 
         return self.model
 
+
+class WriteSKLearnModelToFile(beam.PTransform):
+    def __init__(self, file_path):
+        self.file_path = file_path
+
+    def expand(self, model, *args, **kwargs):
+        joblib.dump(model, self.file_path + _DEFAULT_MODEL_NAME)
+        return model
