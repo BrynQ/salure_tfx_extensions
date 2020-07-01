@@ -3,6 +3,7 @@
 from typing import Text, List, Any, Union
 import tensorflow as tf
 import apache_beam as beam
+import numpy as np
 import absl
 
 
@@ -14,6 +15,10 @@ def example_to_list(example: tf.train.Example) -> List[Union[Text, int, float]]:
         result.append(feature_value[feature_value.WhichOneof('kind')])
 
     return result
+
+
+def to_numpy_ndarray(matrix: List[List[Any]]) -> np.ndarray:
+    return np.array(matrix)
 
 
 class CombineFeatureLists(beam.CombineFn):

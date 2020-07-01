@@ -23,6 +23,7 @@ class SKLearnTrainer(base_component.BaseComponent):
 
     def __init__(self,
                  examples: types.Channel,
+                 supervised: bool = True,
                  # module_file: Text,
                  model_pickle: Text,
                  instance_name: Optional[Text] = None,

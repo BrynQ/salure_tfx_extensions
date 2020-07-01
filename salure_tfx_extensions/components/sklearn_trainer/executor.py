@@ -12,6 +12,8 @@ from tfx.types import artifact_utils
 from tfx.utils import io_utils
 from tfx.utils import path_utils
 from salure_tfx_extensions.utils import example_parsing_utils
+
+from sklearn.base import BaseEstimator
 # from tfx_bsl.tfxio import tf_example_record
 
 EXAMPLES_KEY = 'examples'
@@ -53,8 +55,11 @@ class Executor(base_executor.BaseExecutor):
             raise ValueError('\'examples\' is missing in input dict')
         if 'model_pickle' not in exec_properties:
             raise ValueError('\'model_pickle\' is missing in exec_properties')
+        if 'supervised' not in exec_properties:
+            raise ValueError('\'supervised\' is missing in exec_properties')
 
         model = pickle.loads(exec_properties['model_pickle'])
+        is_supervised = exec_properties['supervised']
 
         absl.logging.info(model)
 
@@ -70,14 +75,24 @@ class Executor(base_executor.BaseExecutor):
         train_uri, eval_uri = _get_train_and_eval_uris(artifact, splits)
 
         with self._make_beam_pipeline() as pipeline:
-            training_data = (pipeline
-                             | 'ReadTrainingExamplesFromTFRecord' >> beam.io.ReadFromTFRecord(
-                                file_pattern=train_uri)
-                             | 'ParseTrianingExamples' >> beam.Map(tf.train.Example.FromString))
+            training_data = (
+                pipeline
+                | 'ReadTrainingExamplesFromTFRecord' >> beam.io.ReadFromTFRecord(
+                    file_pattern=train_uri)
+                | 'ParseTrainingExamples' >> beam.Map(tf.train.Example.FromString))
 
             # training_data_rows is PCollection of List[Any]
-            training_data_rows = training_data | 'Training Example to rows' >> beam.Map(
-                example_parsing_utils.example_to_list)
+            training_data_rows = (
+                training_data
+                | 'Training Example to rows' >> beam.Map(
+                    example_parsing_utils.example_to_list)
+                | 'Aggregating training rows' >> beam.CombineGlobally(
+                    example_parsing_utils.CombineFeatureLists()))
+
+            model_pcoll = (
+                training_data_rows
+                | 'Rows To Numpy' >> beam.Map(example_parsing_utils.to_numpy_ndarray)
+                | 'Train SKLearnModel' >> TrainSklearnModel(model))
 
             # TODO: Support label key in the tf.examples
             # TODO: Make it possible to train unsupervised models
@@ -85,6 +100,13 @@ class Executor(base_executor.BaseExecutor):
                 # tip: parse tf.Example to python list using stfxe.utils.example_parsing
 
 
+class TrainSklearnModel(beam.PTransform):
+    def __init__(self, model: BaseEstimator):
+        self.model = model
+        super(TrainSklearnModel, self).__init__()
 
+    def expand(self, matrix):
+        self.model.fit(matrix)
 
+        return self.model
 
