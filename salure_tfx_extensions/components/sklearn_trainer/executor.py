@@ -23,21 +23,13 @@ _TELEMETRY_DESCRIPTORS = ['SKLearnTrainer']
 _DEFAULT_MODEL_NAME = 'model.joblib'
 
 
-def _get_train_and_eval_uris(artifact: types.Artifact, splits: List[Text]) -> Tuple[Text, Text]:
-    if not ('train' in splits and 'eval' in splits):
-        raise ValueError('Missing \'train\' and \'eval\' splits in \'examples\' artifact,'
-                         'got {} instead'.format(splits))
-    return (os.path.join(artifact.uri, 'train'),
-            os.path.join(artifact.uri, 'eval'))
-
-
 class Executor(base_executor.BaseExecutor):
     """Executor for the SKLearnTrainer Component
 
     Takes in Examples, parses them, and trains an SKLearnModel on it
     """
 
-    # TODO
+    # TODO: NOT DONE AT ALL
     def Do(self, input_dict: Dict[Text, List[types.Artifact]],
            output_dict: Dict[Text, List[types.Artifact]],
            exec_properties: Dict[Text, Any]) -> None:
@@ -76,7 +68,7 @@ class Executor(base_executor.BaseExecutor):
         artifact = input_dict[EXAMPLES_KEY][0]
         splits = artifact_utils.decode_split_names(artifact.split_names)
 
-        train_uri, eval_uri = _get_train_and_eval_uris(artifact, splits)
+        train_uri, eval_uri = example_parsing_utils.get_train_and_eval_uris(artifact, splits)
 
         with self._make_beam_pipeline() as pipeline:
             training_data = (

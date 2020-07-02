@@ -28,7 +28,7 @@ class SKLearnTrainerSpec(ComponentSpec):
     """Salure_tfx_extensions SKLearnTrainer spec"""
 
     PARAMETERS = {
-        'model_pickle': ExecutionParameter(type=(str, Text)),
+        'model_pickle': ExecutionParameter(type=(bytes, Text)),
         'supervised': ExecutionParameter(type=bool),
     }
     INPUTS = {
@@ -38,3 +38,18 @@ class SKLearnTrainerSpec(ComponentSpec):
         'model': ChannelParameter(type=stfxe_artifacts.SKLearnModel),
     }
 
+
+class SKLearnTransformSpec(ComponentSpec):
+    """Salure_tfx_extensions SKLearnTransform spec"""
+
+    PARAMETERS = {
+        'module_file': ExecutionParameter(type=(str, Text)),
+        'pipeline_name': ExecutionParameter(type=(str, Text), optional=True)
+    }
+    INPUTS = {
+        'examples': ChannelParameter(type=standard_artifacts.Examples)
+    }
+    OUTPUTS = {
+        'transformed_examples': ChannelParameter(type=standard_artifacts.Examples),
+        'transform_pipeline': ChannelParameter(type=stfxe_artifacts.SKLearnPrepocessor)
+    }

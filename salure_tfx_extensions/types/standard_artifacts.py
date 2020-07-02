@@ -5,3 +5,7 @@ from tfx.types.artifact import Artifact
 
 class SKLearnModel(Artifact):
     TYPE_NAME = 'SKLearnModel'
+
+
+class SKLearnPrepocessor(Artifact):
+    TYPE_NAME = 'SKLearnPreprocessor'

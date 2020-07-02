@@ -23,9 +23,9 @@ class SKLearnTrainer(base_component.BaseComponent):
 
     def __init__(self,
                  examples: types.Channel,
+                 model_pickle: Text,
                  supervised: bool = True,
                  # module_file: Text,
-                 model_pickle: Text,
                  instance_name: Optional[Text] = None,
                  enable_cache: Optional[bool] = None):
         """
@@ -48,5 +48,5 @@ class SKLearnTrainer(base_component.BaseComponent):
         super(SKLearnTrainer, self).__init__(
             spec=spec,
             instance_name=instance_name,
-            enable_cache=enable_cache
+            enable_cache=enable_cache,
         )

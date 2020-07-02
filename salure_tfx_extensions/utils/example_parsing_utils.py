@@ -1,6 +1,8 @@
 """Helper functions for parsing and handling tf.Examples"""
 
-from typing import Text, List, Any, Union
+import os
+from tfx import types
+from typing import Text, List, Any, Union, Tuple
 import tensorflow as tf
 import apache_beam as beam
 import numpy as np
@@ -19,6 +21,14 @@ def example_to_list(example: tf.train.Example) -> List[Union[Text, int, float]]:
 
 def to_numpy_ndarray(matrix: List[List[Any]]) -> np.ndarray:
     return np.array(matrix)
+
+
+def get_train_and_eval_uris(artifact: types.Artifact, splits: List[Text]) -> Tuple[Text, Text]:
+    if not ('train' in splits and 'eval' in splits):
+        raise ValueError('Missing \'train\' and \'eval\' splits in \'examples\' artifact,'
+                         'got {} instead'.format(splits))
+    return (os.path.join(artifact.uri, 'train'),
+            os.path.join(artifact.uri, 'eval'))
 
 
 class CombineFeatureLists(beam.CombineFn):
