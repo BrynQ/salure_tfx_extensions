@@ -13,6 +13,8 @@ from tfx.types import artifact_utils
 from tfx.utils import io_utils
 from tfx.utils import path_utils
 from salure_tfx_extensions.utils import example_parsing_utils
+from salure_tfx_extensions.utils import sklearn_utils
+from salure_tfx_extensions import constants
 
 from sklearn.base import BaseEstimator
 # from tfx_bsl.tfxio import tf_example_record
@@ -20,7 +22,6 @@ from sklearn.base import BaseEstimator
 EXAMPLES_KEY = 'examples'
 MODEL_KEY = 'model'
 _TELEMETRY_DESCRIPTORS = ['SKLearnTrainer']
-_DEFAULT_MODEL_NAME = 'model.joblib'
 
 
 class Executor(base_executor.BaseExecutor):
@@ -89,7 +90,8 @@ class Executor(base_executor.BaseExecutor):
                 training_data_rows
                 | 'Rows To Numpy' >> beam.Map(example_parsing_utils.to_numpy_ndarray)
                 | 'Train SKLearnModel' >> beam.ParDo(TrainSKLearnModel(model))
-                | 'Write Model to file' >> WriteSKLearnModelToFile(output_dict['model']))
+                | 'Write Model to file' >> sklearn_utils.WriteSKLearnModelToFile(output_dict['model'] +
+                                                                                 constants.DEFAULT_SKLEARN_MODEL_NAME))
 
             # TODO: Support label key in the tf.examples
             # TODO: Make it possible to train unsupervised models
@@ -104,14 +106,6 @@ class TrainSKLearnModel(beam.DoFn):
 
     def process(self, matrix, *args, **kwargs):
         self.model.fit(matrix)
-
         return self.model
 
 
-class WriteSKLearnModelToFile(beam.PTransform):
-    def __init__(self, file_path):
-        self.file_path = file_path
-
-    def expand(self, model, *args, **kwargs):
-        joblib.dump(model, self.file_path + _DEFAULT_MODEL_NAME)
-        return model

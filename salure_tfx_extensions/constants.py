@@ -1,0 +1,1 @@
+DEFAULT_SKLEARN_MODEL_NAME = 'model.joblib'

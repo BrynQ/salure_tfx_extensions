@@ -14,6 +14,7 @@ from tfx.types import artifact_utils
 from tfx.utils import io_utils
 from tfx.utils import path_utils
 from salure_tfx_extensions.utils import example_parsing_utils
+from sklearn.pipeline import Pipeline
 
 
 EXAMPLES_KEY = 'examples'
@@ -71,8 +72,21 @@ class Executor(base_executor.BaseExecutor):
                     file_pattern=train_uri)
                 | 'ParseTrainingExamples' >> beam.Map(tf.train.Example.FromString))
 
+            training_data_rows = (
+                training_data
+                | 'Training Example to rows' >> beam.Map(
+                    example_parsing_utils.example_to_list)
+                | 'Aggregating training rows' >> beam.CombineGlobally(
+                    example_parsing_utils.CombineFeatureLists()))
 
-def import_pipeline_from_source(source_path: Text, pipeline_name: Text) -> Callable:
+            preprocessor_pcoll = (
+                training_data_rows
+                | 'Rows to numpy' >> beam.Map(example_parsing_utils.to_numpy_ndarray)
+                | 'Fit Preprocessor' >> beam.ParDo()
+            )
+
+
+def import_pipeline_from_source(source_path: Text, pipeline_name: Text) -> Pipeline:
     """Imports an SKLearn Pipeline object from a local source file"""
 
     try:
@@ -87,3 +101,12 @@ def import_pipeline_from_source(source_path: Text, pipeline_name: Text) -> Calla
         raise ImportError('{} in {} not found in import_func_from_source()'.format(
             pipeline_name, source_path))
 
+
+class FitPreprocessingPipeline(beam.DoFn):
+    def __init__(self, pipeline):
+        self.pipeline = pipeline
+        super(FitPreprocessingPipeline, self).__init__()
+
+    def process(self, matrix, *args, **kwargs):
+        self.pipeline.fit(matrix)
+        return self.pipeline
