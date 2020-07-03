@@ -29,15 +29,20 @@ class SKLearnTransform(base_component.BaseComponent):
                  instance_name: Optional[Text] = None,
                  enable_cache: Optional[bool] = None):
 
-        output = types.Channel(
+        transform_pipeline = types.Channel(
             type=stfxe_artifacts.SKLearnPrepocessor, artifacts=[stfxe_artifacts.SKLearnPrepocessor()]
+        )
+
+        transformed_examples = types.Channel(
+            type=standard_artifacts.Examples, artifacts=[standard_artifacts.Examples()]
         )
 
         spec = SKLearnTransformSpec(
             examples=examples,
             module_file=module_file,
             pipeline_name=pipeline_name,
-            transformed_examples=output,
+            transform_pipeline=transform_pipeline,
+            transformed_examples=transformed_examples,
         )
 
         super(SKLearnTransform, self).__init__(
