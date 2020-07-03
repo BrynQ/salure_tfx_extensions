@@ -11,12 +11,15 @@ from tfx.types import artifact_utils
 from tfx.proto import example_gen_pb2
 from tfx.components.example_gen import utils
 from tfx.types import channel_utils
-from salure_tfx_extensions.components.sklearn_trainer import executor
+from salure_tfx_extensions.components.sklearn_transform import executor
 from salure_tfx_extensions.types.component_specs import SKLearnTransformSpec
 
 
 class SKLearnTransform(base_component.BaseComponent):
     """A component for preprocessing examples using SKLearn"""
+
+    SPEC_CLASS = SKLearnTransformSpec
+    EXECUTOR_SPEC = executor_spec.ExecutorClassSpec(executor.Executor)
 
     # TODO
     def __init__(self,
