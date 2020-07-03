@@ -25,7 +25,7 @@ class SKLearnTransform(base_component.BaseComponent):
     def __init__(self,
                  examples: types.Channel,
                  module_file: Text,
-                 pipeline_name: Optional[Text] = None,
+                 preprocessor_pipeline_name: Optional[Text] = None,
                  instance_name: Optional[Text] = None):
                  # enable_cache: Optional[bool] = None):
 
@@ -40,7 +40,7 @@ class SKLearnTransform(base_component.BaseComponent):
         spec = SKLearnTransformSpec(
             examples=examples,
             module_file=module_file,
-            pipeline_name=pipeline_name,
+            preprocessor_pipeline_name=preprocessor_pipeline_name,
             transform_pipeline=transform_pipeline,
             transformed_examples=transformed_examples,
         )
