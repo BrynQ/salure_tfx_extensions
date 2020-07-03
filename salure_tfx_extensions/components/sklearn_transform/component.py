@@ -26,8 +26,8 @@ class SKLearnTransform(base_component.BaseComponent):
                  examples: types.Channel,
                  module_file: Text,
                  pipeline_name: Optional[Text] = None,
-                 instance_name: Optional[Text] = None,
-                 enable_cache: Optional[bool] = None):
+                 instance_name: Optional[Text] = None):
+                 # enable_cache: Optional[bool] = None):
 
         transform_pipeline = types.Channel(
             type=stfxe_artifacts.SKLearnPrepocessor, artifacts=[stfxe_artifacts.SKLearnPrepocessor()]
@@ -48,5 +48,5 @@ class SKLearnTransform(base_component.BaseComponent):
         super(SKLearnTransform, self).__init__(
             spec=spec,
             instance_name=instance_name,
-            enable_cache=enable_cache,
+            # enable_cache=enable_cache,
         )

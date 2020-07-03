@@ -26,8 +26,8 @@ class SKLearnTrainer(base_component.BaseComponent):
                  model_pickle: Text,
                  supervised: bool = True,
                  # module_file: Text,
-                 instance_name: Optional[Text] = None,
-                 enable_cache: Optional[bool] = None):
+                 instance_name: Optional[Text] = None):
+                 # enable_cache: Optional[bool] = None):
         """
 
         :param examples: A TFX Channel of type 'Examples'
@@ -48,5 +48,5 @@ class SKLearnTrainer(base_component.BaseComponent):
         super(SKLearnTrainer, self).__init__(
             spec=spec,
             instance_name=instance_name,
-            enable_cache=enable_cache,
+            # enable_cache=enable_cache,
         )
