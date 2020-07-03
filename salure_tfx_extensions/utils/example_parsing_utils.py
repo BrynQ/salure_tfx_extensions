@@ -6,6 +6,7 @@ from typing import Text, List, Any, Union, Tuple
 import tensorflow as tf
 import apache_beam as beam
 import numpy as np
+import pyarrow
 import absl
 
 
@@ -43,3 +44,19 @@ class CombineFeatureLists(beam.CombineFn):
 
     def extract_output(self, accumulator, *args, **kwargs):
         return accumulator
+
+
+class RecordBatchesToTable(beam.CombineFn):
+    """Combine a pcoll of RecordBatches into a Table"""
+    # TODO
+    def create_accumulator(self, *args, **kwargs):
+        return []
+
+    def add_input(self, mutable_accumulator, element, *args, **kwargs):
+        return mutable_accumulator.append(element)
+
+    def merge_accumulators(self, accumulators, *args, **kwargs):
+        return [item for acc in accumulators for item in acc]
+
+    def extract_output(self, accumulator, *args, **kwargs):
+        return pyarrow.Table.from_batches(accumulator)
