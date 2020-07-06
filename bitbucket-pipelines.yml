@@ -57,8 +57,4 @@ pipelines:
             - printf "FROM tensorflow/tfx:$TFX_VERSION\nRUN pip install scikit-learn==$SKLEARN_VERSION\nCOPY . /salure_tfx_extensions\nRUN pip install /salure_tfx_extensions" > Dockerfile
             - docker build -t $IMAGE_NAME_FULL .
             - docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
-            - docker tag $IMAGE_NAME_FULL $IMAGE_NAME_MINOR
-            - docker tag $IMAGE_NAME_FULL $IMAGE_NAME:latest
             - docker push $IMAGE_NAME_FULL
-            - docker push $IMAGE_NAME_MINOR
-            - docker push $IMAGE_NAME:latest

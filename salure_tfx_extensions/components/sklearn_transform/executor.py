@@ -85,6 +85,8 @@ class Executor(base_executor.BaseExecutor):
             training_data = (
                 pipeline
                 | 'Read Training Examples as RecordBatches' >> input_tfxio.BeamSource()
+                # TODO Remove debug logging
+                | 'DEBUG: logging the RecordBatches' >> beam.Map(absl.logging.info)
                 | 'Training Record Batches to Table' >> beam.CombineGlobally(
                     example_parsing_utils.RecordBatchesToTable())
                 | 'To Pandas Dataframe' >> beam.Map(lambda x: x.to_pandas()))
