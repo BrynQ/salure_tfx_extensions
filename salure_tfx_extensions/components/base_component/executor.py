@@ -11,6 +11,7 @@ from tfx.types import artifact_utils
 from tfx.utils import io_utils
 from tfx.utils import path_utils
 # from tfx_bsl.tfxio import tf_example_record
+from tfx_bsl.tfxio import tf_example_record
 
 EXAMPLES_KEY = 'examples'
 OUTPUT_EXAMPLES_KEY = 'output_examples'
@@ -60,10 +61,10 @@ class Executor(base_executor.BaseExecutor):
             for split, uri in split_uris:
                 absl.logging.info('Loading examples for split {}'.format(split))
                 input_uri = io_utils.all_files_pattern(uri)
-                # input_tfxio = tf_example_record.TFExampleRecord(
-                #     file_pattern=input_uri,
-                #     telemetry_descriptors=_TELEMETRY_DESCRIPTORS
-                # )
+                input_tfxio = tf_example_record.TFExampleRecord(
+                    file_pattern=input_uri,
+                    telemetry_descriptors=_TELEMETRY_DESCRIPTORS
+                )
 
                 absl.logging.info(input_dict)
                 absl.logging.info(output_dict)
@@ -75,11 +76,11 @@ class Executor(base_executor.BaseExecutor):
                 output_path = os.path.join(output_examples_artifacts[0].uri, split)
 
                 # loading the data and displaying
-                # data = pipeline | 'TFXIORead[{}]'.format(split) >> input_tfxio.BeamSource()
-                data = (pipeline
-                        | 'ReadExamplesFromTFRecord[{}]'.format(split) >> beam.io.ReadFromTFRecord(
-                            file_pattern=input_uri)
-                        | 'ParseExamples[{}]'.format(split) >> beam.Map(tf.train.Example.FromString))
+                data = pipeline | 'TFXIORead[{}]'.format(split) >> input_tfxio.BeamSource()
+                # data = (pipeline
+                #         | 'ReadExamplesFromTFRecord[{}]'.format(split) >> beam.io.ReadFromTFRecord(
+                #             file_pattern=input_uri)
+                #         | 'ParseExamples[{}]'.format(split) >> beam.Map(tf.train.Example.FromString))
 
                 # logging the rows, and writing them back to file
                 # this is of course not as efficient as copying the input files
