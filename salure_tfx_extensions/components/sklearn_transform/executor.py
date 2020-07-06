@@ -68,6 +68,9 @@ class Executor(base_executor.BaseExecutor):
 
         train_uri, eval_uri = example_parsing_utils.get_train_and_eval_uris(artifact, splits)
 
+        absl.logging.info(train_uri)
+        absl.logging.info(eval_uri)
+
         input_tfxio = tf_example_record.TFExampleRecord(
             file_pattern=train_uri,
             telemetry_descriptors=_TELEMETRY_DESCRIPTORS
