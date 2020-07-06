@@ -41,3 +41,24 @@ pipelines:
             # Second time image will be cached at docker hub
             - docker push $IMAGE_NAME_MINOR
             - docker push $IMAGE_NAME:latest
+    staging:
+      - step:
+          name: Build & Publish Docker Image
+          trigger: automatic
+          caches:
+            - docker
+          services:
+            - docker
+          script:
+            - export $(cat VERSION | xargs)
+            - export IMAGE_NAME=salure/$DOCKER_IMAGE_NAME
+            - export IMAGE_NAME_FULL=$IMAGE_NAME:$VERSION_MAJOR.$VERSION_MINOR.$VERSION_HOTFIX
+            - export IMAGE_NAME_MINOR=$IMAGE_NAME:$VERSION_MAJOR.$VERSION_MINOR
+            - printf "FROM tensorflow/tfx:$TFX_VERSION\nRUN pip install scikit-learn==$SKLEARN_VERSION\nCOPY . /salure_tfx_extensions\nRUN pip install /salure_tfx_extensions" > Dockerfile
+            - docker build -t $IMAGE_NAME_FULL .
+            - docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
+            - docker tag $IMAGE_NAME_FULL $IMAGE_NAME_MINOR
+            - docker tag $IMAGE_NAME_FULL $IMAGE_NAME:latest
+            - docker push $IMAGE_NAME_FULL
+            - docker push $IMAGE_NAME_MINOR
+            - docker push $IMAGE_NAME:latest
