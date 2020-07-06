@@ -72,12 +72,11 @@ class Executor(base_executor.BaseExecutor):
         absl.logging.info(eval_uri)
         absl.logging.info(io_utils.all_files_pattern(train_uri))
 
-        input_tfxio = tf_example_record.TFExampleRecord(
-            file_pattern=io_utils.all_files_pattern(train_uri),
-            # telemetry_descriptors=_TELEMETRY_DESCRIPTORS
-        )
-
         with self._make_beam_pipeline() as pipeline:
+            input_tfxio = tf_example_record.TFExampleRecord(
+                file_pattern=io_utils.all_files_pattern(train_uri),
+                telemetry_descriptors=_TELEMETRY_DESCRIPTORS
+            )
             # # For loading in a pcollection of tf.Examples
             # training_data = (
             #         pipeline
