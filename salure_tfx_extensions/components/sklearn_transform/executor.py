@@ -72,11 +72,15 @@ class Executor(base_executor.BaseExecutor):
         absl.logging.info(eval_uri)
         absl.logging.info(io_utils.all_files_pattern(train_uri))
 
+        input_uri = io_utils.all_files_pattern(train_uri)
+        absl.logging.info('uri: {}'.format(input_uri))
+
         with self._make_beam_pipeline() as pipeline:
             input_tfxio = tf_example_record.TFExampleRecord(
-                file_pattern=io_utils.all_files_pattern(train_uri),
+                file_pattern=input_uri,
                 telemetry_descriptors=_TELEMETRY_DESCRIPTORS
             )
+
             # # For loading in a pcollection of tf.Examples
             # training_data = (
             #         pipeline
@@ -89,10 +93,7 @@ class Executor(base_executor.BaseExecutor):
                 pipeline
                 | 'Read Training Examples as RecordBatches' >> input_tfxio.BeamSource())
 
-            _ = (
-                training_data_recordbatch
-                | 'DEBUG: logging the RecordBatches' >> beam.Map(absl.logging.info)
-            )
+            training_data_recordbatch | 'DEBUG: logging the RecordBatches' >> beam.Map(absl.logging.info)
 
             training_data = (
                 training_data_recordbatch

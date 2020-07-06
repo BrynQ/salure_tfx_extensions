@@ -70,6 +70,7 @@ class Executor(base_executor.BaseExecutor):
                 absl.logging.info(output_dict)
                 absl.logging.info('split: {}'.format(split))
                 absl.logging.info('uri: {}'.format(uri))
+                absl.logging.info('input_uri: {}'.format(input_uri))
 
                 # output_path = artifact_utils.get_split_uri(output_dict[OUTPUT_EXAMPLES_KEY],
                 #                                            split)
