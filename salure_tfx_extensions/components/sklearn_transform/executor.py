@@ -70,6 +70,7 @@ class Executor(base_executor.BaseExecutor):
 
         absl.logging.info(train_uri)
         absl.logging.info(eval_uri)
+        absl.logging.info(io_utils.all_files_pattern(train_uri))
 
         input_tfxio = tf_example_record.TFExampleRecord(
             file_pattern=io_utils.all_files_pattern(train_uri),
