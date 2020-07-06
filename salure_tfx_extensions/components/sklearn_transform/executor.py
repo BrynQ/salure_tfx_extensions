@@ -74,7 +74,7 @@ class Executor(base_executor.BaseExecutor):
 
         input_tfxio = tf_example_record.TFExampleRecord(
             file_pattern=io_utils.all_files_pattern(train_uri),
-            telemetry_descriptors=_TELEMETRY_DESCRIPTORS
+            # telemetry_descriptors=_TELEMETRY_DESCRIPTORS
         )
 
         with self._make_beam_pipeline() as pipeline:
@@ -86,11 +86,17 @@ class Executor(base_executor.BaseExecutor):
             #         | 'ParseTrainingExamples' >> beam.Map(tf.train.Example.FromString))
 
             # For loading in Apache arrow Record Batches and turning into a PyArrow Table
-            training_data = (
+            training_data_recordbatch = (
                 pipeline
-                | 'Read Training Examples as RecordBatches' >> input_tfxio.BeamSource()
-                # TODO Remove debug logging
+                | 'Read Training Examples as RecordBatches' >> input_tfxio.BeamSource())
+
+            _ = (
+                training_data_recordbatch
                 | 'DEBUG: logging the RecordBatches' >> beam.Map(absl.logging.info)
+            )
+
+            training_data = (
+                training_data_recordbatch
                 | 'Training Record Batches to Table' >> beam.CombineGlobally(
                     example_parsing_utils.RecordBatchesToTable())
                 | 'To Pandas Dataframe' >> beam.Map(lambda x: x.to_pandas()))
