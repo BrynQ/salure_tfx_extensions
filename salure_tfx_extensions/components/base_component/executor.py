@@ -91,8 +91,6 @@ class Executor(base_executor.BaseExecutor):
                         lambda x: x.SerializeToString(deterministic=True))
                  | 'WriteSplit[{}]'.format(split) >> _WriteSplit(output_path))
 
-/mnt/data/kubeflow-tfx-volume/tfx/salure_tfx_extensions_sklearn_transform_test/CsvExampleGen/examples/176/train
-/mnt/data/kubeflow-tfx-volume/tfx/salure_tfx_extensions_sklearn_transform_test/CsvExampleGen/examples/176/train
 
 @beam.ptransform_fn
 @beam.typehints.with_input_types(bytes)
