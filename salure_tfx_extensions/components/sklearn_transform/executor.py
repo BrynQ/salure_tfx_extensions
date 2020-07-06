@@ -81,6 +81,15 @@ class Executor(base_executor.BaseExecutor):
                 telemetry_descriptors=_TELEMETRY_DESCRIPTORS
             )
 
+            eval_input_tfxio = tf_example_record.TFExampleRecord(
+                file_pattern=io_utils.all_files_pattern(eval_uri),
+                telemetry_descriptors=_TELEMETRY_DESCRIPTORS
+            )
+
+            (pipeline
+             | 'Read Eval Examples as RecordBatches' >> eval_input_tfxio.BeamSource()
+             | 'Logging Eval data' >> beam.Map(absl.logging.info))
+
             # # For loading in a pcollection of tf.Examples
             # training_data = (
             #         pipeline
