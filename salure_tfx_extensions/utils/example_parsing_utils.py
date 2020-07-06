@@ -53,10 +53,12 @@ class RecordBatchesToTable(beam.CombineFn):
         return []
 
     def add_input(self, mutable_accumulator, element, *args, **kwargs):
+        absl.logging.info(element)
         return mutable_accumulator.append(element)
 
     def merge_accumulators(self, accumulators, *args, **kwargs):
         return [item for acc in accumulators for item in acc]
 
     def extract_output(self, accumulator, *args, **kwargs):
+        absl.logging.info(accumulator)
         return pyarrow.Table.from_batches(accumulator)
