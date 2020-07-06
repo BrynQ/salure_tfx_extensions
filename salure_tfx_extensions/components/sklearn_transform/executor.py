@@ -54,7 +54,7 @@ class Executor(base_executor.BaseExecutor):
         if 'transform_pipeline' not in output_dict:
             raise ValueError('\'transform_pipeline\' is missing in output_dict')
 
-        pipeline_name = exec_properties['preprocessing_pipeline_name'] or _DEFAULT_PIPELINE_NAME
+        pipeline_name = exec_properties['preprocessor_pipeline_name'] or _DEFAULT_PIPELINE_NAME
         preprocessing_pipeline = import_pipeline_from_source(exec_properties['module_file'], pipeline_name)
 
         if not len(input_dict[EXAMPLES_KEY]) == 1:

@@ -54,3 +54,4 @@ class SKLearnTransformSpec(ComponentSpec):
         'transformed_examples': ChannelParameter(type=standard_artifacts.Examples),
         'transform_pipeline': ChannelParameter(type=stfxe_artifacts.SKLearnPrepocessor)
     }
+
