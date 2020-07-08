@@ -77,11 +77,11 @@ class Executor(base_executor.BaseExecutor):
                 output_path = os.path.join(output_examples_artifacts[0].uri, split)
 
                 # loading the data and displaying
-                data = pipeline | 'TFXIORead[{}]'.format(split) >> input_tfxio.BeamSource()
-                # data = (pipeline
-                #         | 'ReadExamplesFromTFRecord[{}]'.format(split) >> beam.io.ReadFromTFRecord(
-                #             file_pattern=input_uri)
-                #         | 'ParseExamples[{}]'.format(split) >> beam.Map(tf.train.Example.FromString))
+                # data = pipeline | 'TFXIORead[{}]'.format(split) >> input_tfxio.BeamSource()
+                data = (pipeline
+                        | 'ReadExamplesFromTFRecord[{}]'.format(split) >> beam.io.ReadFromTFRecord(
+                            file_pattern=input_uri)
+                        | 'ParseExamples[{}]'.format(split) >> beam.Map(tf.train.Example.FromString))
 
                 # logging the rows, and writing them back to file
                 # this is of course not as efficient as copying the input files
