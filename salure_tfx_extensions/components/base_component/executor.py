@@ -28,16 +28,16 @@ class Executor(base_executor.BaseExecutor):
            output_dict: Dict[Text, List[types.Artifact]],
            exec_properties: Dict[Text, Any]) -> None:
         """Validate current model against last blessed model.
-    Args:
-      input_dict: Input dict from input key to a list of Artifacts.
-        - examples: Tensorflow Examples
-      output_dict: Output dict from output key to a list of Artifacts.
-        - output_examples: Tensorflow Examples
-      exec_properties: A dict of execution properties.
-        In this case there are no items in exec_properties, as stated by BaseComponentSpec
-    Returns:
-      None
-    """
+        Args:
+          input_dict: Input dict from input key to a list of Artifacts.
+            - examples: Tensorflow Examples
+          output_dict: Output dict from output key to a list of Artifacts.
+            - output_examples: Tensorflow Examples
+          exec_properties: A dict of execution properties.
+            In this case there are no items in exec_properties, as stated by BaseComponentSpec
+        Returns:
+          None
+        """
         self._log_startup(input_dict, output_dict, exec_properties)
 
         if EXAMPLES_KEY not in input_dict:

@@ -60,5 +60,5 @@ class RecordBatchesToTable(beam.CombineFn):
         return [item for acc in accumulators for item in acc]
 
     def extract_output(self, accumulator, *args, **kwargs):
-        absl.logging.info(accumulator)
+        absl.logging.info('accumulator: {}'.format(accumulator))
         return pyarrow.Table.from_batches(accumulator)

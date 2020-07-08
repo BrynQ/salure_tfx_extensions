@@ -90,12 +90,13 @@ class Executor(base_executor.BaseExecutor):
              | 'Read Eval Examples as RecordBatches' >> eval_input_tfxio.BeamSource()
              | 'Logging Eval data' >> beam.Map(absl.logging.info))
 
-            # # For loading in a pcollection of tf.Examples
-            # training_data = (
-            #         pipeline
-            #         | 'ReadTrainingExamplesFromTFRecord' >> beam.io.ReadFromTFRecord(
-            #             file_pattern=train_uri)
-            #         | 'ParseTrainingExamples' >> beam.Map(tf.train.Example.FromString))
+            # For loading in a pcollection of tf.Examples
+            _ = (
+                    pipeline
+                    | 'ReadTrainingExamplesFromTFRecord' >> beam.io.ReadFromTFRecord(
+                        file_pattern=train_uri)
+                    | 'ParseTrainingExamples' >> beam.Map(tf.train.Example.FromString)
+                    | 'Log the examples' >> beam.Map(absl.logging.info))
 
             # For loading in Apache arrow Record Batches and turning into a PyArrow Table
             training_data_recordbatch = (
