@@ -27,7 +27,7 @@ class Executor(base_executor.BaseExecutor):
     def Do(self, input_dict: Dict[Text, List[types.Artifact]],
            output_dict: Dict[Text, List[types.Artifact]],
            exec_properties: Dict[Text, Any]) -> None:
-        """Validate current model against last blessed model.
+        """
         Args:
           input_dict: Input dict from input key to a list of Artifacts.
             - examples: Tensorflow Examples
