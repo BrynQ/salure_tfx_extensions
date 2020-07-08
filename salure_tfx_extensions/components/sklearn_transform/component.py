@@ -35,6 +35,8 @@ class SKLearnTransform(base_component.BaseComponent):
             examples=examples,
             module_file=module_file,
             preprocessor_pipeline_name=preprocessor_pipeline_name,
+            transformed_examples=transformed_examples_artifact,
+            transform_pipeline=preprocessor_artifact
         )
 
         super(SKLearnTransform, self).__init__(spec=spec, instance_name=instance_name)
