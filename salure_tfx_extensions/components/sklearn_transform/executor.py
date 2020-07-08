@@ -8,6 +8,7 @@ from tfx.components.base import base_executor
 from tfx.types import artifact_utils
 from tfx.utils import io_utils
 from tfx_bsl.tfxio import tf_example_record
+import apache_beam as beam
 
 
 EXAMPLES_KEY = 'examples'
@@ -15,6 +16,8 @@ MODULE_FILE_KEY = 'module_file'
 PREPROCESSOR_PIPELINE_NAME_KEY = 'preprocessor_pipeline_name'
 TRANSFORMED_EXAMPLES_KEY = 'transformed_examples'
 TRANSFORM_PIPELINE_KEY = 'transform_pipeline'
+
+_TELEMETRY_DESCRIPTORS = ['SKLearnTransform']
 
 
 class Executor(base_executor.BaseExecutor):
@@ -56,9 +59,24 @@ class Executor(base_executor.BaseExecutor):
         train_split = 'train' if train_and_eval_split else 'single_split'
 
         train_uri = os.path.join(examples_artifact.uri, train_split)
-        absl.logging.info(train_uri)
+        absl.logging.info('train_uri: {}'.format(train_uri))
 
         with self._make_beam_pipeline() as pipeline:
-            pass
+            absl.logging.info('Loading Training Examples')
+            train_input_uri = io_utils.all_files_pattern(train_uri)
+
+            input_tfxio = tf_example_record.TFExampleRecord(
+                file_pattern=train_input_uri,
+                telemetry_descriptors=_TELEMETRY_DESCRIPTORS
+            )
+
+            absl.logging.info(input_dict)
+            absl.logging.info(output_dict)
+            absl.logging.info('uri: {}'.format(train_uri))
+            absl.logging.info('input_uri: {}'.format(train_input_uri))
+
+            data = pipeline | 'TFXIORead Train Files' >> input_tfxio.BeamSource()
+            data | 'Printing data from Train Files' >> beam.Map(absl.logging.info)
+
 
 
