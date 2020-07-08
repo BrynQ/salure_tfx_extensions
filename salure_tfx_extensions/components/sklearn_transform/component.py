@@ -28,8 +28,8 @@ class SKLearnTransform(base_component.BaseComponent):
                  preprocessor_pipeline_name: Union[str, Text],
                  instance_name: Optional[Text] = None):
 
-        preprocessor_artifact = stfxe_artifacts.SKLearnPrepocessor()
-        transformed_examples_artifact = standard_artifacts.Examples()
+        preprocessor_artifact = channel_utils.as_channel([stfxe_artifacts.SKLearnPrepocessor()])
+        transformed_examples_artifact = channel_utils.as_channel([standard_artifacts.Examples()])
 
         spec = SKLearnTransformSpec(
             examples=examples,

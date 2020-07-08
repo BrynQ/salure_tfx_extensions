@@ -45,4 +45,5 @@ class BaseComponent(base_component.BaseComponent):
             examples=examples,
             output_examples=example_artifacts
         )
+
         super(BaseComponent, self).__init__(spec=spec, instance_name=instance_name)
