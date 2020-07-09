@@ -84,8 +84,10 @@ class Executor(base_executor.BaseExecutor):
 
             training_data = (
                 training_data_recordbatch
-                | 'Recordbatches to Table' >> beam.CombineGlobally(
-                    example_parsing_utils.RecordBatchesToTable())
+                # | 'Recordbatches to Table' >> beam.CombineGlobally(
+                #     example_parsing_utils.RecordBatchesToTable())
+                | 'Aggregate RecordBatches' >> beam.CombineGlobally(
+                    beam.combiners.ToListCombineFn())
             )
 
             training_data | 'Logging Pyarrow Table' >> beam.Map(absl.logging.info)
