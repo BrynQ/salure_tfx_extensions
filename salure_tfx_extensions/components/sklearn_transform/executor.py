@@ -12,6 +12,7 @@ from tfx.utils import io_utils
 from tfx_bsl.tfxio import tf_example_record
 from salure_tfx_extensions.utils import example_parsing_utils
 import apache_beam as beam
+import pyarrow as pa
 from sklearn.pipeline import Pipeline
 
 
@@ -88,6 +89,7 @@ class Executor(base_executor.BaseExecutor):
                 #     example_parsing_utils.RecordBatchesToTable())
                 | 'Aggregate RecordBatches' >> beam.CombineGlobally(
                     beam.combiners.ToListCombineFn())
+                | 'To Pyarrow Table' >> beam.Map(pa.Table.from_batches)
             )
 
             training_data | 'Logging Pyarrow Table' >> beam.Map(absl.logging.info)
