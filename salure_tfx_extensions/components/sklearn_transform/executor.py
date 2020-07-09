@@ -1,4 +1,6 @@
 import os
+import importlib.machinery
+from types import ModuleType
 import absl
 import apache_beam
 import tensorflow
@@ -8,7 +10,9 @@ from tfx.components.base import base_executor
 from tfx.types import artifact_utils
 from tfx.utils import io_utils
 from tfx_bsl.tfxio import tf_example_record
+from salure_tfx_extensions.utils import example_parsing_utils
 import apache_beam as beam
+from sklearn.pipeline import Pipeline
 
 
 EXAMPLES_KEY = 'examples'
@@ -75,8 +79,50 @@ class Executor(base_executor.BaseExecutor):
             absl.logging.info('uri: {}'.format(train_uri))
             absl.logging.info('input_uri: {}'.format(train_input_uri))
 
-            data = pipeline | 'TFXIORead Train Files' >> input_tfxio.BeamSource()
-            data | 'Printing data from Train Files' >> beam.Map(absl.logging.info)
+            training_data_recordbatch = pipeline | 'TFXIORead Train Files' >> input_tfxio.BeamSource()
+            # data | 'Printing data from Train Files' >> beam.Map(absl.logging.info)
+
+            training_data = (
+                training_data_recordbatch
+                | 'Recordbatches to table' >> beam.CombineGlobally(
+                    example_parsing_utils.RecordBatchesToTable())
+            )
 
 
+def import_pipeline_from_source(source_path: Text, pipeline_name: Text) -> Pipeline:
+    """Imports an SKLearn Pipeline object from a local source file"""
+
+    try:
+        loader = importlib.machinery.SourceFileLoader(
+            fullname='user_module',
+            path=source_path,
+        )
+        user_module = ModuleType(loader.name)
+        loader.exec_module(user_module)
+        return getattr(user_module, pipeline_name)
+    except IOError:
+        raise ImportError('{} in {} not found in import_func_from_source()'.format(
+            pipeline_name, source_path))
+
+
+class FitPreprocessingPipeline(beam.DoFn):
+    def __init__(self, pipeline):
+        self.pipeline = pipeline
+        super(FitPreprocessingPipeline, self).__init__()
+
+    def process(self, matrix, *args, **kwargs):
+        self.pipeline.fit(matrix)
+        return self.pipeline
+
+
+class TransformUsingPipeline(beam.DoFn):
+    """Returns preprocessed inputs"""
+    # TODO
+
+    def __init__(self, pipeline: Pipeline):
+        self.pipeline = pipeline
+        super(TransformUsingPipeline, self).__init__()
+
+    def process(self, element, *args, **kwargs):
+        pass
 
