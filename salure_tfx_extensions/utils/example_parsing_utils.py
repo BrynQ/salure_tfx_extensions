@@ -54,22 +54,23 @@ class RecordBatchesToTable(beam.CombineFn):
         return []
 
     def add_input(self, mutable_accumulator, element, *args, **kwargs):
-        if not mutable_accumulator:
-            mutable_accumulator = []
         absl.logging.info(element)
-        return mutable_accumulator.append(element)
+        mutable_accumulator.append(element)
+        return mutable_accumulator
 
     def merge_accumulators(self, accumulators, *args, **kwargs):
+        return sum(accumulators, [])
         # return [item for acc in accumulators for item in acc]
         # def none_acc_to_list(acc):
         #     if acc:
         #         return acc
         #     return []
         # accumulators = list(map(none_acc_to_list, accumulators))
-        for acc in accumulators[1:]:
-            accumulators[0].extend(acc)
-        return accumulators[0]
         # return list(itertools.chain(*list(map(none_acc_to_list, accumulators))))
+
+        # for acc in accumulators[1:]:
+        #     accumulators[0].extend(acc)
+        # return accumulators[0]
 
     def extract_output(self, accumulator, *args, **kwargs):
         absl.logging.info('accumulator: {}'.format(accumulator))
