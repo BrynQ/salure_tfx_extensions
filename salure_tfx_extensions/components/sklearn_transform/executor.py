@@ -79,7 +79,8 @@ class Executor(base_executor.BaseExecutor):
 
             input_tfxio = tf_example_record.TFExampleRecord(
                 file_pattern=train_input_uri,
-                telemetry_descriptors=_TELEMETRY_DESCRIPTORS
+                telemetry_descriptors=_TELEMETRY_DESCRIPTORS,
+                schema=schema
             )
 
             absl.logging.info(input_dict)
@@ -98,7 +99,7 @@ class Executor(base_executor.BaseExecutor):
                     beam.combiners.ToListCombineFn())
                 # Work around non-picklability for pa.Table.from_batches
                 # TODO: Before converting to Table make sure all recordsbatches have same schema
-                # | 'To Pyarrow Table' >> beam.Map(lambda x: pa.Table.from_batches(x))
+                | 'To Pyarrow Table' >> beam.Map(lambda x: pa.Table.from_batches(x))
             )
 
             training_data | 'Logging Pyarrow Table' >> beam.Map(absl.logging.info)
