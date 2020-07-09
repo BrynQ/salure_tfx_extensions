@@ -61,7 +61,11 @@ class RecordBatchesToTable(beam.CombineFn):
 
     def merge_accumulators(self, accumulators, *args, **kwargs):
         # return [item for acc in accumulators for item in acc]
-        return list(itertools.chain(*accumulators))
+        def none_acc_to_list(acc):
+            if acc:
+                return acc
+            return []
+        return list(itertools.chain(*list(map(none_acc_to_list, accumulators))))
 
     def extract_output(self, accumulator, *args, **kwargs):
         absl.logging.info('accumulator: {}'.format(accumulator))
