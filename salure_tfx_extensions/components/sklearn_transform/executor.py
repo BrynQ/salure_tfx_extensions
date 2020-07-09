@@ -89,7 +89,8 @@ class Executor(base_executor.BaseExecutor):
                 #     example_parsing_utils.RecordBatchesToTable())
                 | 'Aggregate RecordBatches' >> beam.CombineGlobally(
                     beam.combiners.ToListCombineFn())
-                | 'To Pyarrow Table' >> beam.Map(pa.Table.from_batches)
+                # Work around non-picklability for pa.Table.from_batches
+                | 'To Pyarrow Table' >> beam.Map(lambda x: pa.Table.from_batches(x))
             )
 
             training_data | 'Logging Pyarrow Table' >> beam.Map(absl.logging.info)
