@@ -22,8 +22,8 @@ pipelines:
       - step:
           name: Build & Publish Docker Image
           trigger: automatic
-          caches:
-            - docker
+#          caches:
+#            - docker
           services:
             - docker
 #          size: 2x
@@ -47,8 +47,8 @@ pipelines:
           trigger: automatic
           caches:
             - docker
-          services:
-            - docker
+#          services:
+#            - docker
           script:
             - export $(cat VERSION | xargs)
             - export IMAGE_NAME=salure/$DOCKER_IMAGE_NAME

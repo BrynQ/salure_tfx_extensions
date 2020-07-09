@@ -17,6 +17,7 @@ from sklearn.pipeline import Pipeline
 
 
 EXAMPLES_KEY = 'examples'
+SCHEMA_KEY = 'schema'
 MODULE_FILE_KEY = 'module_file'
 PREPROCESSOR_PIPELINE_NAME_KEY = 'preprocessor_pipeline_name'
 TRANSFORMED_EXAMPLES_KEY = 'transformed_examples'
@@ -66,6 +67,12 @@ class Executor(base_executor.BaseExecutor):
         train_uri = os.path.join(examples_artifact.uri, train_split)
         absl.logging.info('train_uri: {}'.format(train_uri))
 
+        # Load in the schema
+        schema_path = io_utils.get_only_uri_in_dir(
+            artifact_utils.get_single_uri(input_dict[SCHEMA_KEY]))
+        schema = io_utils.SchemaReader().read(schema_path)
+        absl.logging.info('schema: {}'.format(schema))
+
         with self._make_beam_pipeline() as pipeline:
             absl.logging.info('Loading Training Examples')
             train_input_uri = io_utils.all_files_pattern(train_uri)
@@ -90,7 +97,8 @@ class Executor(base_executor.BaseExecutor):
                 | 'Aggregate RecordBatches' >> beam.CombineGlobally(
                     beam.combiners.ToListCombineFn())
                 # Work around non-picklability for pa.Table.from_batches
-                | 'To Pyarrow Table' >> beam.Map(lambda x: pa.Table.from_batches(x))
+                # TODO: Before converting to Table make sure all recordsbatches have same schema
+                # | 'To Pyarrow Table' >> beam.Map(lambda x: pa.Table.from_batches(x))
             )
 
             training_data | 'Logging Pyarrow Table' >> beam.Map(absl.logging.info)
