@@ -1,6 +1,7 @@
 """Helper functions for parsing and handling tf.Examples"""
 
 import os
+import itertools
 from tfx import types
 from typing import Text, List, Any, Union, Tuple
 import tensorflow as tf
@@ -57,8 +58,10 @@ class RecordBatchesToTable(beam.CombineFn):
         return mutable_accumulator.append(element)
 
     def merge_accumulators(self, accumulators, *args, **kwargs):
-        return [item for acc in accumulators for item in acc]
+        # return [item for acc in accumulators for item in acc]
+        return list(itertools.chain(*accumulators))
 
     def extract_output(self, accumulator, *args, **kwargs):
         absl.logging.info('accumulator: {}'.format(accumulator))
         return pyarrow.Table.from_batches(accumulator)
+
