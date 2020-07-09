@@ -45,10 +45,10 @@ pipelines:
       - step:
           name: Build & Publish Docker Image
           trigger: automatic
-          caches:
-            - docker
-#          services:
+#          caches:
 #            - docker
+          services:
+            - docker
           script:
             - export $(cat VERSION | xargs)
             - export IMAGE_NAME=salure/$DOCKER_IMAGE_NAME
