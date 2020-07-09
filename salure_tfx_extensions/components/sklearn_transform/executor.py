@@ -80,13 +80,13 @@ class Executor(base_executor.BaseExecutor):
             absl.logging.info('input_uri: {}'.format(train_input_uri))
 
             training_data_recordbatch = pipeline | 'TFXIORead Train Files' >> input_tfxio.BeamSource()
-            # data | 'Printing data from Train Files' >> beam.Map(absl.logging.info)
+            training_data_recordbatch | 'Printing data from Train Files' >> beam.Map(absl.logging.info)
 
-            training_data = (
-                training_data_recordbatch
-                | 'Recordbatches to table' >> beam.CombineGlobally(
-                    example_parsing_utils.RecordBatchesToTable())
-            )
+            # training_data = (
+            #     training_data_recordbatch
+            #     | 'Recordbatches to table' >> beam.CombineGlobally(
+            #         example_parsing_utils.RecordBatchesToTable())
+            # )
 
 
 def import_pipeline_from_source(source_path: Text, pipeline_name: Text) -> Pipeline:
