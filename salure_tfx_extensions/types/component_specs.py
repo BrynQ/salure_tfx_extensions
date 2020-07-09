@@ -48,7 +48,8 @@ class SKLearnTransformSpec(ComponentSpec):
         # 'data_format': ExecutionParameter(type=(str, Text), optional=True),  # Default will be pandas
     }
     INPUTS = {
-        'examples': ChannelParameter(type=standard_artifacts.Examples)
+        'examples': ChannelParameter(type=standard_artifacts.Examples),
+        'schema': ChannelParameter(type=standard_artifacts.Schema)
     }
     OUTPUTS = {
         'transformed_examples': ChannelParameter(type=standard_artifacts.Examples),

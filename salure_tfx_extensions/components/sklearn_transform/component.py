@@ -24,6 +24,7 @@ class SKLearnTransform(base_component.BaseComponent):
 
     def __init__(self,
                  examples: types.Channel,
+                 schema: types.Channel,
                  module_file: Union[str, Text],
                  preprocessor_pipeline_name: Union[str, Text],
                  instance_name: Optional[Text] = None):
@@ -33,6 +34,7 @@ class SKLearnTransform(base_component.BaseComponent):
 
         spec = SKLearnTransformSpec(
             examples=examples,
+            schema=schema,
             module_file=module_file,
             preprocessor_pipeline_name=preprocessor_pipeline_name,
             transformed_examples=transformed_examples_artifact,
