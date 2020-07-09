@@ -73,6 +73,10 @@ class Executor(base_executor.BaseExecutor):
         schema = io_utils.SchemaReader().read(schema_path)
         absl.logging.info('schema: {}'.format(schema))
 
+        # Load in preprocessor
+
+
+
         with self._make_beam_pipeline() as pipeline:
             absl.logging.info('Loading Training Examples')
             train_input_uri = io_utils.all_files_pattern(train_uri)
@@ -98,11 +102,13 @@ class Executor(base_executor.BaseExecutor):
                 | 'Aggregate RecordBatches' >> beam.CombineGlobally(
                     beam.combiners.ToListCombineFn())
                 # Work around non-picklability for pa.Table.from_batches
-                # TODO: Before converting to Table make sure all recordsbatches have same schema
                 | 'To Pyarrow Table' >> beam.Map(lambda x: pa.Table.from_batches(x))
+                | 'To Pandas DataFrame' >> beam.Map(lambda x: x.to_pandas())
             )
 
-            training_data | 'Logging Pyarrow Table' >> beam.Map(absl.logging.info)
+            (training_data
+             | 'Logging Pandas DataFrame' >> beam.Map(absl.logging.info)
+             | 'Log DataFrame head' >> beam.Map(lambda x: absl.logging.info(x.head().to_string())))
 
 
 def import_pipeline_from_source(source_path: Text, pipeline_name: Text) -> Pipeline:
