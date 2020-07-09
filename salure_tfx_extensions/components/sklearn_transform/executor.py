@@ -84,7 +84,7 @@ class Executor(base_executor.BaseExecutor):
 
             training_data = (
                 training_data_recordbatch
-                | 'Recordbatches to table' >> beam.CombineGlobally(
+                | 'Recordbatches to Table' >> beam.CombineGlobally(
                     example_parsing_utils.RecordBatchesToTable()).without_defaults()
             )
 

@@ -54,6 +54,8 @@ class RecordBatchesToTable(beam.CombineFn):
         return []
 
     def add_input(self, mutable_accumulator, element, *args, **kwargs):
+        if not mutable_accumulator:
+            mutable_accumulator = []
         absl.logging.info(element)
         return mutable_accumulator.append(element)
 
