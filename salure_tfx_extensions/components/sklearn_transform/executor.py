@@ -173,7 +173,7 @@ class FitPreprocessingPipeline(beam.PTransform):
         """
 
         self.pipeline.fit(dataframe)
-        return self.pipeline
+        return [self.pipeline]
 
 
 class TransformUsingPipeline(beam.DoFn):
