@@ -1,5 +1,5 @@
 import os
-import importlib.machinery
+import importlib.machinery, importlib.util
 from types import ModuleType
 import absl
 import apache_beam
@@ -74,11 +74,24 @@ class Executor(base_executor.BaseExecutor):
         schema = io_utils.SchemaReader().read(schema_path)
         absl.logging.info('schema: {}'.format(schema))
 
-        # Load in preprocessor
-        sklearn_pipeline = import_utils.import_func_from_source(
-            exec_properties[MODULE_FILE_KEY],
-            exec_properties[PREPROCESSOR_PIPELINE_NAME_KEY]
-        )
+        # Load in the specified module file
+        try:
+            spec = importlib.util.spec_from_file_location('user_module', exec_properties[MODULE_FILE_KEY])
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+
+            # Load in preprocessor
+            sklearn_pipeline = getattr(module, exec_properties[PREPROCESSOR_PIPELINE_NAME_KEY])
+        except IOError:
+            raise ImportError('{} in {} not found'.format(
+                exec_properties[PREPROCESSOR_PIPELINE_NAME_KEY], exec_properties[MODULE_FILE_KEY]))
+
+
+
+        # sklearn_pipeline = import_utils.import_func_from_source(
+        #     exec_properties[MODULE_FILE_KEY],
+        #     exec_properties[PREPROCESSOR_PIPELINE_NAME_KEY]
+        # )
 
         sklearn_pipeline = SKLearnPipeline(sklearn_pipeline)
 
