@@ -80,6 +80,8 @@ class Executor(base_executor.BaseExecutor):
             exec_properties[PREPROCESSOR_PIPELINE_NAME_KEY]
         )
 
+        sklearn_pipeline = SKLearnPipeline(sklearn_pipeline)
+
         absl.logging.info('pipeline: {}'.format(sklearn_pipeline))
 
         with self._make_beam_pipeline() as pipeline:
@@ -140,9 +142,23 @@ def import_pipeline_from_source(source_path: Text, pipeline_name: Text) -> Pipel
             pipeline_name, source_path))
 
 
+class SKLearnPipeline(object):
+    """This exists to appease the python pickling Gods"""
+
+    def __init__(self, pipeline):
+        self._pipeline = pipeline
+
+    def fit(self, dataframe):
+        self._pipeline.fit(dataframe)
+
+    @property
+    def pipeline(self):
+        return self._pipeline
+
+
 class FitPreprocessingPipeline(beam.PTransform):
     def __init__(self, pipeline):
-        self.pipeline = pipeline  # SKLearn Pipeline object
+        self.pipeline = pipeline  # SKLearnPipeline object
         super(FitPreprocessingPipeline, self).__init__()
 
     # def process(self, matrix, pipeline, *args, **kwargs):
@@ -157,7 +173,7 @@ class FitPreprocessingPipeline(beam.PTransform):
         """
 
         self.pipeline.fit(dataframe)
-        return self.pipeline
+        return self.pipeline.pipeline
 
 
 class TransformUsingPipeline(beam.DoFn):
