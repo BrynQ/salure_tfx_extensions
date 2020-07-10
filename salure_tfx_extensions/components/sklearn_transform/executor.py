@@ -116,6 +116,8 @@ class Executor(base_executor.BaseExecutor):
             fit_preprocessor = training_data | 'Fit Preprocessing Pipeline' >> beam.ParDo(
                 FitPreprocessingPipeline(pipeline))
 
+            fit_preprocessor | 'Logging Fit Preprocessor' >> beam.Map(absl.logging.info)
+
 
 def import_pipeline_from_source(source_path: Text, pipeline_name: Text) -> Pipeline:
     """Imports an SKLearn Pipeline object from a local source file"""
