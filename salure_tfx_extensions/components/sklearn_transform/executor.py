@@ -79,7 +79,7 @@ class Executor(base_executor.BaseExecutor):
             exec_properties[PREPROCESSOR_PIPELINE_NAME_KEY]
         )
 
-
+        absl.logging.info(pipeline)
 
         with self._make_beam_pipeline() as pipeline:
             absl.logging.info('Loading Training Examples')
