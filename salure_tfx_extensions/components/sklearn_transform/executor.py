@@ -9,6 +9,7 @@ from tfx import types
 from tfx.components.base import base_executor
 from tfx.types import artifact_utils
 from tfx.utils import io_utils
+from tfx.utils import import_utils
 from tfx_bsl.tfxio import tf_example_record
 from salure_tfx_extensions.utils import example_parsing_utils
 import apache_beam as beam
@@ -74,7 +75,7 @@ class Executor(base_executor.BaseExecutor):
         absl.logging.info('schema: {}'.format(schema))
 
         # Load in preprocessor
-        sklearn_pipeline = import_pipeline_from_source(
+        sklearn_pipeline = import_utils.import_func_from_source(
             exec_properties[MODULE_FILE_KEY],
             exec_properties[PREPROCESSOR_PIPELINE_NAME_KEY]
         )
@@ -114,8 +115,11 @@ class Executor(base_executor.BaseExecutor):
                 lambda x: absl.logging.info('dataframe: {}'.format(x)))
             training_data | 'Log DataFrame head' >> beam.Map(lambda x: print(x.head().to_string()))
 
-            fit_preprocessor = training_data | 'Fit Preprocessing Pipeline' >> beam.ParDo(
-                FitPreprocessingPipeline(sklearn_pipeline))
+            # fit_preprocessor = training_data | 'Fit Preprocessing Pipeline' >> beam.ParDo(
+            #     FitPreprocessingPipeline(), beam.pvalue.AsSingleton(sklearn_pipeline))
+
+            fit_preprocessor = training_data | 'Fit Preprocessing Pipeline' >> FitPreprocessingPipeline(
+                sklearn_pipeline)
 
             fit_preprocessor | 'Logging Fit Preprocessor' >> beam.Map(absl.logging.info)
 
@@ -136,13 +140,23 @@ def import_pipeline_from_source(source_path: Text, pipeline_name: Text) -> Pipel
             pipeline_name, source_path))
 
 
-class FitPreprocessingPipeline(beam.DoFn):
+class FitPreprocessingPipeline(beam.PTransform):
     def __init__(self, pipeline):
-        self.pipeline = pipeline
+        self.pipeline = pipeline  # SKLearn Pipeline object
         super(FitPreprocessingPipeline, self).__init__()
 
-    def process(self, matrix, *args, **kwargs):
-        self.pipeline.fit(matrix)
+    # def process(self, matrix, pipeline, *args, **kwargs):
+    #     pipeline.fit(matrix)
+    #     return pipeline
+
+    def expand(self, dataframe):
+        """Fits an SKLearn Pipeline object
+
+        Returns:
+            A fit SKLearn Pipeline
+        """
+
+        self.pipeline.fit(dataframe)
         return self.pipeline
 
 
