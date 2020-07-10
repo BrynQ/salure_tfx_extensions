@@ -110,8 +110,9 @@ class Executor(base_executor.BaseExecutor):
                 | 'To Pandas DataFrame' >> beam.Map(lambda x: x.to_pandas())
             )
 
-            training_data | 'Logging Pandas DataFrame' >> beam.Map(absl.logging.info)
-            training_data | 'Log DataFrame head' >> beam.Map(lambda x: absl.logging.info(x.head().to_string()))
+            training_data | 'Logging Pandas DataFrame' >> beam.Map(
+                lambda x: absl.logging.info('dataframe: {}'.format(x)))
+            training_data | 'Log DataFrame head' >> beam.Map(lambda x: print(x.head().to_string()))
 
             fit_preprocessor = training_data | 'Fit Preprocessing Pipeline' >> beam.ParDo(
                 FitPreprocessingPipeline(pipeline))
