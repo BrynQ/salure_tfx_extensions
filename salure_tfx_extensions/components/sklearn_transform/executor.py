@@ -74,12 +74,12 @@ class Executor(base_executor.BaseExecutor):
         absl.logging.info('schema: {}'.format(schema))
 
         # Load in preprocessor
-        pipeline = import_pipeline_from_source(
+        sklearn_pipeline = import_pipeline_from_source(
             exec_properties[MODULE_FILE_KEY],
             exec_properties[PREPROCESSOR_PIPELINE_NAME_KEY]
         )
 
-        absl.logging.info(pipeline)
+        absl.logging.info('pipeline: {}'.format(sklearn_pipeline))
 
         with self._make_beam_pipeline() as pipeline:
             absl.logging.info('Loading Training Examples')
@@ -115,7 +115,7 @@ class Executor(base_executor.BaseExecutor):
             training_data | 'Log DataFrame head' >> beam.Map(lambda x: print(x.head().to_string()))
 
             fit_preprocessor = training_data | 'Fit Preprocessing Pipeline' >> beam.ParDo(
-                FitPreprocessingPipeline(pipeline))
+                FitPreprocessingPipeline(sklearn_pipeline))
 
             fit_preprocessor | 'Logging Fit Preprocessor' >> beam.Map(absl.logging.info)
 
