@@ -2,6 +2,7 @@ import os
 import importlib.machinery, importlib.util
 from types import ModuleType
 import absl
+import dill
 import apache_beam
 import tensorflow
 from typing import Any, Dict, List, Text
@@ -50,6 +51,7 @@ class Executor(base_executor.BaseExecutor):
         """
 
         self._log_startup(input_dict, output_dict, exec_properties)
+        dill.settings['recurse'] = True
 
         if not (len(input_dict[EXAMPLES_KEY]) == 1):
             raise ValueError('input_dict[{}] should only contain one artifact'.format(EXAMPLES_KEY))
