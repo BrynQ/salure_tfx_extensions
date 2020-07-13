@@ -36,7 +36,7 @@ class SKLearnTransform(base_component.BaseComponent):
 
         dill_recurse_setting = dill.settings['recurse']
         dill.settings['recurse'] = True
-        preprocessor_pickle = dill.dumps(sklearn_pipeline)
+        preprocessor_pickle = dill.dumps(sklearn_pipeline).decode('utf-8')
         dill.settings['recurse'] = dill_recurse_setting
 
         preprocessor_artifact = channel_utils.as_channel([stfxe_artifacts.SKLearnPrepocessor()])
