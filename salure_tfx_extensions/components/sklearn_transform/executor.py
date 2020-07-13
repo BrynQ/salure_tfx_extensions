@@ -11,6 +11,7 @@ from tfx.types import artifact_utils
 from tfx.utils import io_utils
 from tfx.utils import import_utils
 from tfx_bsl.tfxio import tf_example_record
+import tensorflow_transform.beam as tft_beam
 from salure_tfx_extensions.utils import example_parsing_utils
 import apache_beam as beam
 import pyarrow as pa
@@ -98,45 +99,47 @@ class Executor(base_executor.BaseExecutor):
         absl.logging.info('pipeline: {}'.format(sklearn_pipeline))
 
         with self._make_beam_pipeline() as pipeline:
-            absl.logging.info('Loading Training Examples')
-            train_input_uri = io_utils.all_files_pattern(train_uri)
+            with tft_beam.Context(
+                    use_deep_copy_optimization=True):
+                absl.logging.info('Loading Training Examples')
+                train_input_uri = io_utils.all_files_pattern(train_uri)
 
-            input_tfxio = tf_example_record.TFExampleRecord(
-                file_pattern=train_input_uri,
-                telemetry_descriptors=_TELEMETRY_DESCRIPTORS,
-                schema=schema
-            )
+                input_tfxio = tf_example_record.TFExampleRecord(
+                    file_pattern=train_input_uri,
+                    telemetry_descriptors=_TELEMETRY_DESCRIPTORS,
+                    schema=schema
+                )
 
-            absl.logging.info(input_dict)
-            absl.logging.info(output_dict)
-            absl.logging.info('uri: {}'.format(train_uri))
-            absl.logging.info('input_uri: {}'.format(train_input_uri))
+                absl.logging.info(input_dict)
+                absl.logging.info(output_dict)
+                absl.logging.info('uri: {}'.format(train_uri))
+                absl.logging.info('input_uri: {}'.format(train_input_uri))
 
-            training_data_recordbatch = pipeline | 'TFXIORead Train Files' >> input_tfxio.BeamSource()
-            training_data_recordbatch | 'Logging data from Train Files' >> beam.Map(absl.logging.info)
+                training_data_recordbatch = pipeline | 'TFXIORead Train Files' >> input_tfxio.BeamSource()
+                training_data_recordbatch | 'Logging data from Train Files' >> beam.Map(absl.logging.info)
 
-            training_data = (
-                training_data_recordbatch
-                # | 'Recordbatches to Table' >> beam.CombineGlobally(
-                #     example_parsing_utils.RecordBatchesToTable())
-                | 'Aggregate RecordBatches' >> beam.CombineGlobally(
-                    beam.combiners.ToListCombineFn())
-                # Work around non-picklability for pa.Table.from_batches
-                | 'To Pyarrow Table' >> beam.Map(lambda x: pa.Table.from_batches(x))
-                | 'To Pandas DataFrame' >> beam.Map(lambda x: x.to_pandas())
-            )
+                training_data = (
+                    training_data_recordbatch
+                    # | 'Recordbatches to Table' >> beam.CombineGlobally(
+                    #     example_parsing_utils.RecordBatchesToTable())
+                    | 'Aggregate RecordBatches' >> beam.CombineGlobally(
+                        beam.combiners.ToListCombineFn())
+                    # Work around non-picklability for pa.Table.from_batches
+                    | 'To Pyarrow Table' >> beam.Map(lambda x: pa.Table.from_batches(x))
+                    | 'To Pandas DataFrame' >> beam.Map(lambda x: x.to_pandas())
+                )
 
-            training_data | 'Logging Pandas DataFrame' >> beam.Map(
-                lambda x: absl.logging.info('dataframe: {}'.format(x)))
-            training_data | 'Log DataFrame head' >> beam.Map(lambda x: print(x.head().to_string()))
+                training_data | 'Logging Pandas DataFrame' >> beam.Map(
+                    lambda x: absl.logging.info('dataframe: {}'.format(x)))
+                training_data | 'Log DataFrame head' >> beam.Map(lambda x: print(x.head().to_string()))
 
-            # fit_preprocessor = training_data | 'Fit Preprocessing Pipeline' >> beam.ParDo(
-            #     FitPreprocessingPipeline(), beam.pvalue.AsSingleton(sklearn_pipeline))
+                # fit_preprocessor = training_data | 'Fit Preprocessing Pipeline' >> beam.ParDo(
+                #     FitPreprocessingPipeline(), beam.pvalue.AsSingleton(sklearn_pipeline))
 
-            fit_preprocessor = training_data | 'Fit Preprocessing Pipeline' >> FitPreprocessingPipeline(
-                sklearn_pipeline)
+                fit_preprocessor = training_data | 'Fit Preprocessing Pipeline' >> FitPreprocessingPipeline(
+                    sklearn_pipeline)
 
-            fit_preprocessor | 'Logging Fit Preprocessor' >> beam.Map(absl.logging.info)
+                fit_preprocessor | 'Logging Fit Preprocessor' >> beam.Map(absl.logging.info)
 
 
 def import_pipeline_from_source(source_path: Text, pipeline_name: Text) -> Pipeline:
