@@ -3,6 +3,7 @@ import importlib.machinery, importlib.util
 from types import ModuleType
 import absl
 import dill
+import base64
 import apache_beam
 import tensorflow
 from typing import Any, Dict, List, Text
@@ -78,7 +79,7 @@ class Executor(base_executor.BaseExecutor):
         schema = io_utils.SchemaReader().read(schema_path)
         absl.logging.info('schema: {}'.format(schema))
 
-        sklearn_pipeline = dill.loads(exec_properties['preprocessor_pickle']).encode('utf-8')
+        sklearn_pipeline = dill.loads(base64.decodebytes(exec_properties['preprocessor_pickle']))
 
         # Load in the specified module file
         # try:
