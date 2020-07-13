@@ -38,7 +38,8 @@ class SKLearnTransform(base_component.BaseComponent):
         dill_recurse_setting = dill.settings['recurse']
         dill.settings['recurse'] = True
         # Pickle must be a string to put it in json
-        preprocessor_pickle = base64.encodebytes(dill.dumps(sklearn_pipeline)).decode('utf-8')
+        # preprocessor_pickle = base64.encodebytes(dill.dumps(sklearn_pipeline)).decode('utf-8')
+        preprocessor_pickle = 'a'
         dill.settings['recurse'] = dill_recurse_setting
 
         preprocessor_artifact = channel_utils.as_channel([stfxe_artifacts.SKLearnPrepocessor()])
