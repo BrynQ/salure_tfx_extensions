@@ -21,8 +21,9 @@ from sklearn.pipeline import Pipeline
 
 EXAMPLES_KEY = 'examples'
 SCHEMA_KEY = 'schema'
-MODULE_FILE_KEY = 'module_file'
-PREPROCESSOR_PIPELINE_NAME_KEY = 'preprocessor_pipeline_name'
+# MODULE_FILE_KEY = 'module_file'
+# PREPROCESSOR_PIPELINE_NAME_KEY = 'preprocessor_pipeline_name'
+PREPROCESSOR_PICKLE_KEY = 'preprocessor_pickle'
 TRANSFORMED_EXAMPLES_KEY = 'transformed_examples'
 TRANSFORM_PIPELINE_KEY = 'transform_pipeline'
 
@@ -77,17 +78,19 @@ class Executor(base_executor.BaseExecutor):
         schema = io_utils.SchemaReader().read(schema_path)
         absl.logging.info('schema: {}'.format(schema))
 
-        # Load in the specified module file
-        try:
-            spec = importlib.util.spec_from_file_location('user_module', exec_properties[MODULE_FILE_KEY])
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
+        sklearn_pipeline = dill.loads(exec_properties['preprocessor_pickle'])
 
-            # Load in preprocessor
-            sklearn_pipeline = getattr(module, exec_properties[PREPROCESSOR_PIPELINE_NAME_KEY])
-        except IOError:
-            raise ImportError('{} in {} not found'.format(
-                exec_properties[PREPROCESSOR_PIPELINE_NAME_KEY], exec_properties[MODULE_FILE_KEY]))
+        # Load in the specified module file
+        # try:
+        #     spec = importlib.util.spec_from_file_location('user_module', exec_properties[MODULE_FILE_KEY])
+        #     module = importlib.util.module_from_spec(spec)
+        #     spec.loader.exec_module(module)
+        #
+        #     # Load in preprocessor
+        #     sklearn_pipeline = getattr(module, exec_properties[PREPROCESSOR_PIPELINE_NAME_KEY])
+        # except IOError:
+        #     raise ImportError('{} in {} not found'.format(
+        #         exec_properties[PREPROCESSOR_PIPELINE_NAME_KEY], exec_properties[MODULE_FILE_KEY]))
 
 
 

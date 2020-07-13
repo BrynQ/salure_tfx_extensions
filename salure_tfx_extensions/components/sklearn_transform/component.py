@@ -1,5 +1,7 @@
 from typing import Optional, Text, Dict, Any, Union
 
+import dill
+
 from tfx import types
 from tfx.components.base import base_component
 from tfx.components.base import executor_spec
@@ -11,6 +13,8 @@ from tfx.types import channel_utils
 from salure_tfx_extensions.components.sklearn_transform import executor
 from salure_tfx_extensions.types.component_specs import SKLearnTransformSpec
 import salure_tfx_extensions.types.standard_artifacts as stfxe_artifacts
+
+from sklearn.pipeline import Pipeline
 
 
 class SKLearnTransform(base_component.BaseComponent):
@@ -25,9 +29,15 @@ class SKLearnTransform(base_component.BaseComponent):
     def __init__(self,
                  examples: types.Channel,
                  schema: types.Channel,
-                 module_file: Union[str, Text],
-                 preprocessor_pipeline_name: Union[str, Text],
+                 sklearn_pipeline: Pipeline,
+                 # module_file: Union[str, Text],
+                 # preprocessor_pipeline_name: Union[str, Text],
                  instance_name: Optional[Text] = None):
+
+        dill_recurse_setting = dill.settings['recurse']
+        dill.settings['recurse'] = True
+        preprocessor_pickle = dill.dumps(sklearn_pipeline)
+        dill.settings['recurse'] = dill_recurse_setting
 
         preprocessor_artifact = channel_utils.as_channel([stfxe_artifacts.SKLearnPrepocessor()])
         transformed_examples_artifact = channel_utils.as_channel([standard_artifacts.Examples()])
@@ -35,8 +45,9 @@ class SKLearnTransform(base_component.BaseComponent):
         spec = SKLearnTransformSpec(
             examples=examples,
             schema=schema,
-            module_file=module_file,
-            preprocessor_pipeline_name=preprocessor_pipeline_name,
+            # module_file=module_file,
+            # preprocessor_pipeline_name=preprocessor_pipeline_name,
+            preprocessor_pickle=preprocessor_pickle,
             transformed_examples=transformed_examples_artifact,
             transform_pipeline=preprocessor_artifact
         )
