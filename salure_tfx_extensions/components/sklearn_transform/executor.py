@@ -93,7 +93,7 @@ class Executor(base_executor.BaseExecutor):
         #     exec_properties[PREPROCESSOR_PIPELINE_NAME_KEY]
         # )
 
-        sklearn_pipeline = SKLearnPipeline(sklearn_pipeline)
+        # sklearn_pipeline = SKLearnPipeline(sklearn_pipeline)
 
         absl.logging.info('pipeline: {}'.format(sklearn_pipeline))
 
