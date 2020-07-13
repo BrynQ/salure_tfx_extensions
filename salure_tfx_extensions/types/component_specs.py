@@ -45,7 +45,7 @@ class SKLearnTransformSpec(ComponentSpec):
     PARAMETERS = {
         # 'module_file': ExecutionParameter(type=(str, Text)),
         # 'preprocessor_pipeline_name': ExecutionParameter(type=(str, Text), optional=True),
-        'preprocessor_pickle': ExecutionParameter(type=(bytes, Text))
+        'preprocessor_pickle': ExecutionParameter(type=(str, Text))
         # 'data_format': ExecutionParameter(type=(str, Text), optional=True),  # Default will be pandas
     }
     INPUTS = {
