@@ -79,7 +79,7 @@ class Executor(base_executor.BaseExecutor):
         schema = io_utils.SchemaReader().read(schema_path)
         absl.logging.info('schema: {}'.format(schema))
 
-        sklearn_pipeline = dill.loads(base64.decodebytes(exec_properties['preprocessor_pickle']))
+        sklearn_pipeline = dill.loads(base64.decodebytes(exec_properties['preprocessor_pickle'].encode('utf-8')))
 
         # Load in the specified module file
         # try:
