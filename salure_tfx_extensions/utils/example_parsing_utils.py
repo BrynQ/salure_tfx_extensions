@@ -10,6 +10,7 @@ import apache_beam as beam
 import numpy as np
 import pyarrow
 import absl
+from tensorflow_metadata.proto.v0 import schema_pb2
 
 
 def example_to_list(example: tf.train.Example) -> List[Union[Text, int, float]]:
@@ -96,9 +97,9 @@ def from_tfrecords(file_paths, schema, compression_type='GZIP'):
 def schema_to_dict(schema):
     features = {}
 
-    for col, col_type in schema.items():
-        features[col] = tf.io.FixedLenFeature(
-            (), _get_feature_type(type=col_type))
+    for feature in schema.feature:
+        features[feature.name] = tf.io.FixedLenFeature(
+            (), _get_feature_type(type=feature.type))
 
     return features
 
@@ -117,9 +118,17 @@ def to_pandas(tfrecords):
 
 
 def _get_feature_type(type):
-    return {
-        int: tf.int64,
-        float: tf.float32,
-        str: tf.string,
-        bytes: tf.string,
-    }[type]
+    # return {
+    #     int: tf.int64,
+    #     float: tf.float32,
+    #     str: tf.string,
+    #     bytes: tf.string,
+    # }[type]
+
+    if type == schema_pb2.FeatureType.BYTES:
+        return tf.string
+    if type == schema_pb2.FeatureType.INT:
+        return tf.int64
+    if type == schema_pb2.FeatureType.FLOAT:
+        return tf.float32
+    return tf.string
