@@ -1,6 +1,7 @@
 """Helper functions for parsing and handling tf.Examples"""
 
 import os
+import pandas as pd
 import itertools
 from tfx import types
 from typing import Text, List, Any, Union, Tuple
@@ -49,6 +50,7 @@ class CombineFeatureLists(beam.CombineFn):
 
 class RecordBatchesToTable(beam.CombineFn):
     """Combine a pcoll of RecordBatches into a Table"""
+
     # TODO
     def create_accumulator(self, *args, **kwargs):
         return []
@@ -76,3 +78,48 @@ class RecordBatchesToTable(beam.CombineFn):
         absl.logging.info('accumulator: {}'.format(accumulator))
         return pyarrow.Table.from_batches(accumulator)
 
+
+def from_tfrecords(file_paths, schema, compression_type='GZIP'):
+    if not isinstance(file_paths, list):
+        # For the case there is a wildcard in the path, like: '*'
+        file_paths = tf.data.Dataset.list_files(file_paths)
+
+    dataset = tf.data.TFRecordDataset(
+        file_paths, compression_type=compression_type)
+
+    features = schema_to_dict(schema)
+
+    return dataset.map(lambda x: tf.io.parse_single_example(
+        x, features=features))
+
+
+def schema_to_dict(schema):
+    features = {}
+
+    for col, col_type in schema.items():
+        features[col] = tf.io.FixedLenFeature(
+            (), _get_feature_type(type=col_type))
+
+    return features
+
+
+def to_pandas(tfrecords):
+    # TODO: Could use a performance increase
+    df = None
+
+    for row in tfrecords:
+        if df is None:
+            df = pd.DataFrame(columns=row.keys())
+
+        df.append(row, ignore_index=True)
+
+    return df
+
+
+def _get_feature_type(type):
+    return {
+        int: tf.int64,
+        float: tf.float32,
+        str: tf.string,
+        bytes: tf.string,
+    }[type]

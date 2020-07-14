@@ -22,13 +22,16 @@ from sklearn.pipeline import Pipeline
 
 EXAMPLES_KEY = 'examples'
 SCHEMA_KEY = 'schema'
-# MODULE_FILE_KEY = 'module_file'
-# PREPROCESSOR_PIPELINE_NAME_KEY = 'preprocessor_pipeline_name'
+MODULE_FILE_KEY = 'module_file'
+PREPROCESSOR_PIPELINE_NAME_KEY = 'preprocessor_pipeline_name'
 PREPROCESSOR_PICKLE_KEY = 'preprocessor_pickle'
 TRANSFORMED_EXAMPLES_KEY = 'transformed_examples'
 TRANSFORM_PIPELINE_KEY = 'transform_pipeline'
 
 _TELEMETRY_DESCRIPTORS = ['SKLearnTransform']
+
+DEFAULT_PIPELINE_NAME = 'pipeline'
+PIPELINE_FILE_NAME = 'pipeline.pickle'
 
 
 class Executor(base_executor.BaseExecutor):
@@ -45,6 +48,7 @@ class Executor(base_executor.BaseExecutor):
           input_dict:
             - examples: Tensorflow Examples
           exec_properties:
+            - preprocessor_pickle: A pickle string of the preprocessor
             - module_file: String file path to a module file
             - preprocessor_pipeline_name: The name of the pipeline object in the specified module file
           output_dict:
@@ -53,10 +57,14 @@ class Executor(base_executor.BaseExecutor):
         """
 
         self._log_startup(input_dict, output_dict, exec_properties)
-        dill.settings['recurse'] = True
 
         if not (len(input_dict[EXAMPLES_KEY]) == 1):
             raise ValueError('input_dict[{}] should only contain one artifact'.format(EXAMPLES_KEY))
+        if bool(exec_properties['preprocessor_pickle']) == bool(exec_properties['module_file']):
+            raise ValueError('Could not determine which preprocessor to use, both or neither of the module file and a'
+                             'preprocessor pickle were provided')
+
+        use_module_file = bool(exec_properties['module_file'])
 
         examples_artifact = input_dict[EXAMPLES_KEY][0]
         examples_splits = artifact_utils.decode_split_names(examples_artifact.split_names)
@@ -79,73 +87,85 @@ class Executor(base_executor.BaseExecutor):
         schema = io_utils.SchemaReader().read(schema_path)
         absl.logging.info('schema: {}'.format(schema))
 
-        sklearn_pipeline = dill.loads(base64.decodebytes(exec_properties['preprocessor_pickle'].encode('utf-8')))
+        if use_module_file:
+            # Load in the specified module file
+            try:
+                spec = importlib.util.spec_from_file_location('user_module', exec_properties[MODULE_FILE_KEY])
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
 
-        # Load in the specified module file
-        # try:
-        #     spec = importlib.util.spec_from_file_location('user_module', exec_properties[MODULE_FILE_KEY])
-        #     module = importlib.util.module_from_spec(spec)
-        #     spec.loader.exec_module(module)
-        #
-        #     # Load in preprocessor
-        #     sklearn_pipeline = getattr(module, exec_properties[PREPROCESSOR_PIPELINE_NAME_KEY])
-        # except IOError:
-        #     raise ImportError('{} in {} not found'.format(
-        #         exec_properties[PREPROCESSOR_PIPELINE_NAME_KEY], exec_properties[MODULE_FILE_KEY]))
+                # Load in preprocessor
+                sklearn_pipeline = getattr(module, exec_properties[PREPROCESSOR_PIPELINE_NAME_KEY])
+            except IOError:
+                raise ImportError('{} in {} not found'.format(
+                    exec_properties[PREPROCESSOR_PIPELINE_NAME_KEY], exec_properties[MODULE_FILE_KEY]))
 
-
-
-        # sklearn_pipeline = import_utils.import_func_from_source(
-        #     exec_properties[MODULE_FILE_KEY],
-        #     exec_properties[PREPROCESSOR_PIPELINE_NAME_KEY]
-        # )
-
-        # sklearn_pipeline = SKLearnPipeline(sklearn_pipeline)
+            sklearn_pipeline = import_utils.import_func_from_source(
+                exec_properties[MODULE_FILE_KEY],
+                exec_properties[PREPROCESSOR_PIPELINE_NAME_KEY]
+            )
+        else:  # use the provided pickle
+            # This way a pickle bytestring could be sent over json
+            sklearn_pipeline = dill.loads(base64.decodebytes(exec_properties['preprocessor_pickle'].encode('utf-8')))
 
         absl.logging.info('pipeline: {}'.format(sklearn_pipeline))
 
-        with self._make_beam_pipeline() as pipeline:
-            with tft_beam.Context(
-                    use_deep_copy_optimization=True):
-                absl.logging.info('Loading Training Examples')
-                train_input_uri = io_utils.all_files_pattern(train_uri)
+        data = example_parsing_utils.from_tfrecords(train_uri, schema)
+        df = example_parsing_utils.to_pandas(data)
+        absl.logging.info('dataframe head: {}'.format(df.head().to_string()))
 
-                input_tfxio = tf_example_record.TFExampleRecord(
-                    file_pattern=train_input_uri,
-                    telemetry_descriptors=_TELEMETRY_DESCRIPTORS,
-                    schema=schema
-                )
+        # Fit the pipeline
+        sklearn_pipeline.fit(df)
 
-                absl.logging.info(input_dict)
-                absl.logging.info(output_dict)
-                absl.logging.info('uri: {}'.format(train_uri))
-                absl.logging.info('input_uri: {}'.format(train_input_uri))
+        absl.logging.info(sklearn_pipeline)
+        absl.logging.info(output_dict[TRANSFORM_PIPELINE_KEY])
+        with open(os.path.join(output_dict[TRANSFORM_PIPELINE_KEY], PIPELINE_FILE_NAME)) as f:
+            dill.dump(sklearn_pipeline, f)
 
-                training_data_recordbatch = pipeline | 'TFXIORead Train Files' >> input_tfxio.BeamSource()
-                training_data_recordbatch | 'Logging data from Train Files' >> beam.Map(absl.logging.info)
+        # Scrap the beam pipeline for this component get the pickled SKLearn Pipeline to work
 
-                training_data = (
-                    training_data_recordbatch
-                    # | 'Recordbatches to Table' >> beam.CombineGlobally(
-                    #     example_parsing_utils.RecordBatchesToTable())
-                    | 'Aggregate RecordBatches' >> beam.CombineGlobally(
-                        beam.combiners.ToListCombineFn())
-                    # Work around non-picklability for pa.Table.from_batches
-                    | 'To Pyarrow Table' >> beam.Map(lambda x: pa.Table.from_batches(x))
-                    | 'To Pandas DataFrame' >> beam.Map(lambda x: x.to_pandas())
-                )
-
-                training_data | 'Logging Pandas DataFrame' >> beam.Map(
-                    lambda x: absl.logging.info('dataframe: {}'.format(x)))
-                training_data | 'Log DataFrame head' >> beam.Map(lambda x: print(x.head().to_string()))
-
-                # fit_preprocessor = training_data | 'Fit Preprocessing Pipeline' >> beam.ParDo(
-                #     FitPreprocessingPipeline(), beam.pvalue.AsSingleton(sklearn_pipeline))
-
-                fit_preprocessor = training_data | 'Fit Preprocessing Pipeline' >> FitPreprocessingPipeline(
-                    sklearn_pipeline)
-
-                fit_preprocessor | 'Logging Fit Preprocessor' >> beam.Map(absl.logging.info)
+        # with self._make_beam_pipeline() as pipeline:
+        #     with tft_beam.Context(
+        #             use_deep_copy_optimization=True):
+        #         absl.logging.info('Loading Training Examples')
+        #         train_input_uri = io_utils.all_files_pattern(train_uri)
+        #
+        #         input_tfxio = tf_example_record.TFExampleRecord(
+        #             file_pattern=train_input_uri,
+        #             telemetry_descriptors=_TELEMETRY_DESCRIPTORS,
+        #             schema=schema
+        #         )
+        #
+        #         absl.logging.info(input_dict)
+        #         absl.logging.info(output_dict)
+        #         absl.logging.info('uri: {}'.format(train_uri))
+        #         absl.logging.info('input_uri: {}'.format(train_input_uri))
+        #
+        #         training_data_recordbatch = pipeline | 'TFXIORead Train Files' >> input_tfxio.BeamSource()
+        #         training_data_recordbatch | 'Logging data from Train Files' >> beam.Map(absl.logging.info)
+        #
+        #         training_data = (
+        #             training_data_recordbatch
+        #             # | 'Recordbatches to Table' >> beam.CombineGlobally(
+        #             #     example_parsing_utils.RecordBatchesToTable())
+        #             | 'Aggregate RecordBatches' >> beam.CombineGlobally(
+        #                 beam.combiners.ToListCombineFn())
+        #             # Work around non-picklability for pa.Table.from_batches
+        #             | 'To Pyarrow Table' >> beam.Map(lambda x: pa.Table.from_batches(x))
+        #             | 'To Pandas DataFrame' >> beam.Map(lambda x: x.to_pandas())
+        #         )
+        #
+        #         training_data | 'Logging Pandas DataFrame' >> beam.Map(
+        #             lambda x: absl.logging.info('dataframe: {}'.format(x)))
+        #         training_data | 'Log DataFrame head' >> beam.Map(lambda x: print(x.head().to_string()))
+        #
+        #         # fit_preprocessor = training_data | 'Fit Preprocessing Pipeline' >> beam.ParDo(
+        #         #     FitPreprocessingPipeline(), beam.pvalue.AsSingleton(sklearn_pipeline))
+        #
+        #         fit_preprocessor = training_data | 'Fit Preprocessing Pipeline' >> FitPreprocessingPipeline(
+        #             sklearn_pipeline)
+        #
+        #         fit_preprocessor | 'Logging Fit Preprocessor' >> beam.Map(absl.logging.info)
 
 
 def import_pipeline_from_source(source_path: Text, pipeline_name: Text) -> Pipeline:
@@ -164,18 +184,18 @@ def import_pipeline_from_source(source_path: Text, pipeline_name: Text) -> Pipel
             pipeline_name, source_path))
 
 
-class SKLearnPipeline(object):
-    """This exists to appease the python pickling Gods"""
-
-    def __init__(self, pipeline):
-        self._pipeline = pipeline
-
-    def fit(self, dataframe):
-        self._pipeline.fit(dataframe)
-
-    @property
-    def pipeline(self):
-        return self._pipeline
+# class SKLearnPipeline(object):
+#     """This exists to appease the python pickling Gods"""
+#
+#     def __init__(self, pipeline):
+#         self._pipeline = pipeline
+#
+#     def fit(self, dataframe):
+#         self._pipeline.fit(dataframe)
+#
+#     @property
+#     def pipeline(self):
+#         return self._pipeline
 
 
 class FitPreprocessingPipeline(beam.PTransform):

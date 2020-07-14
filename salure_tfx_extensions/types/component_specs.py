@@ -43,9 +43,9 @@ class SKLearnTransformSpec(ComponentSpec):
     """Salure_tfx_extensions SKLearnTransform spec"""
 
     PARAMETERS = {
-        # 'module_file': ExecutionParameter(type=(str, Text)),
-        # 'preprocessor_pipeline_name': ExecutionParameter(type=(str, Text), optional=True),
-        'preprocessor_pickle': ExecutionParameter(type=(str, Text))
+        'module_file': ExecutionParameter(type=(str, Text), optional=True),
+        'preprocessor_pipeline_name': ExecutionParameter(type=(str, Text), optional=True),
+        'preprocessor_pickle': ExecutionParameter(type=(str, Text), optional=True)
         # 'data_format': ExecutionParameter(type=(str, Text), optional=True),  # Default will be pandas
     }
     INPUTS = {
