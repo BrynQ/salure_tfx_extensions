@@ -30,9 +30,9 @@ class SKLearnTransform(base_component.BaseComponent):
     def __init__(self,
                  examples: types.Channel,
                  schema: types.Channel,
-                 sklearn_pipeline: Pipeline,
-                 # module_file: Union[str, Text],
-                 # preprocessor_pipeline_name: Union[str, Text],
+                 sklearn_pipeline: Pipeline = None,
+                 module_file: Optional[Union[str, Text]] = None,
+                 preprocessor_pipeline_name: Optional[Union[str, Text]] = None,
                  instance_name: Optional[Text] = None):
 
         dill_recurse_setting = dill.settings['recurse']
@@ -47,8 +47,8 @@ class SKLearnTransform(base_component.BaseComponent):
         spec = SKLearnTransformSpec(
             examples=examples,
             schema=schema,
-            # module_file=module_file,
-            # preprocessor_pipeline_name=preprocessor_pipeline_name,
+            module_file=module_file,
+            preprocessor_pipeline_name=preprocessor_pipeline_name,
             preprocessor_pickle=preprocessor_pickle,
             transformed_examples=transformed_examples_artifact,
             transform_pipeline=preprocessor_artifact
