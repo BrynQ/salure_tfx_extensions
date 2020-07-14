@@ -61,7 +61,7 @@ class Executor(base_executor.BaseExecutor):
         if not (len(input_dict[EXAMPLES_KEY]) == 1):
             raise ValueError('input_dict[{}] should only contain one artifact'.format(EXAMPLES_KEY))
         if bool(exec_properties['preprocessor_pickle']) == bool(exec_properties['module_file']):
-            raise ValueError('Could not determine which preprocessor to use, both or neither of the module file and a'
+            raise ValueError('Could not determine which preprocessor to use, both or neither of the module file and a '
                              'preprocessor pickle were provided')
 
         use_module_file = bool(exec_properties['module_file'])
