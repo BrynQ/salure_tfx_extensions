@@ -106,7 +106,10 @@ class Executor(base_executor.BaseExecutor):
             )
         else:  # use the provided pickle
             # This way a pickle bytestring could be sent over json
+            dill_recurse_setting = dill.settings['recurse']
+            dill.settings['recurse'] = True
             sklearn_pipeline = dill.loads(base64.decodebytes(exec_properties['preprocessor_pickle'].encode('utf-8')))
+            dill.settings['recurse'] = dill_recurse_setting
 
         absl.logging.info('pipeline: {}'.format(sklearn_pipeline))
 
