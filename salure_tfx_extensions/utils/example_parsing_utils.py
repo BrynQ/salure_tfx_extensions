@@ -92,19 +92,26 @@ def from_tfrecords(file_paths, schema, compression_type='GZIP'):
     feature_types = extract_schema_features(schema)
 
     # Research whether we need default values
-    features = {k: tf.io.FixedLenFeature((), v) for k, v in feature_types.items()}
+    features = {k: tf.io.FixedLenFeature((), v, default_value=_default_value_for_type(v))
+                for k, v in feature_types.items()}
 
     return dataset.map(lambda x: tf.io.parse_single_example(
         x, features=features))
 
 
-def extract_schema_features(schema):
+def _default_value_for_type(type):
+    if type in [schema_pb2.FeatureType.BYTES, 'BYTES']:
+        return tf.strings.as_string('')
+    if type in [schema_pb2.FeatureType.INT, 'INT']:
+        return 0
+    if type in [schema_pb2.FeatureType.FLOAT, 'FLOAT']:
+        return 0.0
+    return tf.string
 
+
+def extract_schema_features(schema):
     features = {}
 
-    # for feature in schema.feature:
-    #     features[feature.name] = tf.io.FixedLenFeature(
-    #         (), _get_feature_type(type=feature.type))
     schema_dict = json_format.MessageToDict(schema, preserving_proto_field_name=True)
 
     for item in schema_dict['feature']:
