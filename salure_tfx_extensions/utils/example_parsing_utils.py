@@ -101,12 +101,14 @@ def from_tfrecords(file_paths, schema, compression_type='GZIP'):
 
 def _default_value_for_type(type):
     if type in [schema_pb2.FeatureType.BYTES, 'BYTES']:
-        return tf.strings.as_string('')
+        # return tf.strings.as_string('')
+        return ''
     if type in [schema_pb2.FeatureType.INT, 'INT']:
         return 0
     if type in [schema_pb2.FeatureType.FLOAT, 'FLOAT']:
         return 0.0
-    return tf.strings.as_string('')
+    # return tf.strings.as_string('')
+    return ''
 
 
 def _to_tf_dtypes(type):
