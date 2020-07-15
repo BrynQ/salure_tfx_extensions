@@ -18,6 +18,7 @@ from salure_tfx_extensions.utils import example_parsing_utils
 import apache_beam as beam
 import pyarrow as pa
 from sklearn.pipeline import Pipeline
+from google.protobuf import json_format
 
 
 EXAMPLES_KEY = 'examples'
@@ -85,7 +86,9 @@ class Executor(base_executor.BaseExecutor):
         schema_path = io_utils.get_only_uri_in_dir(
             artifact_utils.get_single_uri(input_dict[SCHEMA_KEY]))
         schema = io_utils.SchemaReader().read(schema_path)
+        schema_dict = json_format.MessageToDict(schema, preserving_proto_field_name=True)
         absl.logging.info('schema: {}'.format(schema))
+        absl.logging.info('schema_dict: {}'.format(schema_dict))
 
         if use_module_file:
             # Load in the specified module file
