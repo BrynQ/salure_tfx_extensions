@@ -89,7 +89,10 @@ def from_tfrecords(file_paths, schema, compression_type='GZIP'):
     dataset = tf.data.TFRecordDataset(
         file_paths, compression_type=compression_type)
 
-    features = extract_schema_features(schema)
+    feature_types = extract_schema_features(schema)
+
+    # Research whether we need default values
+    features = {k: tf.io.FixedLenFeature((), v) for k, v in feature_types.items()}
 
     return dataset.map(lambda x: tf.io.parse_single_example(
         x, features=features))
