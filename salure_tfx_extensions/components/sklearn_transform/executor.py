@@ -117,8 +117,10 @@ class Executor(base_executor.BaseExecutor):
         absl.logging.info('pipeline: {}'.format(sklearn_pipeline))
 
         data = example_parsing_utils.from_tfrecords(io_utils.all_files_pattern(train_uri), schema)
-        for item in data.take(7):
-            absl.logging.info('item: {}'.format(item))
+        for index, item in enumerate(data):
+            if index > 7:
+                break
+            absl.logging.info('item {}: {}'.format(index, item))
 
         df = example_parsing_utils.to_pandas(data)
         absl.logging.info('dataframe head: {}'.format(df.head().to_string()))

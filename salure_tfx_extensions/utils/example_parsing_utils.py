@@ -11,6 +11,7 @@ import numpy as np
 import pyarrow
 import absl
 from tensorflow_metadata.proto.v0 import schema_pb2
+import tensorflow_datasets as tfds
 from google.protobuf import json_format
 
 
@@ -89,14 +90,16 @@ def from_tfrecords(file_paths, schema, compression_type='GZIP'):
     dataset = tf.data.TFRecordDataset(
         file_paths, compression_type=compression_type)
 
-    feature_types = extract_schema_features(schema)
+    return tfds.as_numpy(dataset)
+
+    # feature_types = extract_schema_features(schema)
 
     # Research whether we need default values
-    features = {k: tf.io.FixedLenFeature((), _to_tf_dtypes(v), default_value=_default_value_for_type(v))
-                for k, v in feature_types.items()}
-
-    return dataset.map(lambda x: tf.io.parse_single_example(
-        x, features=features))
+    # features = {k: tf.io.FixedLenFeature((), _to_tf_dtypes(v), default_value=_default_value_for_type(v))
+    #             for k, v in feature_types.items()}
+    #
+    # return dataset.map(lambda x: tf.io.parse_single_example(
+    #     x, features=features))
 
 
 def _default_value_for_type(type):

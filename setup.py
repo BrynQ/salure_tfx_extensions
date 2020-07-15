@@ -31,6 +31,7 @@ setup(
         # 'beam-nuggets>=0.15.1,<0.16',
         'PyMySQL>=0.9.3,<0.10',
         'scikit-learn>=0.23,<0.24',
+        'tensorflow-datasets>=3.0,<4.0',
     ],
     zip_safe=False
 )
