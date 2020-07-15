@@ -11,6 +11,7 @@ import numpy as np
 import pyarrow
 import absl
 from tensorflow_metadata.proto.v0 import schema_pb2
+from google.protobuf import json_format
 
 
 def example_to_list(example: tf.train.Example) -> List[Union[Text, int, float]]:
@@ -88,18 +89,23 @@ def from_tfrecords(file_paths, schema, compression_type='GZIP'):
     dataset = tf.data.TFRecordDataset(
         file_paths, compression_type=compression_type)
 
-    features = schema_to_dict(schema)
+    features = extract_schema_features(schema)
 
     return dataset.map(lambda x: tf.io.parse_single_example(
         x, features=features))
 
 
-def schema_to_dict(schema):
+def extract_schema_features(schema):
+
     features = {}
 
-    for feature in schema.feature:
-        features[feature.name] = tf.io.FixedLenFeature(
-            (), _get_feature_type(type=feature.type))
+    # for feature in schema.feature:
+    #     features[feature.name] = tf.io.FixedLenFeature(
+    #         (), _get_feature_type(type=feature.type))
+    schema_dict = json_format.MessageToDict(schema, preserving_proto_field_name=True)
+
+    for item in schema_dict['feature']:
+        features[item['name']] = _get_feature_type(item['type'])
 
     return features
 
@@ -125,10 +131,10 @@ def _get_feature_type(type):
     #     bytes: tf.string,
     # }[type]
 
-    if type == schema_pb2.FeatureType.BYTES:
+    if type in [schema_pb2.FeatureType.BYTES, 'BYTES']:
         return tf.string
-    if type == schema_pb2.FeatureType.INT:
+    if type in [schema_pb2.FeatureType.INT, 'INT']:
         return tf.int64
-    if type == schema_pb2.FeatureType.FLOAT:
+    if type in [schema_pb2.FeatureType.FLOAT, 'FLOAT']:
         return tf.float32
     return tf.string
