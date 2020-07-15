@@ -135,13 +135,14 @@ def extract_schema_features(schema):
     return features
 
 
-def to_pandas(tfrecords):
+def to_pandas(tfrecords, schema):
     # TODO: Could use a performance increase
     df = None
+    schema_dict = json_format.MessageToDict(schema)
 
     for row in tfrecords:
         if df is None:
-            df = pd.DataFrame(columns=row.keys())
+            df = pd.DataFrame(columns=[item['name'] for item in schema_dict['feature']])
 
         df.append(row, ignore_index=True)
 

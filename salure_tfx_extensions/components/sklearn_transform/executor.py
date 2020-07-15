@@ -7,6 +7,7 @@ import base64
 import apache_beam
 import tensorflow
 from typing import Any, Dict, List, Text
+import tensorflow as tf
 from tfx import types
 from tfx.components.base import base_executor
 from tfx.types import artifact_utils
@@ -121,8 +122,18 @@ class Executor(base_executor.BaseExecutor):
             if index > 7:
                 break
             absl.logging.info('item {}: {}'.format(index, item))
+        features = example_parsing_utils.extract_schema_features(schema)
+        data = list(map(lambda x: tf.io.parse_single_example(x, features=features), data))
+
+        for index, item in enumerate(data):
+            if index > 7:
+                break
+            absl.logging.info('item {}: {}'.format(index, item))
 
         df = example_parsing_utils.to_pandas(data)
+
+
+
         absl.logging.info('dataframe head: {}'.format(df.head().to_string()))
 
         # Fit the pipeline
