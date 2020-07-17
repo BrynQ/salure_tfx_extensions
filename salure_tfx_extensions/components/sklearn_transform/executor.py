@@ -137,13 +137,13 @@ class Executor(base_executor.BaseExecutor):
         for index, item in enumerate(data):
             if index > 7:
                 break
-            absl.logging.info('item {}: {}'.format(index, item.to_string()))
+            absl.logging.info('item {}: {}'.format(index, item))
             # absl.logging.info('item DF {}: {}'.format(index, pd.DataFrame(item).to_string()))
 
 
         # df = example_parsing_utils.to_pandas(data, schema)
 
-        absl.logging.info('dataframe head: {}'.format(df.head().to_string()))
+        # absl.logging.info('dataframe head: {}'.format(df.head().to_string()))
 
         # Fit the pipeline
         sklearn_pipeline.fit(df)
