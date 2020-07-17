@@ -13,6 +13,7 @@ import absl
 from tensorflow_metadata.proto.v0 import schema_pb2
 import tensorflow_datasets as tfds
 from google.protobuf import json_format
+import base64
 
 
 def example_to_list(example: tf.train.Example) -> List[Union[Text, int, float]]:
@@ -209,7 +210,7 @@ def dataframe_from_feature_dicts(features, schema):
     for item in features_list[1:]:
         for key in item.keys():
             if 'bytesList' in item[key]:
-                result[key].extend(item[key]['bytesList']['value'])
+                result[key].extend(list(map(base64.decode, item[key]['bytesList']['value'])))
             elif'floatList' in item[key]:
                 result[key].extend(list(map(float, item[key]['floatList']['value'])))
             elif 'int64List' in item[key]:
