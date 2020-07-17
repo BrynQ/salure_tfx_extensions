@@ -125,6 +125,7 @@ class Executor(base_executor.BaseExecutor):
         features = example_parsing_utils.extract_schema_features(schema)
         # data = list(map(lambda x: tf.io.parse_single_example(x, features=features), data))
         data = list(map(json_format.MessageToDict, map(tf.train.Example.FromString, data)))
+        data = list(map(example_parsing_utils.parse_feature_dict, data))
 
         for index, item in enumerate(data):
             if index > 7:

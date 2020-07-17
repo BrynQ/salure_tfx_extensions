@@ -167,7 +167,7 @@ def _get_feature_type(type):
     return tf.string
 
 
-def feature_dict_to_series(feature):
+def parse_feature_dict(feature):
     # Dictionary based on tf.Example proto
     feature_list = feature['features']['feature']
 
@@ -182,4 +182,6 @@ def feature_dict_to_series(feature):
             result[key] = list(map(int, feature_list[key]['int64List']['value']))
         else:
             result[key] = [None]
+
+    return result
 
