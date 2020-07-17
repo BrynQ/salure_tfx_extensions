@@ -130,7 +130,7 @@ def extract_schema_features(schema):
     schema_dict = json_format.MessageToDict(schema, preserving_proto_field_name=True)
 
     for item in schema_dict['feature']:
-        features[item['name']] = _get_feature_type(item['type'])
+        features[item['name']] = _get_feature_type(_to_tf_dtypes(item['type']))
 
     return features
 
