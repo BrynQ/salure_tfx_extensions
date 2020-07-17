@@ -60,6 +60,9 @@ class Executor(base_executor.BaseExecutor):
 
         self._log_startup(input_dict, output_dict, exec_properties)
 
+        dill_recurse_setting = dill.settings['recurse']
+        dill.settings['recurse'] = True
+
         if not (len(input_dict[EXAMPLES_KEY]) == 1):
             raise ValueError('input_dict[{}] should only contain one artifact'.format(EXAMPLES_KEY))
         if bool(exec_properties['preprocessor_pickle']) == bool(exec_properties['module_file']):
@@ -110,10 +113,7 @@ class Executor(base_executor.BaseExecutor):
             )
         else:  # use the provided pickle
             # This way a pickle bytestring could be sent over json
-            dill_recurse_setting = dill.settings['recurse']
-            dill.settings['recurse'] = True
             sklearn_pipeline = dill.loads(base64.decodebytes(exec_properties['preprocessor_pickle'].encode('utf-8')))
-            dill.settings['recurse'] = dill_recurse_setting
 
         absl.logging.info('pipeline: {}'.format(sklearn_pipeline))
 
@@ -155,8 +155,10 @@ class Executor(base_executor.BaseExecutor):
         absl.logging.info(output_dict[TRANSFORM_PIPELINE_KEY])
         with open(os.path.join(
                 artifact_utils.get_single_uri(output_dict[TRANSFORM_PIPELINE_KEY]),
-                PIPELINE_FILE_NAME)) as f:
+                PIPELINE_FILE_NAME), 'w') as f:
             dill.dump(sklearn_pipeline, f)
+
+        dill.settings['recurse'] = dill_recurse_setting
 
         # TODO write pandas DataFrame back to TFRecords
 
