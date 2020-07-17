@@ -199,7 +199,7 @@ def dataframe_from_feature_dicts(features, schema):
     item = features_list[0]
     for key in item.keys():
         if 'bytesList' in item[key]:
-            result[key] = item[key]['bytesList']['value']
+            result[key] = list(map(base64.b64decode, item[key]['bytesList']['value']))
         elif 'floatList' in item[key]:
             result[key] = list(map(float, item[key]['floatList']['value']))
         elif 'int64List' in item[key]:
@@ -210,7 +210,7 @@ def dataframe_from_feature_dicts(features, schema):
     for item in features_list[1:]:
         for key in item.keys():
             if 'bytesList' in item[key]:
-                result[key].extend(list(map(base64.decode, item[key]['bytesList']['value'])))
+                result[key].extend(list(map(base64.b64decode, item[key]['bytesList']['value'])))
             elif'floatList' in item[key]:
                 result[key].extend(list(map(float, item[key]['floatList']['value'])))
             elif 'int64List' in item[key]:
