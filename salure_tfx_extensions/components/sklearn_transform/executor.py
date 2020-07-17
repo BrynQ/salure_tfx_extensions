@@ -131,16 +131,17 @@ class Executor(base_executor.BaseExecutor):
                 break
             absl.logging.info('item {}: {}'.format(index, item))
 
-        data = list(map(example_parsing_utils.parse_feature_dict, data))
+        # data = list(map(example_parsing_utils.parse_feature_dict, data))
+        data = example_parsing_utils.dataframe_from_feature_dicts(data, schema)
 
         for index, item in enumerate(data):
             if index > 7:
                 break
-            absl.logging.info('item {}: {}'.format(index, item))
-            absl.logging.info('item DF {}: {}'.format(index, pd.DataFrame(item)))
+            absl.logging.info('item {}: {}'.format(index, item.to_string()))
+            # absl.logging.info('item DF {}: {}'.format(index, pd.DataFrame(item).to_string()))
 
 
-        df = example_parsing_utils.to_pandas(data, schema)
+        # df = example_parsing_utils.to_pandas(data, schema)
 
         absl.logging.info('dataframe head: {}'.format(df.head().to_string()))
 

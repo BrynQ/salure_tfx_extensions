@@ -185,3 +185,38 @@ def parse_feature_dict(feature):
 
     return result
 
+
+def dataframe_from_feature_dicts(features, schema):
+    schema_dict = json_format.MessageToDict(schema, preserving_proto_field_name=True)
+
+    # Dictionary based on tf.Example proto
+    features_list = list(map(lambda x: x['features']['feature'], features))
+    columns = [item['name'] for item in schema_dict['feature']]
+
+    result = {}
+    # bytesList, floatList, int64List
+    item = features_list[0]
+    for key in item.keys():
+        if 'bytesList' in item[key]:
+            result[key] = item[key]['bytesList']['value']
+        elif 'floatList' in item[key]:
+            result[key] = list(map(float, item[key]['floatList']['value']))
+        elif 'int64List' in item[key]:
+            result[key] = list(map(int, item[key]['int64List']['value']))
+        else:
+            result[key] = [None]
+
+    for item in features_list[1:]:
+        for key in item.keys():
+            if 'bytesList' in item[key]:
+                result[key].extend(item[key]['bytesList']['value'])
+            elif'floatList' in item[key]:
+                result[key].extend(list(map(float, item[key]['floatList']['value'])))
+            elif 'int64List' in item[key]:
+                result[key].extend(list(map(int, item[key]['int64List']['value'])))
+            else:
+                result[key].append(None)
+
+    return pd.DataFrame(result, columns=columns)
+
+
