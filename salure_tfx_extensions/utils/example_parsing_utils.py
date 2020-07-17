@@ -140,11 +140,12 @@ def to_pandas(tfrecords, schema):
     df = None
     schema_dict = json_format.MessageToDict(schema)
 
+    columns = [item['name'] for item in schema_dict['feature']]
     for row in tfrecords:
         if df is None:
-            df = pd.DataFrame(columns=[item['name'] for item in schema_dict['feature']])
+            df = pd.DataFrame(columns=columns)
 
-        df.append(row, ignore_index=True)
+        df.append(pd.DataFrame(row, columns=columns), ignore_index=True)
 
     return df
 
@@ -164,3 +165,21 @@ def _get_feature_type(type):
     if type in [schema_pb2.FeatureType.FLOAT, 'FLOAT']:
         return tf.float32
     return tf.string
+
+
+def feature_dict_to_series(feature):
+    # Dictionary based on tf.Example proto
+    feature_list = feature['features']['feature']
+
+    result = {}
+    # bytesList, floatList, int64List
+    for key in feature_list.keys():
+        if 'bytesList' in feature_list[key]:
+            result[key] = feature_list[key]['bytesList']['value']
+        elif'floatList' in feature_list[key]:
+            result[key] = list(map(float, feature_list[key]['floatList']['value']))
+        elif 'int64List' in feature_list[key]:
+            result[key] = list(map(int, feature_list[key]['int64List']['value']))
+        else:
+            result[key] = [None]
+
