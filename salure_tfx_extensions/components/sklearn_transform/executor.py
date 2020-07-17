@@ -137,7 +137,7 @@ class Executor(base_executor.BaseExecutor):
             if index > 7:
                 break
             absl.logging.info('item {}: {}'.format(index, item))
-            absl.logging.info('item DF {}: {}'.format(index, pd.Dataframe(item)))
+            absl.logging.info('item DF {}: {}'.format(index, pd.DataFrame(item)))
 
 
         df = example_parsing_utils.to_pandas(data, schema)
