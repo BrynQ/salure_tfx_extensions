@@ -131,9 +131,7 @@ class Executor(base_executor.BaseExecutor):
                 break
             absl.logging.info('item {}: {}'.format(index, item))
 
-        df = example_parsing_utils.to_pandas(data)
-
-
+        df = example_parsing_utils.to_pandas(data, schema)
 
         absl.logging.info('dataframe head: {}'.format(df.head().to_string()))
 
