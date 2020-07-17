@@ -4,8 +4,7 @@ from types import ModuleType
 import absl
 import dill
 import base64
-import apache_beam
-import tensorflow
+# import apache_beam
 from typing import Any, Dict, List, Text
 import tensorflow as tf
 from tfx import types
@@ -14,11 +13,11 @@ from tfx.types import artifact_utils
 from tfx.utils import io_utils
 from tfx.utils import import_utils
 from tfx_bsl.tfxio import tf_example_record
-import tensorflow_transform.beam as tft_beam
+# import tensorflow_transform.beam as tft_beam
 from salure_tfx_extensions.utils import example_parsing_utils
 import apache_beam as beam
-import pandas as pd
-import pyarrow as pa
+# import pandas as pd
+# import pyarrow as pa
 from sklearn.pipeline import Pipeline
 from google.protobuf import json_format
 
@@ -119,6 +118,7 @@ class Executor(base_executor.BaseExecutor):
         absl.logging.info('pipeline: {}'.format(sklearn_pipeline))
 
         data = example_parsing_utils.from_tfrecords(io_utils.all_files_pattern(train_uri), schema)
+        # TODO: Remove redundant logging
         for index, item in enumerate(data):
             if index > 7:
                 break
@@ -126,6 +126,7 @@ class Executor(base_executor.BaseExecutor):
         features = example_parsing_utils.extract_schema_features(schema)
         # data = list(map(lambda x: tf.io.parse_single_example(x, features=features), data))
         data = list(map(json_format.MessageToDict, map(tf.train.Example.FromString, data)))
+        # TODO: Remove redundant logging
         for index, item in enumerate(data):
             if index > 7:
                 break
@@ -134,6 +135,7 @@ class Executor(base_executor.BaseExecutor):
         # data = list(map(example_parsing_utils.parse_feature_dict, data))
         data = example_parsing_utils.dataframe_from_feature_dicts(data, schema)
 
+        # TODO: Remove redundant logging
         # for index, item in enumerate(data):
         #     if index > 7:
         #         break
@@ -147,11 +149,16 @@ class Executor(base_executor.BaseExecutor):
 
         # Fit the pipeline
         sklearn_pipeline.fit(data)
+        transformed_data = sklearn_pipeline.transform(data)
 
         absl.logging.info(sklearn_pipeline)
         absl.logging.info(output_dict[TRANSFORM_PIPELINE_KEY])
-        with open(os.path.join(output_dict[TRANSFORM_PIPELINE_KEY], PIPELINE_FILE_NAME)) as f:
+        with open(os.path.join(
+                artifact_utils.get_single_uri(output_dict[TRANSFORM_PIPELINE_KEY]),
+                PIPELINE_FILE_NAME)) as f:
             dill.dump(sklearn_pipeline, f)
+
+        # TODO write pandas DataFrame back to TFRecords
 
         # Scrap the beam pipeline for this component get the pickled SKLearn Pipeline to work
 
