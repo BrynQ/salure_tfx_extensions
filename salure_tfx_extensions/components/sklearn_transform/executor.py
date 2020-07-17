@@ -153,9 +153,11 @@ class Executor(base_executor.BaseExecutor):
 
         absl.logging.info(sklearn_pipeline)
         absl.logging.info(output_dict[TRANSFORM_PIPELINE_KEY])
+
+        # transform_sklearn_pipeline_pickle = dill.dumps(sklearn_pipeline)
         with open(os.path.join(
                 artifact_utils.get_single_uri(output_dict[TRANSFORM_PIPELINE_KEY]),
-                PIPELINE_FILE_NAME), 'w') as f:
+                PIPELINE_FILE_NAME), 'wb') as f:
             dill.dump(sklearn_pipeline, f)
 
         dill.settings['recurse'] = dill_recurse_setting
