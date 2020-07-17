@@ -17,6 +17,7 @@ from tfx_bsl.tfxio import tf_example_record
 import tensorflow_transform.beam as tft_beam
 from salure_tfx_extensions.utils import example_parsing_utils
 import apache_beam as beam
+import pandas as pd
 import pyarrow as pa
 from sklearn.pipeline import Pipeline
 from google.protobuf import json_format
@@ -125,12 +126,19 @@ class Executor(base_executor.BaseExecutor):
         features = example_parsing_utils.extract_schema_features(schema)
         # data = list(map(lambda x: tf.io.parse_single_example(x, features=features), data))
         data = list(map(json_format.MessageToDict, map(tf.train.Example.FromString, data)))
+        for index, item in enumerate(data):
+            if index > 7:
+                break
+            absl.logging.info('item {}: {}'.format(index, item))
+
         data = list(map(example_parsing_utils.parse_feature_dict, data))
 
         for index, item in enumerate(data):
             if index > 7:
                 break
             absl.logging.info('item {}: {}'.format(index, item))
+            absl.logging.info('item DF {}: {}'.format(index, pd.Dataframe(item)))
+
 
         df = example_parsing_utils.to_pandas(data, schema)
 
