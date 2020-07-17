@@ -150,6 +150,7 @@ class Executor(base_executor.BaseExecutor):
         # Fit the pipeline
         sklearn_pipeline.fit(data)
         transformed_data = sklearn_pipeline.transform(data)
+        absl.logging.info(transformed_data.head().to_string())
 
         absl.logging.info(sklearn_pipeline)
         absl.logging.info(output_dict[TRANSFORM_PIPELINE_KEY])
