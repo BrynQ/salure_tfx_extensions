@@ -134,19 +134,19 @@ class Executor(base_executor.BaseExecutor):
         # data = list(map(example_parsing_utils.parse_feature_dict, data))
         data = example_parsing_utils.dataframe_from_feature_dicts(data, schema)
 
-        for index, item in enumerate(data):
-            if index > 7:
-                break
-            absl.logging.info('item {}: {}'.format(index, item))
-            # absl.logging.info('item DF {}: {}'.format(index, pd.DataFrame(item).to_string()))
-
+        # for index, item in enumerate(data):
+        #     if index > 7:
+        #         break
+        #     absl.logging.info('item {}: {}'.format(index, item))
+        # absl.logging.info('item DF {}: {}'.format(index, pd.DataFrame(item).to_string()))
+        absl.logging.info(data.head().to_string())
 
         # df = example_parsing_utils.to_pandas(data, schema)
 
         # absl.logging.info('dataframe head: {}'.format(df.head().to_string()))
 
         # Fit the pipeline
-        sklearn_pipeline.fit(df)
+        sklearn_pipeline.fit(data)
 
         absl.logging.info(sklearn_pipeline)
         absl.logging.info(output_dict[TRANSFORM_PIPELINE_KEY])
