@@ -4,7 +4,6 @@ from types import ModuleType
 import absl
 import dill
 import base64
-# import apache_beam
 from typing import Any, Dict, List, Text
 import tensorflow as tf
 from tfx import types
@@ -16,6 +15,7 @@ from tfx_bsl.tfxio import tf_example_record
 import tensorflow_transform.beam as tft_beam
 from salure_tfx_extensions.utils import example_parsing_utils
 import apache_beam as beam
+from apache_beam import pvalue
 # import pandas as pd
 import pyarrow as pa
 from sklearn.pipeline import Pipeline
@@ -210,11 +210,25 @@ class Executor(base_executor.BaseExecutor):
                 # fit_preprocessor = training_data | 'Fit Preprocessing Pipeline' >> beam.ParDo(
                 #     FitPreprocessingPipeline(), beam.pvalue.AsSingleton(sklearn_pipeline))
 
-                fit_preprocessor = training_data | 'Fit Preprocessing Pipeline' >> FitPreprocessingPipeline(
-                    sklearn_pipeline)
+                preprocessor_pcoll = pipeline | beam.Create([sklearn_pipeline])
+
+                def fit_sklearn_preprocessor(df, sklearn_preprocessor_pipeline):
+                    sklearn_preprocessor_pipeline.fit(df)
+                    yield pvalue.TaggedOutput('fit_preprocessor', sklearn_preprocessor_pipeline)
+                    yield pvalue.TaggedOutput('transformed_df', sklearn_preprocessor_pipeline.transform(df))
+
+                results = training_data | 'Fit Preprocessing Pipeline' >> beam.Map(
+                    fit_sklearn_preprocessor,
+                    pvalue.AsSingleton(preprocessor_pcoll))
+
+                fit_preprocessor = results.fit_preprocessor
+                transformed_df = results.transformed_df
 
                 fit_preprocessor | 'Logging Fit Preprocessor' >> beam.Map(
                     lambda x: absl.logging.info('fit_preprocessor: {}'.format(x)))
+
+                transformed_df | 'Logging Transformed DF head' >> beam.Map(
+                    lambda x: absl.logging.info('transformed_df head: {}'.format(x)))
 
 
 def import_pipeline_from_source(source_path: Text, pipeline_name: Text) -> Pipeline:
