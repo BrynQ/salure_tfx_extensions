@@ -177,6 +177,7 @@ class Executor(base_executor.BaseExecutor):
                     use_deep_copy_optimization=True):
                 absl.logging.info('Loading Training Examples')
                 train_input_uri = io_utils.all_files_pattern(train_uri)
+                preprocessor_output_uri = artifact_utils.get_single_uri(output_dict[TRANSFORM_PIPELINE_KEY])
 
                 input_tfxio = tf_example_record.TFExampleRecord(
                     file_pattern=train_input_uri,
@@ -188,6 +189,7 @@ class Executor(base_executor.BaseExecutor):
                 absl.logging.info(output_dict)
                 absl.logging.info('uri: {}'.format(train_uri))
                 absl.logging.info('input_uri: {}'.format(train_input_uri))
+                absl.logging.info('preprocessor_output_uri: {}'.format(preprocessor_output_uri))
 
                 training_data_recordbatch = pipeline | 'TFXIORead Train Files' >> input_tfxio.BeamSource()
                 training_data_recordbatch | 'Logging data from Train Files' >> beam.Map(absl.logging.info)
@@ -234,7 +236,7 @@ class Executor(base_executor.BaseExecutor):
                  | 'Pickle fit_preprocessor' >> beam.FlatMap(dill.dumps)
                  | 'Write fit_preprocessor to file' >> beam.io.WriteToText(
                             os.path.join(
-                                artifact_utils.get_single_uri(output_dict[TRANSFORM_PIPELINE_KEY]),
+                                preprocessor_output_uri,
                                 PIPELINE_FILE_NAME)))
 
 
