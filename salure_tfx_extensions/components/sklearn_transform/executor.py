@@ -219,7 +219,7 @@ class Executor(base_executor.BaseExecutor):
 
                 results = training_data | 'Fit Preprocessing Pipeline' >> beam.Map(
                     fit_sklearn_preprocessor,
-                    pvalue.AsSingleton(preprocessor_pcoll))
+                    pvalue.AsSingleton(preprocessor_pcoll)).with_outputs()
 
                 fit_preprocessor = results.fit_preprocessor
                 transformed_df = results.transformed_df
