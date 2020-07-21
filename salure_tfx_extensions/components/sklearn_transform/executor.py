@@ -121,7 +121,7 @@ class Executor(base_executor.BaseExecutor):
         data = example_parsing_utils.from_tfrecords(io_utils.all_files_pattern(train_uri), schema)
         # TODO: Remove redundant logging
         for index, item in enumerate(data):
-            if index > 7:
+            if index > 2:
                 break
             absl.logging.info('item {}: {}'.format(index, item))
         features = example_parsing_utils.extract_schema_features(schema)
@@ -129,7 +129,7 @@ class Executor(base_executor.BaseExecutor):
         data = list(map(json_format.MessageToDict, map(tf.train.Example.FromString, data)))
         # TODO: Remove redundant logging
         for index, item in enumerate(data):
-            if index > 7:
+            if index > 2:
                 break
             absl.logging.info('item {}: {}'.format(index, item))
 
