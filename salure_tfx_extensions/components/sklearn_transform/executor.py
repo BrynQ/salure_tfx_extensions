@@ -235,9 +235,13 @@ class Executor(base_executor.BaseExecutor):
                 (fit_preprocessor
                  | 'Pickle fit_preprocessor' >> beam.FlatMap(dill.dumps)
                  | 'Write fit_preprocessor to file' >> beam.io.WriteToText(
-                            os.path.join(
-                                preprocessor_output_uri,
-                                PIPELINE_FILE_NAME)))
+                        os.path.join(
+                            preprocessor_output_uri,
+                            PIPELINE_FILE_NAME),
+                        num_shards=1,
+                        shard_name_template=''))
+
+                # TODO: convert transformed DF to PColl of dicts, use dict_to_example, Write to tfrecord
 
 
 def import_pipeline_from_source(source_path: Text, pipeline_name: Text) -> Pipeline:

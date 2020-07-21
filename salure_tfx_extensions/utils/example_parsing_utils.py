@@ -4,7 +4,7 @@ import os
 import pandas as pd
 import itertools
 from tfx import types
-from typing import Text, List, Any, Union, Tuple
+from typing import Text, List, Any, Union, Tuple, Dict
 import tensorflow as tf
 import apache_beam as beam
 import numpy as np
@@ -14,6 +14,49 @@ from tensorflow_metadata.proto.v0 import schema_pb2
 import tensorflow_datasets as tfds
 from google.protobuf import json_format
 import base64
+import six
+
+
+_DEFAULT_ENCODING = 'utf-8'
+
+
+def dict_to_example(instance: Dict[Text, Any]) -> tf.train.Example:
+    """Converts dict to tf example.
+    From tfx.components.example_gen.utils.
+    To preserve compatibility, as there don't seem to be compatibility guarantees for that module"""
+    feature = {}
+    for key, value in instance.items():
+        if value is None:
+            feature[key] = tf.train.Feature()
+        elif isinstance(value, six.integer_types):
+            feature[key] = tf.train.Feature(
+                int64_list=tf.train.Int64List(value=[value]))
+        elif isinstance(value, float):
+            feature[key] = tf.train.Feature(
+                float_list=tf.train.FloatList(value=[value]))
+        elif isinstance(value, six.text_type) or isinstance(value, str):
+            feature[key] = tf.train.Feature(
+                bytes_list=tf.train.BytesList(
+                    value=[value.encode(_DEFAULT_ENCODING)]))
+        elif isinstance(value, list):
+            if not value:
+                feature[key] = tf.train.Feature()
+            elif isinstance(value[0], six.integer_types):
+                feature[key] = tf.train.Feature(
+                    int64_list=tf.train.Int64List(value=value))
+            elif isinstance(value[0], float):
+                feature[key] = tf.train.Feature(
+                    float_list=tf.train.FloatList(value=value))
+            elif isinstance(value[0], six.text_type) or isinstance(value[0], str):
+                feature[key] = tf.train.Feature(
+                    bytes_list=tf.train.BytesList(
+                        value=[v.encode(_DEFAULT_ENCODING) for v in value]))
+            else:
+                raise RuntimeError('Column type `list of {}` is not supported.'.format(
+                    type(value[0])))
+        else:
+            raise RuntimeError('Column type {} is not supported.'.format(type(value)))
+    return tf.train.Example(features=tf.train.Features(feature=feature))
 
 
 def example_to_list(example: tf.train.Example) -> List[Union[Text, int, float]]:
@@ -177,7 +220,7 @@ def parse_feature_dict(feature):
     for key in feature_list.keys():
         if 'bytesList' in feature_list[key]:
             result[key] = feature_list[key]['bytesList']['value']
-        elif'floatList' in feature_list[key]:
+        elif 'floatList' in feature_list[key]:
             result[key] = list(map(float, feature_list[key]['floatList']['value']))
         elif 'int64List' in feature_list[key]:
             result[key] = list(map(int, feature_list[key]['int64List']['value']))
@@ -211,7 +254,7 @@ def dataframe_from_feature_dicts(features, schema):
         for key in item.keys():
             if 'bytesList' in item[key]:
                 result[key].extend(list(map(base64.b64decode, item[key]['bytesList']['value'])))
-            elif'floatList' in item[key]:
+            elif 'floatList' in item[key]:
                 result[key].extend(list(map(float, item[key]['floatList']['value'])))
             elif 'int64List' in item[key]:
                 result[key].extend(list(map(int, item[key]['int64List']['value'])))
@@ -219,5 +262,3 @@ def dataframe_from_feature_dicts(features, schema):
                 result[key].append(None)
 
     return pd.DataFrame(result, columns=columns)
-
-
