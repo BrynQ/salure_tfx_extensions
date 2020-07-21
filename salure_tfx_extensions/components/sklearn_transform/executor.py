@@ -217,7 +217,7 @@ class Executor(base_executor.BaseExecutor):
                     yield pvalue.TaggedOutput('fit_preprocessor', sklearn_preprocessor_pipeline)
                     yield pvalue.TaggedOutput('transformed_df', sklearn_preprocessor_pipeline.transform(df))
 
-                results = training_data | 'Fit Preprocessing Pipeline' >> beam.Map(
+                results = training_data | 'Fit Preprocessing Pipeline' >> beam.FlatMap(
                     fit_sklearn_preprocessor,
                     pvalue.AsSingleton(preprocessor_pcoll)).with_outputs()
 
