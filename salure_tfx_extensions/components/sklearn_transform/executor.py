@@ -214,7 +214,7 @@ class Executor(base_executor.BaseExecutor):
                     sklearn_pipeline)
 
                 fit_preprocessor | 'Logging Fit Preprocessor' >> beam.Map(
-                    'fit_preprocessor: {}'.format(absl.logging.info))
+                    lambda x: absl.logging.info('fit_preprocessor: {}'.format(x)))
 
 
 def import_pipeline_from_source(source_path: Text, pipeline_name: Text) -> Pipeline:
