@@ -20,6 +20,7 @@ import apache_beam as beam
 # import pyarrow as pa
 from sklearn.pipeline import Pipeline
 from google.protobuf import json_format
+from pandas_tfrecords import to_tfrecords
 
 
 EXAMPLES_KEY = 'examples'
@@ -164,6 +165,8 @@ class Executor(base_executor.BaseExecutor):
         dill.settings['recurse'] = dill_recurse_setting
 
         # TODO write pandas DataFrame back to TFRecords
+        absl.logging.info('transformed_examples artifact: {}'.format(output_dict[TRANSFORMED_EXAMPLES_KEY]))
+        # to_tfrecords.to_tfrecords(transformed_data, )
 
         # Scrap the beam pipeline for this component get the pickled SKLearn Pipeline to work
 
