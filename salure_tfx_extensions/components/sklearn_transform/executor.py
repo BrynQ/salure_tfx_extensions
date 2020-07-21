@@ -167,7 +167,7 @@ class Executor(base_executor.BaseExecutor):
         # TODO write pandas DataFrame back to TFRecords
         absl.logging.info('transformed_examples artifact: {}'.format(output_dict[TRANSFORMED_EXAMPLES_KEY]))
         to_tfrecords.to_tfrecords(transformed_data,
-                                  output_dict[TRANSFORMED_EXAMPLES_KEY].uri,
+                                  artifact_utils.get_single_uri(output_dict[TRANSFORMED_EXAMPLES_KEY]),
                                   columns=list(transformed_data.columns))
 
         # Scrap the beam pipeline for this component get the pickled SKLearn Pipeline to work
