@@ -230,6 +230,13 @@ class Executor(base_executor.BaseExecutor):
                 transformed_df | 'Logging Transformed DF head' >> beam.Map(
                     lambda x: absl.logging.info('transformed_df head: {}'.format(x)))
 
+                (fit_preprocessor
+                 | 'Pickle fit_preprocessor' >> beam.FlatMap(dill.dumps)
+                 | 'Write fit_preprocessor to file' >> beam.io.WriteToText(
+                            os.path.join(
+                                artifact_utils.get_single_uri(output_dict[TRANSFORM_PIPELINE_KEY]),
+                                PIPELINE_FILE_NAME)))
+
 
 def import_pipeline_from_source(source_path: Text, pipeline_name: Text) -> Pipeline:
     """Imports an SKLearn Pipeline object from a local source file"""
