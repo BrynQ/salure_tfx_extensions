@@ -250,6 +250,41 @@ class Executor(base_executor.BaseExecutor):
                     os.path.join(output_dict[TRANSFORMED_EXAMPLES_KEY][0].uri, train_split))
 
                 # TODO: if not single_split: read, transform and write test data.
+                if train_and_eval_split:
+                    test_split = 'eval'
+                    test_uri = os.path.join(examples_artifact.uri, test_split)
+                    test_input_uri = io_utils.all_files_pattern(test_uri)
+
+                    test_tfxio = tf_example_record.TFExampleRecord(
+                        file_pattern=test_input_uri,
+                        telemetry_descriptors=_TELEMETRY_DESCRIPTORS,
+                        schema=schema
+                    )
+
+                    test_data_recordbatch = pipeline | 'TFXIORead Train Files' >> test_tfxio.BeamSource()
+
+                    test_data = (
+                            test_data_recordbatch
+                            | 'Aggregate RecordBatches' >> beam.CombineGlobally(
+                                beam.combiners.ToListCombineFn())
+                            # Work around non-picklability for pa.Table.from_batches
+                            | 'To Pyarrow Table' >> beam.Map(lambda x: pa.Table.from_batches(x))
+                            | 'To Pandas DataFrame' >> beam.Map(lambda x: x.to_pandas()))
+
+                    def transform_data(df, sklearn_preprocessor_pipeline):
+                        return sklearn_preprocessor_pipeline.transform(df)
+
+                    transformed_test_data = test_data | 'Transform Test Data' >> beam.Map(
+                        transform_data,
+                        pvalue.AsSingleton(fit_preprocessor))
+
+                    transformed_test_examples = (
+                        transformed_test_data
+                        | 'Transformed Test DataFrame to dicts' >> beam.FlatMap(lambda x: x.to_dict('records'))
+                        | 'Transformed Test Dicts to Examples' >> beam.Map(example_parsing_utils.dict_to_example))
+
+                    transformed_test_examples | example_parsing_utils.WriteSplit(
+                        os.path.join(output_dict[TRANSFORMED_EXAMPLES_KEY][0].uri, test_split))
 
 
 # def import_pipeline_from_source(source_path: Text, pipeline_name: Text) -> Pipeline:
