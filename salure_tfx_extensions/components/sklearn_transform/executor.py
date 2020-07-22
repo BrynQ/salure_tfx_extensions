@@ -261,15 +261,15 @@ class Executor(base_executor.BaseExecutor):
                         schema=schema
                     )
 
-                    test_data_recordbatch = pipeline | 'TFXIORead Train Files' >> test_tfxio.BeamSource()
+                    test_data_recordbatch = pipeline | 'TFXIORead Test Files' >> test_tfxio.BeamSource()
 
                     test_data = (
                             test_data_recordbatch
-                            | 'Aggregate RecordBatches' >> beam.CombineGlobally(
+                            | 'Aggregate Test RecordBatches' >> beam.CombineGlobally(
                                 beam.combiners.ToListCombineFn())
                             # Work around non-picklability for pa.Table.from_batches
-                            | 'To Pyarrow Table' >> beam.Map(lambda x: pa.Table.from_batches(x))
-                            | 'To Pandas DataFrame' >> beam.Map(lambda x: x.to_pandas()))
+                            | 'Test To Pyarrow Table' >> beam.Map(lambda x: pa.Table.from_batches(x))
+                            | 'Test To Pandas DataFrame' >> beam.Map(lambda x: x.to_pandas()))
 
                     def transform_data(df, sklearn_preprocessor_pipeline):
                         return sklearn_preprocessor_pipeline.transform(df)
