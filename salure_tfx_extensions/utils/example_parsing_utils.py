@@ -46,6 +46,10 @@ def dict_to_example(instance: Dict[Text, Any]) -> tf.train.Example:
             feature[key] = tf.train.Feature(
                 bytes_list=tf.train.BytesList(
                     value=[value.encode(_DEFAULT_ENCODING)]))
+        elif isinstance(value, bytes):
+            feature[key] = tf.train.Feature(
+                bytes_list=tf.train.BytesList(
+                    value=[value]))
         elif isinstance(value, list):
             if not value:
                 feature[key] = tf.train.Feature()
@@ -59,6 +63,10 @@ def dict_to_example(instance: Dict[Text, Any]) -> tf.train.Example:
                 feature[key] = tf.train.Feature(
                     bytes_list=tf.train.BytesList(
                         value=[v.encode(_DEFAULT_ENCODING) for v in value]))
+            elif isinstance(value[0], bytes):
+                feature[key] = tf.train.Feature(
+                    bytes_list=tf.train.BytesList(
+                        value=value))
             else:
                 raise RuntimeError('Column type `list of {}` is not supported.'.format(
                     type(value[0])))

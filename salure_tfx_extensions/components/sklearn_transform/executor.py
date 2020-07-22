@@ -202,8 +202,7 @@ class Executor(base_executor.BaseExecutor):
                         beam.combiners.ToListCombineFn())
                     # Work around non-picklability for pa.Table.from_batches
                     | 'To Pyarrow Table' >> beam.Map(lambda x: pa.Table.from_batches(x))
-                    | 'To Pandas DataFrame' >> beam.Map(lambda x: x.to_pandas())
-                )
+                    | 'To Pandas DataFrame' >> beam.Map(lambda x: x.to_pandas()))
 
                 training_data | 'Logging Pandas DataFrame' >> beam.Map(
                     lambda x: absl.logging.info('dataframe: {}'.format(x)))
@@ -245,8 +244,7 @@ class Executor(base_executor.BaseExecutor):
                 transformed_examples = (
                     transformed_df
                     | 'Transformed DataFrame to dicts' >> beam.FlatMap(lambda x: x.to_dict('records'))
-                    | 'Transformed Dicts to Examples' >> beam.Map(example_parsing_utils.dict_to_example)
-                )
+                    | 'Transformed Dicts to Examples' >> beam.Map(example_parsing_utils.dict_to_example))
 
                 transformed_examples | example_parsing_utils.WriteSplit(
                     os.path.join(output_dict[TRANSFORMED_EXAMPLES_KEY][0].uri, train_split))
