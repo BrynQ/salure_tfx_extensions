@@ -242,22 +242,32 @@ class Executor(base_executor.BaseExecutor):
                         shard_name_template=''))
 
                 # TODO: convert transformed DF to PColl of dicts, use dict_to_example, Write to tfrecord
+                transformed_examples = (
+                    transformed_df
+                    | 'Transformed DataFrame to dicts' >> beam.FlatMap(lambda x: x.to_dict('records'))
+                    | 'Transformed Dicts to Examples' >> beam.Map(example_parsing_utils.dict_to_example)
+                )
+
+                transformed_examples | example_parsing_utils.WriteSplit(
+                    os.path.join(output_dict[TRANSFORMED_EXAMPLES_KEY][0].uri, train_split))
+
+                # TODO: if not single_split: read, transform and write test data.
 
 
-def import_pipeline_from_source(source_path: Text, pipeline_name: Text) -> Pipeline:
-    """Imports an SKLearn Pipeline object from a local source file"""
-
-    try:
-        loader = importlib.machinery.SourceFileLoader(
-            fullname='user_module',
-            path=source_path,
-        )
-        user_module = ModuleType(loader.name)
-        loader.exec_module(user_module)
-        return getattr(user_module, pipeline_name)
-    except IOError:
-        raise ImportError('{} in {} not found in import_func_from_source()'.format(
-            pipeline_name, source_path))
+# def import_pipeline_from_source(source_path: Text, pipeline_name: Text) -> Pipeline:
+#     """Imports an SKLearn Pipeline object from a local source file"""
+#
+#     try:
+#         loader = importlib.machinery.SourceFileLoader(
+#             fullname='user_module',
+#             path=source_path,
+#         )
+#         user_module = ModuleType(loader.name)
+#         loader.exec_module(user_module)
+#         return getattr(user_module, pipeline_name)
+#     except IOError:
+#         raise ImportError('{} in {} not found in import_func_from_source()'.format(
+#             pipeline_name, source_path))
 
 
 # class SKLearnPipeline(object):
@@ -273,35 +283,35 @@ def import_pipeline_from_source(source_path: Text, pipeline_name: Text) -> Pipel
 #     def pipeline(self):
 #         return self._pipeline
 
-
-class FitPreprocessingPipeline(beam.PTransform):
-    def __init__(self, pipeline):
-        self.pipeline = pipeline  # SKLearnPipeline object
-        super(FitPreprocessingPipeline, self).__init__()
-
-    # def process(self, matrix, pipeline, *args, **kwargs):
-    #     pipeline.fit(matrix)
-    #     return pipeline
-
-    def expand(self, dataframe):
-        """Fits an SKLearn Pipeline object
-
-        Returns:
-            A fit SKLearn Pipeline
-        """
-
-        self.pipeline.fit(dataframe)
-        return [self.pipeline]
-
-
-class TransformUsingPipeline(beam.DoFn):
-    """Returns preprocessed inputs"""
-    # TODO
-
-    def __init__(self, pipeline: Pipeline):
-        self.pipeline = pipeline
-        super(TransformUsingPipeline, self).__init__()
-
-    def process(self, element, *args, **kwargs):
-        pass
+#
+# class FitPreprocessingPipeline(beam.PTransform):
+#     def __init__(self, pipeline):
+#         self.pipeline = pipeline  # SKLearnPipeline object
+#         super(FitPreprocessingPipeline, self).__init__()
+#
+#     # def process(self, matrix, pipeline, *args, **kwargs):
+#     #     pipeline.fit(matrix)
+#     #     return pipeline
+#
+#     def expand(self, dataframe):
+#         """Fits an SKLearn Pipeline object
+#
+#         Returns:
+#             A fit SKLearn Pipeline
+#         """
+#
+#         self.pipeline.fit(dataframe)
+#         return [self.pipeline]
+#
+#
+# class TransformUsingPipeline(beam.DoFn):
+#     """Returns preprocessed inputs"""
+#     # TODO
+#
+#     def __init__(self, pipeline: Pipeline):
+#         self.pipeline = pipeline
+#         super(TransformUsingPipeline, self).__init__()
+#
+#     def process(self, element, *args, **kwargs):
+#         pass
 

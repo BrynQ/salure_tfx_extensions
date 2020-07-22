@@ -15,7 +15,7 @@ import tensorflow_datasets as tfds
 from google.protobuf import json_format
 import base64
 import six
-
+from salure_tfx_extensions import constants
 
 _DEFAULT_ENCODING = 'utf-8'
 
@@ -262,3 +262,27 @@ def dataframe_from_feature_dicts(features, schema):
                 result[key].append(None)
 
     return pd.DataFrame(result, columns=columns)
+
+
+@beam.ptransform_fn
+@beam.typehints.with_input_types(Union[tf.train.Example,
+                                       tf.train.SequenceExample, bytes])
+@beam.typehints.with_output_types(beam.pvalue.PDone)
+def WriteSplit(example_split: beam.pvalue.PCollection,
+               output_split_path: Text) -> beam.pvalue.PDone:
+    """Shuffles and writes output split as serialized records in TFRecord.
+    From tfx.components.example_gen, but it lacks compatibility guarantees"""
+
+    def _MaybeSerialize(x):
+        if isinstance(x, (tf.train.Example, tf.train.SequenceExample)):
+            return x.SerializeToString()
+        return x
+
+    return (example_split
+            # TODO(jyzhao): make shuffle optional.
+            | 'MaybeSerialize' >> beam.Map(_MaybeSerialize)
+            | 'Shuffle' >> beam.transforms.Reshuffle()
+            # TODO(jyzhao): multiple output format.
+            | 'Write' >> beam.io.WriteToTFRecord(
+                os.path.join(output_split_path, constants.DEFAULT_TFRECORD_FILE_NAME),
+                file_name_suffix='.gz'))
