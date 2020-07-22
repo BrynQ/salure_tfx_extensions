@@ -25,7 +25,7 @@ from google.protobuf import json_format
 
 EXAMPLES_KEY = 'examples'
 SCHEMA_KEY = 'schema'
-MODULE_FILE_KEY = 'module_file'
+# MODULE_FILE_KEY = 'module_file'
 PREPROCESSOR_PIPELINE_NAME_KEY = 'preprocessor_pipeline_name'
 PREPROCESSOR_PICKLE_KEY = 'preprocessor_pickle'
 TRANSFORMED_EXAMPLES_KEY = 'transformed_examples'
@@ -52,7 +52,6 @@ class Executor(base_executor.BaseExecutor):
             - examples: Tensorflow Examples
           exec_properties:
             - preprocessor_pickle: A pickle string of the preprocessor
-            - module_file: String file path to a module file
             - preprocessor_pipeline_name: The name of the pipeline object in the specified module file
           output_dict:
             - transformed_examples: The transformed Tensorflow Examples
@@ -66,11 +65,9 @@ class Executor(base_executor.BaseExecutor):
 
         if not (len(input_dict[EXAMPLES_KEY]) == 1):
             raise ValueError('input_dict[{}] should only contain one artifact'.format(EXAMPLES_KEY))
-        if bool(exec_properties['preprocessor_pickle']) == bool(exec_properties['module_file']):
-            raise ValueError('Could not determine which preprocessor to use, both or neither of the module file and a '
-                             'preprocessor pickle were provided')
-
-        use_module_file = bool(exec_properties['module_file'])
+        # if bool(exec_properties['preprocessor_pickle']) == bool(exec_properties['module_file']):
+        #     raise ValueError('Could not determine which preprocessor to use, both or neither of the module file and a '
+        #                      'preprocessor pickle were provided')
 
         examples_artifact = input_dict[EXAMPLES_KEY][0]
         examples_splits = artifact_utils.decode_split_names(examples_artifact.split_names)
@@ -95,82 +92,10 @@ class Executor(base_executor.BaseExecutor):
         absl.logging.info('schema: {}'.format(schema))
         absl.logging.info('schema_dict: {}'.format(schema_dict))
 
-        if use_module_file:
-            # Load in the specified module file
-            try:
-                spec = importlib.util.spec_from_file_location('user_module', exec_properties[MODULE_FILE_KEY])
-                module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(module)
-
-                # Load in preprocessor
-                sklearn_pipeline = getattr(module, exec_properties[PREPROCESSOR_PIPELINE_NAME_KEY])
-            except IOError:
-                raise ImportError('{} in {} not found'.format(
-                    exec_properties[PREPROCESSOR_PIPELINE_NAME_KEY], exec_properties[MODULE_FILE_KEY]))
-
-            # sklearn_pipeline = import_utils.import_func_from_source(
-            #     exec_properties[MODULE_FILE_KEY],
-            #     exec_properties[PREPROCESSOR_PIPELINE_NAME_KEY]
-            # )
-        else:  # use the provided pickle
-            # This way a pickle bytestring could be sent over json
-            sklearn_pipeline = dill.loads(base64.decodebytes(exec_properties['preprocessor_pickle'].encode('utf-8')))
+        # This way a pickle bytestring could be sent over json
+        sklearn_pipeline = dill.loads(base64.decodebytes(exec_properties['preprocessor_pickle'].encode('utf-8')))
 
         absl.logging.info('pipeline: {}'.format(sklearn_pipeline))
-
-        # data = example_parsing_utils.from_tfrecords(io_utils.all_files_pattern(train_uri), schema)
-        # # TODO: Remove redundant logging
-        # for index, item in enumerate(data):
-        #     if index > 2:
-        #         break
-        #     absl.logging.info('item {}: {}'.format(index, item))
-        # features = example_parsing_utils.extract_schema_features(schema)
-        # data = list(map(lambda x: tf.io.parse_single_example(x, features=features), data))
-        # data = list(map(json_format.MessageToDict, map(tf.train.Example.FromString, data)))
-        # # TODO: Remove redundant logging
-        # for index, item in enumerate(data):
-        #     if index > 2:
-        #         break
-        #     absl.logging.info('item {}: {}'.format(index, item))
-
-        # data = list(map(example_parsing_utils.parse_feature_dict, data))
-        # data = example_parsing_utils.dataframe_from_feature_dicts(data, schema)
-
-        # TODO: Remove redundant logging
-        # for index, item in enumerate(data):
-        #     if index > 7:
-        #         break
-        #     absl.logging.info('item {}: {}'.format(index, item))
-        # absl.logging.info('item DF {}: {}'.format(index, pd.DataFrame(item).to_string()))
-        # absl.logging.info(data.head().to_string())
-
-        # df = example_parsing_utils.to_pandas(data, schema)
-
-        # absl.logging.info('dataframe head: {}'.format(df.head().to_string()))
-
-        # Fit the pipeline
-        # sklearn_pipeline.fit(data)
-        # transformed_data = sklearn_pipeline.transform(data)
-        # absl.logging.info(transformed_data.head().to_string())
-        #
-        # absl.logging.info(sklearn_pipeline)
-        # absl.logging.info(output_dict[TRANSFORM_PIPELINE_KEY])
-        #
-        # # transform_sklearn_pipeline_pickle = dill.dumps(sklearn_pipeline)
-        # with open(os.path.join(
-        #         artifact_utils.get_single_uri(output_dict[TRANSFORM_PIPELINE_KEY]),
-        #         PIPELINE_FILE_NAME), 'wb') as f:
-        #     dill.dump(sklearn_pipeline, f)
-        #
-        # dill.settings['recurse'] = dill_recurse_setting
-        #
-        # # TODO write pandas DataFrame back to TFRecords
-        # absl.logging.info('transformed_examples artifact: {}'.format(output_dict[TRANSFORMED_EXAMPLES_KEY]))
-        # to_tfrecords.to_tfrecords(transformed_data,
-        #                           artifact_utils.get_single_uri(output_dict[TRANSFORMED_EXAMPLES_KEY]),
-        #                           columns=list(transformed_data.columns))
-
-        # Scrap the beam pipeline for this component get the pickled SKLearn Pipeline to work
 
         with self._make_beam_pipeline() as pipeline:
             with tft_beam.Context(

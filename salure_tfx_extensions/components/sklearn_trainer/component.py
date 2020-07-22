@@ -24,14 +24,12 @@ class SKLearnTrainer(base_component.BaseComponent):
     def __init__(self,
                  examples: types.Channel,
                  model_pickle: Text,
-                 supervised: bool = True,
-                 # module_file: Text,
+                 label_name: Optional[str] = None,
                  instance_name: Optional[Text] = None):
-                 # enable_cache: Optional[bool] = None):
         """
 
         :param examples: A TFX Channel of type 'Examples'
-        :param module_file: A path to a module file containing the model
+        :param label_name: The name of the column that contains the labels, unsupervised if None
         """
 
         # TODO: Allow for transformed inputs, and transformation input graph
