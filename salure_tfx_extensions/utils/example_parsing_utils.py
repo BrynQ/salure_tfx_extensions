@@ -28,6 +28,12 @@ def dict_to_example(instance: Dict[Text, Any]) -> tf.train.Example:
     for key, value in instance.items():
         if value is None:
             feature[key] = tf.train.Feature()
+        # Check if is numpy array, to parse to list
+        elif isinstance(value, np.ndarray):
+            if value.ndims > 1:
+                raise ValueError('numpy ndarrays of more than one dimension are not supported')
+            value = value.tolist()
+
         elif isinstance(value, six.integer_types):
             feature[key] = tf.train.Feature(
                 int64_list=tf.train.Int64List(value=[value]))
