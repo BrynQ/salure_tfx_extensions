@@ -20,7 +20,7 @@ from apache_beam import pvalue
 import pyarrow as pa
 from sklearn.pipeline import Pipeline
 from google.protobuf import json_format
-from pandas_tfrecords import to_tfrecords
+# from pandas_tfrecords import to_tfrecords
 
 
 EXAMPLES_KEY = 'examples'
