@@ -14,6 +14,7 @@ from tfx.utils import import_utils
 from tfx_bsl.tfxio import tf_example_record
 import tensorflow_transform.beam as tft_beam
 from salure_tfx_extensions.utils import example_parsing_utils
+from salure_tfx_extensions.utils import sklearn_utils
 import apache_beam as beam
 from apache_beam import pvalue
 # import pandas as pd
@@ -116,18 +117,23 @@ class Executor(base_executor.BaseExecutor):
                 absl.logging.info('input_uri: {}'.format(train_input_uri))
                 absl.logging.info('preprocessor_output_uri: {}'.format(preprocessor_output_uri))
 
-                training_data_recordbatch = pipeline | 'TFXIORead Train Files' >> input_tfxio.BeamSource()
-                training_data_recordbatch | 'Logging data from Train Files' >> beam.Map(absl.logging.info)
+                # training_data_recordbatch = pipeline | 'TFXIORead Train Files' >> input_tfxio.BeamSource()
+                # training_data_recordbatch | 'Logging data from Train Files' >> beam.Map(absl.logging.info)
+                #
+                # training_data = (
+                #     training_data_recordbatch
+                #     | 'Aggregate RecordBatches' >> beam.CombineGlobally(
+                #         beam.combiners.ToListCombineFn())
+                #     # Work around non-picklability for pa.Table.from_batches
+                #     | 'To Pyarrow Table' >> beam.Map(lambda x: pa.Table.from_batches(x))
+                #     | 'To Pandas DataFrame' >> beam.Map(lambda x: x.to_pandas()))
 
-                training_data = (
-                    training_data_recordbatch
-                    # | 'Recordbatches to Table' >> beam.CombineGlobally(
-                    #     example_parsing_utils.RecordBatchesToTable())
-                    | 'Aggregate RecordBatches' >> beam.CombineGlobally(
-                        beam.combiners.ToListCombineFn())
-                    # Work around non-picklability for pa.Table.from_batches
-                    | 'To Pyarrow Table' >> beam.Map(lambda x: pa.Table.from_batches(x))
-                    | 'To Pandas DataFrame' >> beam.Map(lambda x: x.to_pandas()))
+                training_data = pipeline | 'Read Train Data' >> sklearn_utils.ReadTFRecordToPandas(
+                    file_pattern=train_input_uri,
+                    schema=schema,
+                    split_name='Train',  # Is just for naming the beam operations
+                    telemetry_descriptors=_TELEMETRY_DESCRIPTORS
+                )
 
                 training_data | 'Logging Pandas DataFrame' >> beam.Map(
                     lambda x: absl.logging.info('dataframe: {}'.format(x)))
@@ -156,14 +162,17 @@ class Executor(base_executor.BaseExecutor):
                 transformed_df | 'Logging Transformed DF head' >> beam.Map(
                     lambda x: absl.logging.info('transformed_df head: {}'.format(x)))
 
-                (fit_preprocessor
-                 | 'Pickle fit_preprocessor' >> beam.FlatMap(dill.dumps)
-                 | 'Write fit_preprocessor to file' >> beam.io.WriteToText(
-                        os.path.join(
-                            preprocessor_output_uri,
-                            PIPELINE_FILE_NAME),
-                        num_shards=1,
-                        shard_name_template=''))
+                # (fit_preprocessor
+                #  | 'Pickle fit_preprocessor' >> beam.FlatMap(dill.dumps)
+                #  | 'Write fit_preprocessor to file' >> beam.io.WriteToText(
+                #         os.path.join(
+                #             preprocessor_output_uri,
+                #             PIPELINE_FILE_NAME),
+                #         num_shards=1,
+                #         shard_name_template=''))
+
+                fit_preprocessor | sklearn_utils.WriteSKLearnModelToFile(
+                    os.path.join(preprocessor_output_uri, PIPELINE_FILE_NAME))
 
                 # TODO: convert transformed DF to PColl of dicts, use dict_to_example, Write to tfrecord
                 transformed_examples = (
@@ -171,7 +180,7 @@ class Executor(base_executor.BaseExecutor):
                     | 'Transformed DataFrame to dicts' >> beam.FlatMap(lambda x: x.to_dict('records'))
                     | 'Transformed Dicts to Examples' >> beam.Map(example_parsing_utils.dict_to_example))
 
-                transformed_examples | example_parsing_utils.WriteSplit(
+                transformed_examples | 'Write Transformed Examples' >> example_parsing_utils.WriteSplit(
                     os.path.join(output_dict[TRANSFORMED_EXAMPLES_KEY][0].uri, train_split))
 
                 # TODO: if not single_split: read, transform and write test data.
