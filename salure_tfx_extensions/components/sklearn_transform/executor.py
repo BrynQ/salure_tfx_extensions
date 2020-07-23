@@ -1,32 +1,20 @@
 import os
-import importlib.machinery, importlib.util
-from types import ModuleType
 import absl
 import dill
 import base64
 from typing import Any, Dict, List, Text
-import tensorflow as tf
 from tfx import types
 from tfx.components.base import base_executor
 from tfx.types import artifact_utils
 from tfx.utils import io_utils
-from tfx.utils import import_utils
-from tfx_bsl.tfxio import tf_example_record
 import tensorflow_transform.beam as tft_beam
-from salure_tfx_extensions.utils import example_parsing_utils
 from salure_tfx_extensions.utils import sklearn_utils
 import apache_beam as beam
 from apache_beam import pvalue
-# import pandas as pd
-import pyarrow as pa
-from sklearn.pipeline import Pipeline
-from google.protobuf import json_format
-# from pandas_tfrecords import to_tfrecords
 
 
 EXAMPLES_KEY = 'examples'
 SCHEMA_KEY = 'schema'
-# MODULE_FILE_KEY = 'module_file'
 PREPROCESSOR_PIPELINE_NAME_KEY = 'preprocessor_pipeline_name'
 PREPROCESSOR_PICKLE_KEY = 'preprocessor_pickle'
 TRANSFORMED_EXAMPLES_KEY = 'transformed_examples'
@@ -82,7 +70,6 @@ class Executor(base_executor.BaseExecutor):
         schema_path = io_utils.get_only_uri_in_dir(
             artifact_utils.get_single_uri(input_dict[SCHEMA_KEY]))
         schema = io_utils.SchemaReader().read(schema_path)
-        schema_dict = json_format.MessageToDict(schema, preserving_proto_field_name=True)
 
         # This way a pickle bytestring could be sent over json
         sklearn_pipeline = dill.loads(base64.decodebytes(exec_properties['preprocessor_pickle'].encode('utf-8')))
@@ -98,9 +85,6 @@ class Executor(base_executor.BaseExecutor):
 
                 absl.logging.info(input_dict)
                 absl.logging.info(output_dict)
-                absl.logging.info('uri: {}'.format(train_uri))
-                absl.logging.info('input_uri: {}'.format(train_input_uri))
-                absl.logging.info('preprocessor_output_uri: {}'.format(preprocessor_output_uri))
 
                 training_data = pipeline | 'Read Train Data' >> sklearn_utils.ReadTFRecordToPandas(
                     file_pattern=train_input_uri,
@@ -108,10 +92,6 @@ class Executor(base_executor.BaseExecutor):
                     split_name='Train',  # Is just for naming the beam operations
                     telemetry_descriptors=_TELEMETRY_DESCRIPTORS
                 )
-
-                training_data | 'Logging Pandas DataFrame' >> beam.Map(
-                    lambda x: absl.logging.info('dataframe: {}'.format(x)))
-                training_data | 'Log DataFrame head' >> beam.Map(lambda x: print(x.head().to_string()))
 
                 preprocessor_pcoll = pipeline | beam.Create([sklearn_pipeline])
 
@@ -126,12 +106,6 @@ class Executor(base_executor.BaseExecutor):
 
                 fit_preprocessor = results.fit_preprocessor
                 transformed_df = results.transformed_df
-
-                fit_preprocessor | 'Logging Fit Preprocessor' >> beam.Map(
-                    lambda x: absl.logging.info('fit_preprocessor: {}'.format(x)))
-
-                transformed_df | 'Logging Transformed DF head' >> beam.Map(
-                    lambda x: absl.logging.info('transformed_df head: {}'.format(x)))
 
                 fit_preprocessor | sklearn_utils.WriteSKLearnModelToFile(
                     os.path.join(preprocessor_output_uri, PIPELINE_FILE_NAME))

@@ -1,20 +1,18 @@
 """Helper functions for handling sklearn models"""
 
-import os
 from typing import Text, Optional, List
 import apache_beam as beam
 from tensorflow_metadata.proto.v0 import schema_pb2
 from tfx_bsl.tfxio import tf_example_record
-from salure_tfx_extensions import constants
 from salure_tfx_extensions.utils import example_parsing_utils
 import pyarrow as pa
 import dill
-import joblib
 
 
 class WriteSKLearnModelToFile(beam.PTransform):
     def __init__(self, file_path):
         self.file_path = file_path
+        super(WriteSKLearnModelToFile, self).__init__()
 
     def expand(self, model):
         return (
