@@ -1,10 +1,12 @@
 """Helper functions for handling sklearn models"""
 
+import os
 from typing import Text, Optional, List
 import apache_beam as beam
 from tensorflow_metadata.proto.v0 import schema_pb2
 from tfx_bsl.tfxio import tf_example_record
 from salure_tfx_extensions import constants
+from salure_tfx_extensions.utils import example_parsing_utils
 import pyarrow as pa
 import dill
 import joblib
@@ -39,9 +41,6 @@ class ReadTFRecordToPandas(beam.PTransform):
         :param telemetry_descriptors:
         """
 
-        # self.file_pattern = file_pattern
-        # self.schema = schema
-        # self.telemetry_descriptors = telemetry_descriptors
         self.tfxio = tf_example_record.TFExampleRecord(
             file_pattern=file_pattern,
             telemetry_descriptors=telemetry_descriptors,
@@ -59,3 +58,17 @@ class ReadTFRecordToPandas(beam.PTransform):
             # lambda so it's pickleable
             | '{} Data to Pyarrow Table'.format(self.split_name) >> beam.Map(lambda x: pa.Table.from_batches(x))
             | '{} Data to Pandas DataFrame'.format(self.split_name) >> beam.Map(lambda x: x.to_pandas()))
+
+
+class WriteDataFrame(beam.PTransform):
+
+    def __init__(self, file_path):
+        self.file_path = file_path
+        super(WriteDataFrame, self).__init__()
+
+    def expand(self, df):
+        return (
+            df
+            | 'DataFrame to dicts' >> beam.FlatMap(lambda x: x.to_dict('records'))
+            | 'Dicts to Examples' >> beam.Map(example_parsing_utils.dict_to_example)
+            | 'Write Examples' >> example_parsing_utils.WriteSplit(self.file_path))
