@@ -2,8 +2,6 @@ import abc
 from abc import abstractmethod
 import os
 import absl
-import dill
-import base64
 from typing import Any, Dict, List, Text, Type
 from tfx import types
 from tfx.components.base import base_executor
@@ -12,21 +10,11 @@ from tfx.utils import io_utils
 import tensorflow_transform.beam as tft_beam
 from salure_tfx_extensions.utils import sklearn_utils
 import apache_beam as beam
-from apache_beam import pvalue
 from six import with_metaclass
-
 
 EXAMPLES_KEY = 'examples'
 SCHEMA_KEY = 'schema'
-# TODO: PREPROCESSOR_PICKLE_KEY -> SKLEARN_PICKLE_KEY
-# PREPROCESSOR_PICKLE_KEY = 'preprocessor_pickle'
 TRANSFORMED_EXAMPLES_KEY = 'transformed_examples'
-# TRANSFORM_PIPELINE_KEY = 'transform_pipeline'
-
-# _TELEMETRY_DESCRIPTORS = ['SKLearnTransform']
-
-# DEFAULT_PIPELINE_NAME = 'pipeline'
-# PIPELINE_FILE_NAME = 'pipeline.pickle'
 
 
 class SKLearnBaseExecutor(with_metaclass(abc.ABCMeta, base_executor.BaseExecutor)):
@@ -36,9 +24,9 @@ class SKLearnBaseExecutor(with_metaclass(abc.ABCMeta, base_executor.BaseExecutor
 
     @abc.abstractmethod
     def get_sklearn_object(self,
-                         input_dict: Dict[Text, List[types.Artifact]],
-                         output_dict: Dict[Text, List[types.Artifact]],
-                         exec_properties: Dict[Text, Any]) -> beam.PTransform:
+                           input_dict: Dict[Text, List[types.Artifact]],
+                           output_dict: Dict[Text, List[types.Artifact]],
+                           exec_properties: Dict[Text, Any]) -> beam.PTransform:
         """Returns a Singleton pcoll containing the sklearn object"""
         pass
 
@@ -114,11 +102,7 @@ class SKLearnBaseExecutor(with_metaclass(abc.ABCMeta, base_executor.BaseExecutor
             artifact_utils.get_single_uri(input_dict[SCHEMA_KEY]))
         schema = io_utils.SchemaReader().read(schema_path)
 
-        # TODO: MODULARIZE, sklearn_pipeline -> sklearn_object
-        # This way a pickle bytestring could be sent over json
-        # sklearn_pipeline = dill.loads(base64.decodebytes(exec_properties[PREPROCESSOR_PICKLE_KEY].encode('utf-8')))
         sklearn_object = self.get_sklearn_object(input_dict, output_dict, exec_properties)
-        # END MODULARIZE
 
         absl.logging.info('sklearn loaded in: {}'.format(sklearn_object))
 
@@ -139,18 +123,7 @@ class SKLearnBaseExecutor(with_metaclass(abc.ABCMeta, base_executor.BaseExecutor
                     telemetry_descriptors=self.telemetry_descriptors
                 )
 
-                # TODO: sklearn_pipeline -> sklearn_object
                 preprocessor_pcoll = pipeline | beam.Create([sklearn_object])
-
-                # TODO: MODULARIZE
-                # def fit_sklearn_preprocessor(df, sklearn_preprocessor_pipeline):
-                #     sklearn_preprocessor_pipeline.fit(df)
-                #     yield pvalue.TaggedOutput('fit_preprocessor', sklearn_preprocessor_pipeline)
-                #     yield pvalue.TaggedOutput('transformed_df', sklearn_preprocessor_pipeline.transform(df))
-                #
-                # results = training_data | 'Fit Preprocessing Pipeline' >> beam.FlatMap(
-                #     fit_sklearn_preprocessor,
-                #     pvalue.AsSingleton(preprocessor_pcoll)).with_outputs()
 
                 fit_sklearn_processor = training_data | 'Fit SKLearn Processor' >> self.GetFitSKLearnTransform(
                     preprocessor_pcoll)
@@ -158,12 +131,8 @@ class SKLearnBaseExecutor(with_metaclass(abc.ABCMeta, base_executor.BaseExecutor
                 transformed_df = training_data | 'Transform Training Data' >> self.GetApplySKLearnTransform(
                     fit_sklearn_processor)
 
-                # fit_preprocessor = results.fit_preprocessor
-                # transformed_df = results.transformed_df
-
                 fit_sklearn_processor | sklearn_utils.WriteSKLearnModelToFile(
                     os.path.join(preprocessor_output_uri, self.sklearn_file_name))
-                # END MODULARIZE, OUTPUT: (fit_preprocessor, transformed_df)
 
                 transformed_df | 'Write Train Data to File' >> sklearn_utils.WriteDataFrame(
                     os.path.join(output_dict[TRANSFORMED_EXAMPLES_KEY][0].uri, train_split))
@@ -179,10 +148,6 @@ class SKLearnBaseExecutor(with_metaclass(abc.ABCMeta, base_executor.BaseExecutor
                         split_name='Test',  # Is just for naming the beam operations
                         telemetry_descriptors=self.telemetry_descriptors
                     )
-
-                    # # TODO: MODULARIZE transform_data
-                    # def transform_data(df, sklearn_preprocessor_pipeline):
-                    #     return sklearn_preprocessor_pipeline.transform(df)
 
                     transformed_test_data = test_data | 'Transform Test Data' >> self.GetApplySKLearnTransform(
                         fit_sklearn_processor)
