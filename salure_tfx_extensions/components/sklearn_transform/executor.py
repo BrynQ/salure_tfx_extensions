@@ -1,15 +1,8 @@
-import os
-import absl
 import dill
 import base64
 from typing import Any, Dict, List, Text, Type
 from tfx import types
-from tfx.components.base import base_executor
-from tfx.types import artifact_utils
-from tfx.utils import io_utils
-import tensorflow_transform.beam as tft_beam
-from salure_tfx_extensions.utils import sklearn_utils
-from salure_tfx_extensions.components.sklearn_base.executor import SKLearnBaseExecutor
+from salure_tfx_extensions.components.base.sklearn_base.executor import SKLearnBaseExecutor
 import apache_beam as beam
 from apache_beam import pvalue
 
