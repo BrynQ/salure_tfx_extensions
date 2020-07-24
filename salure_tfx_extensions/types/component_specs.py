@@ -29,12 +29,14 @@ class SKLearnTrainerSpec(ComponentSpec):
 
     PARAMETERS = {
         'model_pickle': ExecutionParameter(type=(bytes, Text)),
-        'supervised': ExecutionParameter(type=bool),
+        'label_name': ExecutionParameter(type=(str, Text)),  # If None: unsupervised
     }
     INPUTS = {
         'examples': ChannelParameter(type=standard_artifacts.Examples),
+        'schema': ChannelParameter(type=standard_artifacts.Schema),
     }
     OUTPUTS = {
+        'transformed_examples': ChannelParameter(type=standard_artifacts.Examples),
         'model': ChannelParameter(type=stfxe_artifacts.SKLearnModel),
     }
 

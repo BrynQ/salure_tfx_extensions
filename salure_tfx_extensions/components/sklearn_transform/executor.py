@@ -13,7 +13,7 @@ PIPELINE_FILE_NAME = 'pipeline.pickle'
 
 
 class _FitPreprocessor(beam.PTransform):
-    def __init__(self, preprocessor):
+    def __init__(self, preprocessor, exec_properties):
         self.preprocessor = preprocessor
         super(_FitPreprocessor, self).__init__()
 
@@ -31,7 +31,7 @@ class _FitPreprocessor(beam.PTransform):
 
 
 class _ApplyPreprocessor(beam.PTransform):
-    def __init__(self, preprocessor):
+    def __init__(self, preprocessor, exec_properties):
         self.preprocessor = preprocessor
         super(_ApplyPreprocessor, self).__init__()
 

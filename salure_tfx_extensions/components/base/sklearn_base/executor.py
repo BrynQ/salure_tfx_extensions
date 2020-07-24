@@ -34,14 +34,18 @@ class SKLearnBaseExecutor(with_metaclass(abc.ABCMeta, base_executor.BaseExecutor
     @abstractmethod
     def GetFitSKLearnTransform(self) -> Type[beam.PTransform]:
         """Should return a PTransform that can take in a DF and a singleton sklearn Model
-        The PTransform should return the fit SKLearn object"""
+        The PTransform should return the fit SKLearn object
+
+        The init takes in a singleton sklearn Model, and exec_properties"""
         pass
 
     @property
     @abstractmethod
     def GetApplySKLearnTransform(self) -> Type[beam.PTransform]:
         """Should return a PTransform that can take in a DF and a singleton sklearn Model
-        The PTransform should return the transformed DF"""
+        The PTransform should return the transformed DF
+
+        The init takes in a singleton sklearn Model, and exec_properties"""
         pass
 
     @property
@@ -126,10 +130,12 @@ class SKLearnBaseExecutor(with_metaclass(abc.ABCMeta, base_executor.BaseExecutor
                 preprocessor_pcoll = pipeline | beam.Create([sklearn_object])
 
                 fit_sklearn_processor = training_data | 'Fit SKLearn Processor' >> self.GetFitSKLearnTransform(
-                    preprocessor_pcoll)
+                    preprocessor_pcoll,
+                    exec_properties)
 
                 transformed_df = training_data | 'Transform Training Data' >> self.GetApplySKLearnTransform(
-                    fit_sklearn_processor)
+                    fit_sklearn_processor,
+                    exec_properties)
 
                 fit_sklearn_processor | sklearn_utils.WriteSKLearnModelToFile(
                     os.path.join(preprocessor_output_uri, self.sklearn_file_name))
