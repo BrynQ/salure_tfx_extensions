@@ -156,7 +156,8 @@ class SKLearnBaseExecutor(with_metaclass(abc.ABCMeta, base_executor.BaseExecutor
                     )
 
                     transformed_test_data = test_data | 'Transform Test Data' >> self.GetApplySKLearnTransform(
-                        fit_sklearn_processor)
+                        fit_sklearn_processor,
+                        exec_properties)
 
                     transformed_test_data | 'Write Test Data to File' >> sklearn_utils.WriteDataFrame(
                         os.path.join(output_dict[TRANSFORMED_EXAMPLES_KEY][0].uri, test_split))
