@@ -7,9 +7,9 @@ from salure_tfx_extensions.deployments.base_deployment import BaseDeployment
 from tfx.components.base.base_component import BaseComponent
 
 
-class SKLearnDeployment(BaseDeployment):
+class TensorflowDeployment(BaseDeployment):
 
-    # TODO: ALLOW FOR DATAFRAMES USING BYTES AS PROTOCOL
+    # TODO: Figure out signature name
 
     TEMPLATE = Template("""
 {
@@ -24,9 +24,21 @@ class SKLearnDeployment(BaseDeployment):
             {
                 "graph": {
                     "children": [],
-                    "implementation": "SKLEARN_SERVER",
+                    "implementation": "TENSORFLOW_SERVER",
                     "modelUri": "pvc://$pvc_name/$model_location",
-                    "name": "$deployment_name"
+                    "name": "$deployment_name",
+                    "parameters": [
+                        {
+                            "name": "signature_name",
+                            "type": "STRING",
+                            "value": "$signature_name"
+                        },
+                        {
+                            "name": "model_name",
+                            "type": "STRING",
+                            "value": "$model_name"
+                        }
+                    ]
                 },
                 "name": "$deployment_name",
                 "replicas": 1
@@ -34,30 +46,29 @@ class SKLearnDeployment(BaseDeployment):
         ]
     }
 }
-""")
+    """)
 
     def __init__(self,
                  deployment_name: str,
                  pvc_name: str,
+                 signature_name: str,
+                 model_name: str,
                  dependents: Optional[List[BaseComponent]] = None,
                  model_location: Optional[str] = None):
         self.deployment_name = deployment_name
         self.pvc_name = pvc_name
+        self.signature_name = signature_name
+        self.model_name = model_name
         self.model_location = model_location or 'data'
         self._dependents = dependents
 
-        self._deployment = SKLearnDeployment.TEMPLATE.substitute(
+        self._deployment = TensorflowDeployment.TEMPLATE.substitute(
             deployment_name=deployment_name,
             pvc_name=pvc_name,
-            model_location=model_location
+            signature_name=signature_name,
+            model_name=model_name,
+            model_location=model_location,
         )
-
-        # self._resource_op = dsl.ResourceOp(
-        #     name=deployment_name,
-        #     action='apply',
-        #     k8s_resource=seldon_deployment,
-        #     success_condition='status.state == Available'
-        # )  #.after(*dependents)
 
     @property
     def resource_op(self) -> dsl.ResourceOp:
@@ -74,15 +85,3 @@ class SKLearnDeployment(BaseDeployment):
     @property
     def dependents(self) -> Optional[List[BaseComponent]]:
         return self._dependents
-
-
-# $deployment_name
-# $pvc_name
-# $model_location
-
-# deployment_name,
-# pvc_name,  [Goes together with model_location to make modelUri]
-# model_location [DEFAULT = related to deployment_name]
-# request_signature:
-#   - bytes
-#   -
