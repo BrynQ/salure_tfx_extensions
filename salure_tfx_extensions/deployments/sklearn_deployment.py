@@ -35,7 +35,7 @@ class SKLearnDeployment(BaseDeployment):
         ]
     }
 }
-"""
+""")
 
 #     TEMPLATE = Template("""
 # apiVersion: machinelearning.seldon.io/v1alpha2
