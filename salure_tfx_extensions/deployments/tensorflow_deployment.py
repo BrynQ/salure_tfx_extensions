@@ -1,5 +1,6 @@
 from string import Template
 from typing import Optional, List, Any
+import json
 
 from kfp import dsl
 
@@ -78,7 +79,7 @@ class TensorflowDeployment(BaseDeployment):
         return dsl.ResourceOp(
             name=self.deployment_name,
             action='apply',
-            k8s_resource=self._deployment,
+            k8s_resource=json.loads(self._deployment),
             success_condition='status.state == Available'
         )
 

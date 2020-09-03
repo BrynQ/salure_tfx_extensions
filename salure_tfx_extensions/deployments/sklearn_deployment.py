@@ -1,5 +1,6 @@
 from string import Template
 from typing import Optional, List, Any
+import json
 
 from kfp import dsl
 
@@ -11,51 +12,51 @@ class SKLearnDeployment(BaseDeployment):
 
     # TODO: ALLOW FOR DATAFRAMES USING BYTES AS PROTOCOL
 
-#     TEMPLATE = Template("""
-# {
-#     "apiVersion": "machinelearning.seldon.io/v1alpha2",
-#     "kind": "SeldonDeployment",
-#     "metadata": {
-#         "name": "$deployment_name"
-#     },
-#     "spec": {
-#         "name": "$deployment_name",
-#         "predictors": [
-#             {
-#                 "graph": {
-#                     "children": [],
-#                     "implementation": "SKLEARN_SERVER",
-#                     "modelUri": "pvc://$pvc_name/$model_location",
-#                     "name": "$deployment_name"
-#                 },
-#                 "name": "$deployment_name",
-#                 "replicas": 1
-#             }
-#         ]
-#     }
-# }
-# """
-
     TEMPLATE = Template("""
-apiVersion: machinelearning.seldon.io/v1alpha2
-kind: SeldonDeployment
-metadata:
-    name: $deployment_name
-spec:
-    name: $deployment_name
-    predictors:
-      - graph:
-          children: []
-          implementation: SKLEARN_SERVER
-          modelUri: pvc://$pvc_name/$model_location
-          name: $deployment_name
-          parameters:
-            - name: method
-              type: STRING
-              value: predict
-        name: $deployment_name
-        replicas: 1
-""")
+{
+    "apiVersion": "machinelearning.seldon.io/v1alpha2",
+    "kind": "SeldonDeployment",
+    "metadata": {
+        "name": "$deployment_name"
+    },
+    "spec": {
+        "name": "$deployment_name",
+        "predictors": [
+            {
+                "graph": {
+                    "children": [],
+                    "implementation": "SKLEARN_SERVER",
+                    "modelUri": "pvc://$pvc_name/$model_location",
+                    "name": "$deployment_name"
+                },
+                "name": "$deployment_name",
+                "replicas": 1
+            }
+        ]
+    }
+}
+"""
+
+#     TEMPLATE = Template("""
+# apiVersion: machinelearning.seldon.io/v1alpha2
+# kind: SeldonDeployment
+# metadata:
+#     name: $deployment_name
+# spec:
+#     name: $deployment_name
+#     predictors:
+#       - graph:
+#           children: []
+#           implementation: SKLEARN_SERVER
+#           modelUri: pvc://$pvc_name/$model_location
+#           name: $deployment_name
+#           parameters:
+#             - name: method
+#               type: STRING
+#               value: predict
+#         name: $deployment_name
+#         replicas: 1
+# """)
 
     def __init__(self,
                  deployment_name: str,
@@ -88,7 +89,7 @@ spec:
         return dsl.ResourceOp(
             name=self.deployment_name,
             action='apply',
-            k8s_resource=self._deployment,
+            k8s_resource=json.loads(self._deployment),
             success_condition='status.state == Available'
         )
 
