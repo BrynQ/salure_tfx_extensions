@@ -41,6 +41,7 @@ class Executor(base_executor.BaseExecutor):
 
         predictions = artifact_utils.get_single_instance(input_dict['inference_result'])
         predictions_path = os.path.join(predictions.uri, _PREDICTION_LOGS_DIR_NAME)
+        predictions_uri = io_utils.all_files_pattern(predictions_path)
 
         # if EXAMPLES_KEY not in input_dict:
         #     raise ValueError('\'{}\' is missing from input_dict'.format(EXAMPLES_KEY))
@@ -63,7 +64,7 @@ class Executor(base_executor.BaseExecutor):
 
             data = (pipeline
                     | 'ReadPredictionLogs' >> beam.io.ReadFromTFRecord(
-                        predictions_path,
+                        predictions_uri,
                         coder=beam.coders.ProtoCoder(prediction_log_pb2.PredictionLog)))
 
             _ = (data
