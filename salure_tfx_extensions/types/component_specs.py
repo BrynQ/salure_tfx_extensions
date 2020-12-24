@@ -5,6 +5,7 @@ from typing import Text
 from tfx.types import ComponentSpec
 from tfx.types.component_spec import ChannelParameter, ExecutionParameter
 from tfx.types import standard_artifacts
+from tfx.types.artifact import Artifact
 from salure_tfx_extensions.types import standard_artifacts as stfxe_artifacts
 from tfx.proto import example_gen_pb2
 
@@ -22,6 +23,21 @@ class BaseSpec(ComponentSpec):
     OUTPUTS = {
         'output_examples': ChannelParameter(type=standard_artifacts.Examples)
     }
+
+
+class MySQLPusherSpec(ComponentSpec):
+    """Salure_tfx_extensions MySQLPusher spec"""
+
+    # PARAMETERS = {
+    #
+    # }
+    PARAMETERS = dict()
+
+    INPUTS = {
+        'inference_result': ChannelParameter(type=standard_artifacts.InferenceResult)
+    }
+
+    OUTPUTS = dict()
 
 
 class SKLearnTrainerSpec(ComponentSpec):
@@ -59,3 +75,19 @@ class SKLearnTransformSpec(ComponentSpec):
         'transform_pipeline': ChannelParameter(type=stfxe_artifacts.SKLearnPrepocessor)
     }
 
+
+class PusherSpec(ComponentSpec):
+    """Salure_tfx_extensions Pusher spec"""
+
+    PARAMETERS = {
+        'push_destination': ExecutionParameter(type=(str, Text)),
+        'timestamp_versioning': ExecutionParameter(type=bool)
+    }
+    INPUTS = {
+        'pushable': ChannelParameter(type=Artifact),  # Allow for any artifact type to be pushed
+        'model_blessing': ChannelParameter(type=standard_artifacts.ModelBlessing, optional=True),
+        'infra_blessing': ChannelParameter(type=standard_artifacts.InfraBlessing, optional=True)
+    }
+    OUTPUTS = {
+        'pushed_model': ChannelParameter(type=standard_artifacts.PushedModel)
+    }

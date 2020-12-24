@@ -33,6 +33,7 @@ class SKLearnTrainer(base_component.BaseComponent):
         """
 
         :param examples: A TFX Channel of type 'Examples'
+        :param sklearn_model: The actual SKLearn Model to be pickled and to be executed
         :param label_name: The name of the column that contains the labels, unsupervised if None
         """
         if label_name is None:

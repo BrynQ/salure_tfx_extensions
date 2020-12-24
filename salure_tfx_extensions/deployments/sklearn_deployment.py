@@ -93,7 +93,7 @@ class SKLearnDeployment(BaseDeployment):
             success_condition='status.state == Available'
         )
 
-    @property
+    # @property
     def dependents(self) -> Optional[List[BaseComponent]]:
         return self._dependents
 
