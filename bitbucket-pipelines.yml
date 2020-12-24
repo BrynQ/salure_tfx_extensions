@@ -14,7 +14,7 @@ pipelines:
           caches:
             - pip
           script:
-            - pip install -r requirements.txt
+#            - pip install -r requirements.txt
             - pipe: atlassian/pypi-publish:0.3.1
               variables:
                 PYPI_USERNAME: $PYPI_USERNAME
