@@ -40,7 +40,8 @@ class Executor(base_executor.BaseExecutor):
         self._log_startup(input_dict, output_dict, exec_properties)
 
         predictions = artifact_utils.get_single_instance(input_dict['inference_result'])
-        predictions_path = os.path.join(predictions.uri, _PREDICTION_LOGS_DIR_NAME)
+        # predictions_path = os.path.join(predictions.uri, _PREDICTION_LOGS_DIR_NAME)
+        predictions_path = predictions.uri
         predictions_uri = io_utils.all_files_pattern(predictions_path)
 
         # if EXAMPLES_KEY not in input_dict:
