@@ -1,4 +1,4 @@
-tfx>=0.22.1
+tfx==0.22.0
 tensorflow>=1.15.0
 tensorflow-datasets==3.2.1
 PyMySQL>=0.9.3,<10

@@ -71,7 +71,7 @@ class TensorflowDeployment(BaseDeployment):
             model_location=model_location,
         )
 
-    @property
+    # @property
     def resource_op(self) -> dsl.ResourceOp:
         """Generates a kfp dsl ResourceOp.
         Must be initialized in the runtime of the function passed to the kfp compiler
