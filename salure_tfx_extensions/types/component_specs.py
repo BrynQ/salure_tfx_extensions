@@ -28,13 +28,12 @@ class BaseSpec(ComponentSpec):
 class MySQLPusherSpec(ComponentSpec):
     """Salure_tfx_extensions MySQLPusher spec"""
 
-    # PARAMETERS = {
-    #
-    # }
-    PARAMETERS = dict()
+    PARAMETERS = {
+        'module_file': ExecutionParameter(type=(bytes, Text)),
+    }
 
     INPUTS = {
-        'inference_result': ChannelParameter(type=standard_artifacts.InferenceResult)
+        'inference_result': ChannelParameter(type=standard_artifacts.InferenceResult),
     }
 
     OUTPUTS = dict()

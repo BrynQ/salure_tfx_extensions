@@ -14,8 +14,11 @@ from tfx.utils import path_utils
 # from tfx_bsl.tfxio import tf_example_record
 from tfx_bsl.tfxio import tf_example_record
 from tfx.components.bulk_inferrer.executor import _PREDICTION_LOGS_DIR_NAME
+from tfx.utils import import_utils
 
 _TELEMETRY_DESCRIPTORS = ['MySQLPusher']
+CUSTOM_EXPORT_FN = 'custom_export_fn'
+_MODULE_FILE_KEY = 'module_file'
 
 
 class Executor(base_executor.BaseExecutor):
@@ -43,6 +46,8 @@ class Executor(base_executor.BaseExecutor):
         # predictions_path = os.path.join(predictions.uri, _PREDICTION_LOGS_DIR_NAME)
         predictions_path = predictions.uri
         predictions_uri = io_utils.all_files_pattern(predictions_path)
+
+        custom_fn = import_utils.import_func_from_source(exec_properties[_MODULE_FILE_KEY], CUSTOM_EXPORT_FN)
 
         # if EXAMPLES_KEY not in input_dict:
         #     raise ValueError('\'{}\' is missing from input_dict'.format(EXAMPLES_KEY))
