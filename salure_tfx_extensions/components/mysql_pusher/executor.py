@@ -131,7 +131,7 @@ class Executor(base_executor.BaseExecutor):
 
 def parse_predictlog(predict_log):
     predict_val = None
-    response_tensor = predict_log.response["output"]
+    response_tensor = predict_log.response.outputs["output"]
     if len(response_tensor.half_val) != 0:
         predict_val = response_tensor.half_val
     elif len(response_tensor.float_val) != 0:
