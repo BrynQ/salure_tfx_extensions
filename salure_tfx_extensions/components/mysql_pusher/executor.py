@@ -48,7 +48,7 @@ class Executor(base_executor.BaseExecutor):
         predictions_path = predictions.uri
         predictions_uri = io_utils.all_files_pattern(predictions_path)
 
-        custom_fn = udf_utils.get_fn(exec_properties, 'custom_export_fn')
+        # custom_fn = udf_utils.get_fn(exec_properties, 'custom_export_fn')
 
         # custom_fn = import_utils.import_func_from_source(exec_properties[_MODULE_FILE_KEY], CUSTOM_EXPORT_FN)
 
