@@ -9,6 +9,7 @@ from tfx import types
 from tfx.components.base import base_executor
 from tfx.types import artifact_utils
 from tensorflow_serving.apis import prediction_log_pb2
+from tfx.components.util import udf_utils
 from tfx.utils import io_utils
 from tfx.utils import path_utils
 # from tfx_bsl.tfxio import tf_example_record
@@ -47,7 +48,9 @@ class Executor(base_executor.BaseExecutor):
         predictions_path = predictions.uri
         predictions_uri = io_utils.all_files_pattern(predictions_path)
 
-        custom_fn = import_utils.import_func_from_source(exec_properties[_MODULE_FILE_KEY], CUSTOM_EXPORT_FN)
+        custom_fn = udf_utils.get_fn(exec_properties, 'custom_export_fn')
+
+        # custom_fn = import_utils.import_func_from_source(exec_properties[_MODULE_FILE_KEY], CUSTOM_EXPORT_FN)
 
         # if EXAMPLES_KEY not in input_dict:
         #     raise ValueError('\'{}\' is missing from input_dict'.format(EXAMPLES_KEY))
@@ -71,7 +74,8 @@ class Executor(base_executor.BaseExecutor):
             data = (pipeline
                     | 'ReadPredictionLogs' >> beam.io.ReadFromTFRecord(
                         predictions_uri,
-                        coder=beam.coders.ProtoCoder(prediction_log_pb2.PredictionLog)))
+                        coder=beam.coders.ProtoCoder(prediction_log_pb2.PredictionLog))
+                    | 'ParsePredictionLogs' >> beam.Map(parse_predictlog))
 
             _ = (data
                  | 'Log PredictionLogs' >> beam.Map(absl.logging.info))
@@ -124,3 +128,39 @@ class Executor(base_executor.BaseExecutor):
 #             | 'Write' >> beam.io.WriteToTFRecord(
 #                 os.path.join(output_split_path, DEFAULT_FILE_NAME),
 #                 file_name_suffix='.gz'))
+
+def parse_predictlog(predict_log):
+    predict_val = None
+    response_tensor = predict_log.response["output"]
+    if len(response_tensor.half_val) != 0:
+        predict_val = response_tensor.half_val
+    elif len(response_tensor.float_val) != 0:
+        predict_val = response_tensor.float_val
+    elif len(response_tensor.double_val) != 0:
+        predict_val = response_tensor.double_val
+    elif len(response_tensor.int_val) != 0:
+        predict_val = response_tensor.int_val
+    elif len(response_tensor.string_val) != 0:
+        predict_val = response_tensor.string_val
+    elif len(response_tensor.int64_val) != 0:
+        predict_val = response_tensor.int64_val
+    elif len(response_tensor.bool_val) != 0:
+        predict_val = response_tensor.bool_val
+    elif len(response_tensor.uint32_val) != 0:
+        predict_val = response_tensor.uint32_val
+    elif len(response_tensor.uint64_val) != 0:
+        predict_val = response_tensor.uint64_val
+
+    if predict_val is None:
+        ValueError("Encountered response tensor with unknown value")
+
+    example = predict_log.request.inputs["examples"].string_val
+    example = tf.train.Example.FromString(example)
+
+    return example, predict_val
+
+
+
+
+
+
