@@ -158,6 +158,7 @@ def parse_predictlog(pb):
 
     example = pb.predict_log.request.inputs["examples"].string_val[0]
     example = tf.train.Example.FromString(example)
+    example = protobuf_to_dict(example)
 
     return example, predict_val
 
