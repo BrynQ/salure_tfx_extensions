@@ -75,8 +75,8 @@ class Executor(base_executor.BaseExecutor):
                     | 'ReadPredictionLogs' >> beam.io.ReadFromTFRecord(
                         predictions_uri,
                         coder=beam.coders.ProtoCoder(prediction_log_pb2.PredictionLog))
-                    # | 'ParsePredictionLogs' >> beam.Map(parse_predictlog))
-                    | 'Log PredictionLogs' >> beam.Map(absl.logging.info))
+                    | 'ParsePredictionLogs' >> beam.Map(parse_predictlog))
+                    # | 'Log PredictionLogs' >> beam.Map(absl.logging.info))
                     # | 'ParsePredictionLogs' >> beam.Map(protobuf_to_dict))
 
             # _ = (data
