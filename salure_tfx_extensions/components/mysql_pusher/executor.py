@@ -79,8 +79,8 @@ class Executor(base_executor.BaseExecutor):
                     # | 'Log PredictionLogs' >> beam.Map(absl.logging.info))
                     # | 'ParsePredictionLogs' >> beam.Map(protobuf_to_dict))
 
-            # _ = (data
-            #      | 'Log PredictionLogs' >> beam.Map(absl.logging.info))
+            _ = (data
+                 | 'Log PredictionLogs' >> beam.Map(absl.logging.info))
 
 
 
