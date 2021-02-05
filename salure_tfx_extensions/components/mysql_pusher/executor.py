@@ -76,10 +76,11 @@ class Executor(base_executor.BaseExecutor):
                         predictions_uri,
                         coder=beam.coders.ProtoCoder(prediction_log_pb2.PredictionLog))
                     # | 'ParsePredictionLogs' >> beam.Map(parse_predictlog))
-                    | 'ParsePredictionLogs' >> beam.Map(protobuf_to_dict))
+                    | 'Log PredictionLogs' >> beam.Map(absl.logging.info))
+                    # | 'ParsePredictionLogs' >> beam.Map(protobuf_to_dict))
 
-            _ = (data
-                 | 'Log PredictionLogs' >> beam.Map(absl.logging.info))
+            # _ = (data
+            #      | 'Log PredictionLogs' >> beam.Map(absl.logging.info))
 
 
 
@@ -161,7 +162,6 @@ def parse_predictlog(predict_log):
     return example, predict_val
 
 
-
 # protobuf_to_dict is from https://github.com/benhodgson/protobuf-to-dict
 from google.protobuf.message import Message
 from google.protobuf.descriptor import FieldDescriptor
@@ -206,6 +206,7 @@ def protobuf_to_dict(pb, type_callable_map=TYPE_CALLABLE_MAP, use_enum_labels=Fa
     if extensions:
         result_dict[EXTENSION_CONTAINER] = extensions
     return result_dict
+
 
 def repeated(type_callable):
     return lambda value_list: [type_callable(value) for value in value_list]
