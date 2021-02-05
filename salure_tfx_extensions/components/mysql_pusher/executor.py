@@ -131,9 +131,9 @@ class Executor(base_executor.BaseExecutor):
 #                 os.path.join(output_split_path, DEFAULT_FILE_NAME),
 #                 file_name_suffix='.gz'))
 
-def parse_predictlog(predict_log):
+def parse_predictlog(pb):
     predict_val = None
-    response_tensor = predict_log.response.outputs["output"]
+    response_tensor = pb.predict_log.response.outputs["output"]
     if len(response_tensor.half_val) != 0:
         predict_val = response_tensor.half_val
     elif len(response_tensor.float_val) != 0:
@@ -156,7 +156,7 @@ def parse_predictlog(predict_log):
     if predict_val is None:
         ValueError("Encountered response tensor with unknown value")
 
-    example = predict_log.request.inputs["examples"].string_val
+    example = pb.predict_log.request.inputs["examples"].string_val
     example = tf.train.Example.FromString(example)
 
     return example, predict_val
