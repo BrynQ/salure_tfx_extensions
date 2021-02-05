@@ -135,28 +135,28 @@ def parse_predictlog(pb):
     predict_val = None
     response_tensor = pb.predict_log.response.outputs["output"]
     if len(response_tensor.half_val) != 0:
-        predict_val = response_tensor.half_val
+        predict_val = response_tensor.half_val[0]
     elif len(response_tensor.float_val) != 0:
-        predict_val = response_tensor.float_val
+        predict_val = response_tensor.float_val[0]
     elif len(response_tensor.double_val) != 0:
-        predict_val = response_tensor.double_val
+        predict_val = response_tensor.double_val[0]
     elif len(response_tensor.int_val) != 0:
-        predict_val = response_tensor.int_val
+        predict_val = response_tensor.int_val[0]
     elif len(response_tensor.string_val) != 0:
-        predict_val = response_tensor.string_val
+        predict_val = response_tensor.string_val[0]
     elif len(response_tensor.int64_val) != 0:
-        predict_val = response_tensor.int64_val
+        predict_val = response_tensor.int64_val[0]
     elif len(response_tensor.bool_val) != 0:
-        predict_val = response_tensor.bool_val
+        predict_val = response_tensor.bool_val[0]
     elif len(response_tensor.uint32_val) != 0:
-        predict_val = response_tensor.uint32_val
+        predict_val = response_tensor.uint32_val[0]
     elif len(response_tensor.uint64_val) != 0:
-        predict_val = response_tensor.uint64_val
+        predict_val = response_tensor.uint64_val[0]
 
     if predict_val is None:
         ValueError("Encountered response tensor with unknown value")
 
-    example = pb.predict_log.request.inputs["examples"].string_val
+    example = pb.predict_log.request.inputs["examples"].string_val[0]
     example = tf.train.Example.FromString(example)
 
     return example, predict_val
