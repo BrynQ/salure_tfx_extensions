@@ -155,10 +155,12 @@ def parse_predictlog(pb):
 
     if predict_val is None:
         ValueError("Encountered response tensor with unknown value")
-
     example = pb.predict_log.request.inputs["examples"].string_val[0]
+    print ("------Example before Fromstring--------")
+    absl.logging.info(example)
     example = tf.train.Example.FromString(example)
-    # absl.logging.info(example)
+    print("------Example after Fromstring--------")
+    absl.logging.info(example)
     example = protobuf_to_dict(example)
 
     return example, predict_val
@@ -194,7 +196,7 @@ TYPE_CALLABLE_MAP = {
 def protobuf_to_dict(pb, type_callable_map=TYPE_CALLABLE_MAP, use_enum_labels=False):
     result_dict = {}
     extensions = {}
-    print ("*************************************")
+    print (""------bf to dict -----------------"")
     absl.logging.info(pb)
     print ("=====================================")
     for field, value in pb.ListFields():
