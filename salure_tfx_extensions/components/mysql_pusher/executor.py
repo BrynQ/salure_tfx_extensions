@@ -17,6 +17,7 @@ from tfx_bsl.tfxio import tf_example_record
 from tfx.components.bulk_inferrer.executor import _PREDICTION_LOGS_DIR_NAME
 from tfx.utils import import_utils
 from google.protobuf.message import Message
+from google.protobuf import json_format
 from google.protobuf.descriptor import FieldDescriptor
 
 _TELEMETRY_DESCRIPTORS = ['MySQLPusher']
@@ -159,18 +160,9 @@ def parse_predictlog(pb):
         ValueError("Encountered response tensor with unknown value")
     example = pb.predict_log.request.inputs["examples"].string_val[0]
     example = tf.train.Example.FromString(example)
-    print("------example1 -----------------")
-    absl.logging.info(example)
-    print("=======end of example1========================")
-
-    example2 = Message.ParseFromString(example)
-    print("------example2 -----------------")
-    absl.logging.info(example2)
-    print("=======end of example2========================")
-    example2 = protobuf_to_dict(example2, use_enum_labels=True)
     example = protobuf_to_dict(example, use_enum_labels=True)
 
-    return example2, predict_val
+    return example, predict_val
 
 
 # protobuf_to_dict is from https://github.com/benhodgson/protobuf-to-dict
@@ -205,6 +197,9 @@ def protobuf_to_dict(pb, type_callable_map=TYPE_CALLABLE_MAP, use_enum_labels=Fa
     print ("------bf to dict -----------------")
     absl.logging.info(pb)
     print ("=====================================")
+    a = json_format.MessageToJson(pb)
+    print (a)
+    print ("---dict---")
     for field, value in pb.ListFields():
         print (f"\n=***=loop in=***=")
         print (f"Field: {field}")
