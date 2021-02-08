@@ -196,7 +196,7 @@ TYPE_CALLABLE_MAP = {
 def protobuf_to_dict(pb, type_callable_map=TYPE_CALLABLE_MAP, use_enum_labels=False):
     result_dict = {}
     extensions = {}
-    print (""------bf to dict -----------------"")
+    print ("------bf to dict -----------------")
     absl.logging.info(pb)
     print ("=====================================")
     for field, value in pb.ListFields():
