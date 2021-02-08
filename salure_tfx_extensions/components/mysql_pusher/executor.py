@@ -160,7 +160,7 @@ def parse_predictlog(pb):
     example = pb.predict_log.request.inputs["examples"].string_val[0]
     example = tf.train.Example.FromString(example)
     print("------example1 -----------------")
-    absl.logging.info(example1)
+    absl.logging.info(example)
     print("=======end of example1========================")
 
     example2 = Message.ParseFromString(example)
