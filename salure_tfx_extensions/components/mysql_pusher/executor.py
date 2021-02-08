@@ -209,19 +209,13 @@ def protobuf_to_dict(pb, type_callable_map=TYPE_CALLABLE_MAP):
             print (f"f name: {f.name}")
             print (f"v value: {v}")
         # type_callable = _get_field_value_adaptor(pb, field, type_callable_map)
-        type_callable = iterate_value(value, type_callable_map)
         if field.label == FieldDescriptor.LABEL_REPEATED:
             type_callable = repeated(type_callable)
-
         result_dict[field.name] = type_callable(value)
 
     if extensions:
         result_dict[EXTENSION_CONTAINER] = extensions
     return result_dict
-
-def iterate_value(value, type_callable_map):
-
-
 
 def repeated(type_callable):
     return lambda value_list: [type_callable(value) for value in value_list]
