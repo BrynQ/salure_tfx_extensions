@@ -156,11 +156,7 @@ def parse_predictlog(pb):
     if predict_val is None:
         ValueError("Encountered response tensor with unknown value")
     example = pb.predict_log.request.inputs["examples"].string_val[0]
-    print ("------Example before Fromstring--------")
-    absl.logging.info(example)
     example = tf.train.Example.FromString(example)
-    print("------Example after Fromstring--------")
-    absl.logging.info(example)
     example = protobuf_to_dict(example, use_enum_labels=True)
 
     return example, predict_val
@@ -200,13 +196,14 @@ def protobuf_to_dict(pb, type_callable_map=TYPE_CALLABLE_MAP, use_enum_labels=Fa
     absl.logging.info(pb)
     print ("=====================================")
     for field, value in pb.ListFields():
+        print (f"\n=***=loop in=***=")
         print (f"Field: {field}")
-        print (f"value: {value}")
+        print(f"Field name: {field.name}")
         print (f"Field type: {field.type}")
         print (f"Field label: {field.label}")
         print (f"Field is_extension: {field.is_extension}")
         print (f"Field number: {field.number}")
-        print (f"Field name: {field.name}")
+        print(f"value: {value}")
         type_callable = _get_field_value_adaptor(pb, field, type_callable_map, use_enum_labels)
         if field.label == FieldDescriptor.LABEL_REPEATED:
             type_callable = repeated(type_callable)
@@ -233,28 +230,28 @@ def enum_label_name(field, value):
 
 def _get_field_value_adaptor(pb, field, type_callable_map=TYPE_CALLABLE_MAP, use_enum_labels=False):
     print("===========_get_field_value_adaptor=======================")
+    print(f"field.name: {field.name}")
+    print(f"field.type: {field.type}")
+    print(f"field.label: {field.label}")
+    print(f"field.number: {field.number}")
     absl.logging.info(pb)
-    print ("---")
-    print(f"field.name{field.name}")
-    print(f"field.type{field.type}")
-    print(f"field.label{field.label}")
-    print(f"field.number{field.number}")
     print("===========_finish_get_field_value_adaptor=======================")
 
     # if field.type == FieldDescriptor.TYPE_MESSAGE:
     if field.name == "features":
         # recursively encode protobuf sub-message
-        print (f"return 1")
+        print (f"----return 1----")
         return lambda pb: protobuf_to_dict(pb,
             type_callable_map=type_callable_map,
             use_enum_labels=use_enum_labels)
 
-    if use_enum_labels and field.type == FieldDescriptor.TYPE_ENUM:
-        print(f"return 2")
+    if use_enum_labels:
+    # if use_enum_labels and field.type == FieldDescriptor.TYPE_ENUM:
+        print(f"----return 2----")
         return lambda value: enum_label_name(field, value)
 
     if field.type in type_callable_map:
-        print(f"return 3")
+        print(f"----return 3----")
         return type_callable_map[field.type]
 
     raise TypeError("Field %s.%s has unrecognised type id %d" % (
