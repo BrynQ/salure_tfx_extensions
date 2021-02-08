@@ -16,6 +16,8 @@ from tfx.utils import path_utils
 from tfx_bsl.tfxio import tf_example_record
 from tfx.components.bulk_inferrer.executor import _PREDICTION_LOGS_DIR_NAME
 from tfx.utils import import_utils
+from google.protobuf.message import Message
+from google.protobuf.descriptor import FieldDescriptor
 
 _TELEMETRY_DESCRIPTORS = ['MySQLPusher']
 CUSTOM_EXPORT_FN = 'custom_export_fn'
@@ -157,14 +159,22 @@ def parse_predictlog(pb):
         ValueError("Encountered response tensor with unknown value")
     example = pb.predict_log.request.inputs["examples"].string_val[0]
     example = tf.train.Example.FromString(example)
+    print("------example1 -----------------")
+    absl.logging.info(example1)
+    print("=======end of example1========================")
+
+    example2 = Message.ParseFromString(example)
+    print("------example2 -----------------")
+    absl.logging.info(example2)
+    print("=======end of example2========================")
+    example2 = protobuf_to_dict(example2, use_enum_labels=True)
     example = protobuf_to_dict(example, use_enum_labels=True)
 
-    return example, predict_val
+    return example2, predict_val
 
 
 # protobuf_to_dict is from https://github.com/benhodgson/protobuf-to-dict
-from google.protobuf.message import Message
-from google.protobuf.descriptor import FieldDescriptor
+
 
 EXTENSION_CONTAINER = '___X'
 
@@ -248,6 +258,7 @@ def _get_field_value_adaptor(pb, field, type_callable_map=TYPE_CALLABLE_MAP, use
     if use_enum_labels:
     # if use_enum_labels and field.type == FieldDescriptor.TYPE_ENUM:
         print(f"----return 2----")
+        print (pb.json_format)
         return lambda value: enum_label_name(field, value)
 
     if field.type in type_callable_map:
