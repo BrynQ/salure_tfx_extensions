@@ -161,7 +161,7 @@ def parse_predictlog(pb):
     example = tf.train.Example.FromString(example)
     print("------Example after Fromstring--------")
     absl.logging.info(example)
-    example = protobuf_to_dict(example)
+    example = protobuf_to_dict(example, use_enum_labels=True)
 
     return example, predict_val
 
@@ -200,6 +200,8 @@ def protobuf_to_dict(pb, type_callable_map=TYPE_CALLABLE_MAP, use_enum_labels=Fa
     absl.logging.info(pb)
     print ("=====================================")
     for field, value in pb.ListFields():
+        print (f"Field: {field}")
+        print (f"value: {value}")
         print (f"Field type: {field.type}")
         print (f"FieldDescriptor.TYPE_MESSAG: {FieldDescriptor.TYPE_MESSAG}")
         print (f"FieldDescriptor.TYPE_ENUM: {FieldDescriptor.TYPE_ENUM}")
