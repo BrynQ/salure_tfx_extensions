@@ -237,7 +237,8 @@ def _get_field_value_adaptor(pb, field, type_callable_map=TYPE_CALLABLE_MAP, use
     print (f"pb{pb}")
     absl.logging.info(pb)
     print("===========_finish_get_field_value_adaptor=======================")
-    if field.type == FieldDescriptor.TYPE_MESSAGE:
+    # if field.type == FieldDescriptor.TYPE_MESSAGE:
+    if field.name == "features":
         # recursively encode protobuf sub-message
         return lambda pb: protobuf_to_dict(pb,
             type_callable_map=type_callable_map,
