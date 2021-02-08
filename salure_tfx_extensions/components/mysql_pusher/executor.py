@@ -191,38 +191,36 @@ TYPE_CALLABLE_MAP = {
 }
 
 
-def protobuf_to_dict(pb, type_callable_map=TYPE_CALLABLE_MAP, use_enum_labels=False):
+def protobuf_to_dict(pb, type_callable_map=TYPE_CALLABLE_MAP):
     result_dict = {}
     extensions = {}
     print ("------bf to dict -----------------")
     absl.logging.info(pb)
     print ("=====================================")
-    a = json_format.MessageToJson(pb)
-    print (a)
-    print ("---dict---")
     for field, value in pb.ListFields():
         print (f"\n=***=loop in=***=")
-        print (f"Field: {field}")
         print(f"Field name: {field.name}")
         print (f"Field type: {field.type}")
         print (f"Field label: {field.label}")
-        print (f"Field is_extension: {field.is_extension}")
         print (f"Field number: {field.number}")
         print(f"value: {value}")
-        type_callable = _get_field_value_adaptor(pb, field, type_callable_map, use_enum_labels)
+        print (f"value type: {type(value)}")
+        for f, v in value.ListFields():
+            print (f"f name: {f.name}")
+            print (f"v value: {v}")
+        # type_callable = _get_field_value_adaptor(pb, field, type_callable_map)
+        type_callable = iterate_value(value, type_callable_map)
         if field.label == FieldDescriptor.LABEL_REPEATED:
             type_callable = repeated(type_callable)
-
-        if field.is_extension:
-            extensions[str(field.number)] = type_callable(value)
-            extensions[str(field.number)] = type_callable(value)
-            continue
 
         result_dict[field.name] = type_callable(value)
 
     if extensions:
         result_dict[EXTENSION_CONTAINER] = extensions
     return result_dict
+
+def iterate_value(value, type_callable_map):
+
 
 
 def repeated(type_callable):
@@ -253,7 +251,6 @@ def _get_field_value_adaptor(pb, field, type_callable_map=TYPE_CALLABLE_MAP, use
     if use_enum_labels:
     # if use_enum_labels and field.type == FieldDescriptor.TYPE_ENUM:
         print(f"----return 2----")
-        print (pb.json_format)
         return lambda value: enum_label_name(field, value)
 
     if field.type in type_callable_map:
