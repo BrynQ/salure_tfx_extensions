@@ -205,8 +205,11 @@ def protobuf_to_dict(pb, type_callable_map=TYPE_CALLABLE_MAP):
         print(f"value: {value}")
         print (f"value type: {type(value)}")
         for f, v in value.ListFields():
-            print (f"f name: {f.name}")
-            print (f"v value: {v}")
+            for ff, vv in v.ListFields():
+                print(f"ff name: {ff.name}")
+                for fff, vvv in vv.ListFields():
+                    print(f"fff name: {fff.name}")
+                    print(f"vvv name: {vvv}")
         # type_callable = _get_field_value_adaptor(pb, field, type_callable_map)
         # if field.label == FieldDescriptor.LABEL_REPEATED:
         #     type_callable = repeated(type_callable)
