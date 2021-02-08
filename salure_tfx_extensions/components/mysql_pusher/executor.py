@@ -203,13 +203,16 @@ def protobuf_to_dict(pb, type_callable_map=TYPE_CALLABLE_MAP, use_enum_labels=Fa
         print (f"Field: {field}")
         print (f"value: {value}")
         print (f"Field type: {field.type}")
-        print (f"FieldDescriptor.TYPE_MESSAG: {FieldDescriptor.TYPE_MESSAG}")
-        print (f"FieldDescriptor.TYPE_ENUM: {FieldDescriptor.TYPE_ENUM}")
+        print (f"Field label: {field.label}")
+        print (f"Field is_extension: {field.is_extension}")
+        print (f"Field number: {field.number}")
+        print (f"Field name: {field.name}")
         type_callable = _get_field_value_adaptor(pb, field, type_callable_map, use_enum_labels)
         if field.label == FieldDescriptor.LABEL_REPEATED:
             type_callable = repeated(type_callable)
 
         if field.is_extension:
+            extensions[str(field.number)] = type_callable(value)
             extensions[str(field.number)] = type_callable(value)
             continue
 
