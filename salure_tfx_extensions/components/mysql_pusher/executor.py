@@ -193,9 +193,6 @@ TYPE_CALLABLE_MAP = {
 }
 
 def dump_object(pb):
-    print("-----------------------")
-    absl.logging.info(pb)
-    print("=====================================")
     for descriptor in pb.DESCRIPTOR.fields:
         value = getattr(pb, descriptor.name)
         if descriptor.type == descriptor.TYPE_MESSAGE:
@@ -205,9 +202,9 @@ def dump_object(pb):
                 dump_object(value)
         elif descriptor.type == descriptor.TYPE_ENUM:
             enum_name = descriptor.enum_type.values[value].name
-            print "%s: %s" % (descriptor.full_name, enum_name)
+            print (descriptor.full_name, enum_name)
         else:
-            print "%s: %s" % (descriptor.full_name, value)
+            print (descriptor.full_name, value)
 
 def protobuf_to_dict(pb, type_callable_map=TYPE_CALLABLE_MAP, use_enum_labels=False):
     result_dict = {}
