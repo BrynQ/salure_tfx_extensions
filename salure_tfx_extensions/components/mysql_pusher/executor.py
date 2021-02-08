@@ -200,6 +200,9 @@ def protobuf_to_dict(pb, type_callable_map=TYPE_CALLABLE_MAP, use_enum_labels=Fa
     absl.logging.info(pb)
     print ("=====================================")
     for field, value in pb.ListFields():
+        print (f"Field type: {field.type}")
+        print (f"FieldDescriptor.TYPE_MESSAG: {FieldDescriptor.TYPE_MESSAG}")
+        print (f"FieldDescriptor.TYPE_ENUM: {FieldDescriptor.TYPE_ENUM}")
         type_callable = _get_field_value_adaptor(pb, field, type_callable_map, use_enum_labels)
         if field.label == FieldDescriptor.LABEL_REPEATED:
             type_callable = repeated(type_callable)
@@ -224,6 +227,11 @@ def enum_label_name(field, value):
 
 
 def _get_field_value_adaptor(pb, field, type_callable_map=TYPE_CALLABLE_MAP, use_enum_labels=False):
+    print("===========_get_field_value_adaptor=======================")
+    print (f"field{field}")
+    print (f"pb{pb}")
+    absl.logging.info(pb)
+    print("===========_finish_get_field_value_adaptor=======================")
     if field.type == FieldDescriptor.TYPE_MESSAGE:
         # recursively encode protobuf sub-message
         return lambda pb: protobuf_to_dict(pb,
