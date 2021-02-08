@@ -237,7 +237,6 @@ def _get_field_value_adaptor(pb, field, type_callable_map=TYPE_CALLABLE_MAP, use
     print ("---")
     print(f"field.name{field.name}")
     print(f"field.type{field.type}")
-    print(f"field.value{field.value}")
     print(f"field.label{field.label}")
     print(f"field.number{field.number}")
     print("===========_finish_get_field_value_adaptor=======================")
