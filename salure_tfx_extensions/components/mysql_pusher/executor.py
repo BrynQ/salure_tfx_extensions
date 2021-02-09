@@ -159,12 +159,14 @@ def parse_predictlog(pb):
     if predict_val is None:
         ValueError("Encountered response tensor with unknown value")
     example = pb.predict_log.request.inputs["examples"].string_val[0]
+    absl.logging.info(example)
     example = tf.train.Example.FromString(example)
     # absl.logging.info(example)
-    example = protobuf_to_dict(example, use_enum_labels=True)
-    example = dump_object(example)
+    example1 = dump_object(example)
+    example2 = protobuf_to_dict(example, use_enum_labels=True)
 
-    return example, predict_val
+
+    return example1, predict_val
 
 
 # protobuf_to_dict is from https://github.com/benhodgson/protobuf-to-dict
@@ -218,13 +220,6 @@ def protobuf_to_dict(pb, type_callable_map=TYPE_CALLABLE_MAP, use_enum_labels=Fa
     print ("------bf to dict -----------------")
     absl.logging.info(pb)
     print ("=====================================")
-    try:
-        print ("hard coded")
-        for f, v in pb.features:
-            print (f"f: {f}")
-            print (f"v: {v}")
-    except:
-        print ("oops")
     for field, value in pb.ListFields():
         try:
             print(f"\n=***=loop in=***=")
@@ -234,9 +229,8 @@ def protobuf_to_dict(pb, type_callable_map=TYPE_CALLABLE_MAP, use_enum_labels=Fa
             print(f"Field label: {field.label}")
             print(f"Field is_extension: {field.is_extension}")
             print(f"Field number: {field.number}")
-            print(f"value: {value}")
             print(f"Field enum_type: {field.enum_type}")
-            print(f"Field field.enum_type.values_by_number: {field.enum_type.values_by_number}")
+            print(f"value: {value}")
         except:
             print ("aya")
         type_callable = _get_field_value_adaptor(pb, field, type_callable_map, use_enum_labels)
@@ -271,11 +265,10 @@ def _get_field_value_adaptor(pb, field, type_callable_map=TYPE_CALLABLE_MAP, use
             type_callable_map=type_callable_map,
             use_enum_labels=use_enum_labels)
 
-    if use_enum_labels:
-    # if use_enum_labels and field.type == FieldDescriptor.TYPE_ENUM:
-        print(f"----return 2----")
-        print (pb.json_format)
-        return lambda value: enum_label_name(field, value)
+    # if use_enum_labels:
+    # # if use_enum_labels and field.type == FieldDescriptor.TYPE_ENUM:
+    #     print(f"----return 2----")
+    #     return lambda value: enum_label_name(field, value)
 
     if field.type in type_callable_map:
         print(f"----return 3----")
