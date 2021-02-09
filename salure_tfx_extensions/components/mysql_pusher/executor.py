@@ -169,12 +169,12 @@ def parse_predictlog(pb):
     directory = os.path.dirname(csv_file)
     if not os.path.exists(directory):
         with open(csv_file, 'w') as csvfile:
-            writer = csv.DictWriter(csvfile)
+            writer = csv.DictWriter(csvfile, fieldnames=list(results.keys()))
             writer.writeheader()
             writer.writerow(results)
     else:
         with open(csv_file, 'a') as csvfile:
-            writer = csv.DictWriter(csvfile)
+            writer = csv.DictWriter(csvfile, fieldnames=list(results.keys()))
             writer.writerow(results)
 
 
