@@ -212,17 +212,29 @@ def protobuf_to_dict(pb, type_callable_map=TYPE_CALLABLE_MAP, use_enum_labels=Fa
     print ("------bf to dict -----------------")
     absl.logging.info(pb)
     print ("=====================================")
+    try:
+        print ("hard coded")
+        for f, v in pb.features:
+            print (f"f: {f}")
+            print (f"v: {v}")
+    except:
+        print ("oops")
     for field, value in pb.ListFields():
-        print (f"\n=***=loop in=***=")
-        print (f"Field: {field}")
-        print(f"Field name: {field.name}")
-        print (f"Field type: {field.type}")
-        print (f"Field label: {field.label}")
-        print (f"Field is_extension: {field.is_extension}")
-        print (f"Field number: {field.number}")
-        print(f"value: {value}")
+        try:
+            print(f"\n=***=loop in=***=")
+            print(f"Field: {field}")
+            print(f"Field name: {field.name}")
+            print(f"Field type: {field.type}")
+            print(f"Field label: {field.label}")
+            print(f"Field is_extension: {field.is_extension}")
+            print(f"Field number: {field.number}")
+            print(f"value: {value}")
+            print(f"Field enum_type: {field.enum_type}")
+            print(f"Field field.enum_type.values_by_number: {field.enum_type.values_by_number}")
+        except:
+            print ("aya")
         type_callable = _get_field_value_adaptor(pb, field, type_callable_map, use_enum_labels)
-        if field.label == FieldDescriptor.LABEL_REPEATED:
+        if field.label == FieldDescriptor.LABEL_REPEATED:  # to see if the field is repeated
             type_callable = repeated(type_callable)
 
         if field.is_extension:
@@ -235,15 +247,6 @@ def protobuf_to_dict(pb, type_callable_map=TYPE_CALLABLE_MAP, use_enum_labels=Fa
     if extensions:
         result_dict[EXTENSION_CONTAINER] = extensions
     return result_dict
-
-
-def repeated(type_callable):
-    return lambda value_list: [type_callable(value) for value in value_list]
-
-
-def enum_label_name(field, value):
-    return field.enum_type.values_by_number[int(value)].name
-
 
 def _get_field_value_adaptor(pb, field, type_callable_map=TYPE_CALLABLE_MAP, use_enum_labels=False):
     print("===========_get_field_value_adaptor=======================")
@@ -275,9 +278,11 @@ def _get_field_value_adaptor(pb, field, type_callable_map=TYPE_CALLABLE_MAP, use
     raise TypeError("Field %s.%s has unrecognised type id %d" % (
         pb.__class__.__name__, field.name, field.type))
 
+def repeated(type_callable):
+    return lambda value_list: [type_callable(value) for value in value_list]
 
-
-
+def enum_label_name(field, value):
+    return field.enum_type.values_by_number[int(value)].name
 
 
 
