@@ -168,7 +168,6 @@ def parse_predictlog(pb):
     csv_file = "prediction.csv"
     directory = os.path.dirname(csv_file)
     if not os.path.exists(directory):
-        os.makedirs(directory)
         with open(csv_file, 'w') as csvfile:
             writer = csv.DictWriter(csvfile)
             writer.writeheader()
