@@ -160,8 +160,8 @@ def parse_predictlog(pb):
         ValueError("Encountered response tensor with unknown value")
     example = pb.predict_log.request.inputs["examples"].string_val[0]
     example = tf.train.Example.FromString(example)
-    absl.logging.info(example)
-    # example = protobuf_to_dict(example, use_enum_labels=True)
+    # absl.logging.info(example)
+    example = protobuf_to_dict(example, use_enum_labels=True)
     example = dump_object(example)
 
     return example, predict_val
@@ -193,8 +193,14 @@ TYPE_CALLABLE_MAP = {
 }
 
 def dump_object(pb):
+    print ('---- Dump object ----')
     for descriptor in pb.DESCRIPTOR.fields:
+        print (f"descripter: {descriptor}")
         value = getattr(pb, descriptor.name)
+        print(f"descripter value: {value}")
+        print(f"descripter type: {descriptor.type}")
+        print(f"descripter label: {descriptor.label}")
+
         if descriptor.type == descriptor.TYPE_MESSAGE:
             if descriptor.label == descriptor.LABEL_REPEATED:
                 map(dump_object, value)
