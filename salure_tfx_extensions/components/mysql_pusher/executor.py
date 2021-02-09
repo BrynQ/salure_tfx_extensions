@@ -19,6 +19,7 @@ from tfx.utils import import_utils
 from google.protobuf.message import Message
 from google.protobuf import json_format
 from google.protobuf.descriptor import FieldDescriptor
+import csv
 
 _TELEMETRY_DESCRIPTORS = ['MySQLPusher']
 CUSTOM_EXPORT_FN = 'custom_export_fn'
@@ -161,11 +162,21 @@ def parse_predictlog(pb):
     example = pb.predict_log.request.inputs["examples"].string_val[0]
     example = tf.train.Example.FromString(example)
     results = parse_pb(example)
-    absl.logging.info(predict_val)
-    print (f"predict_val: {predict_val}")
     results['score'] = predict_val
-    # example2 = protobuf_to_dict(example, use_enum_labels=True)
+    print (results)
 
+    csv_file = "prediction.csv"
+    directory = os.path.dirname(csv_file)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+        with open(csv_file, 'w') as csvfile:
+            writer = csv.DictWriter(csvfile)
+            writer.writeheader()
+            writer.writerow(results)
+    else:
+        with open(csv_file, 'a') as csvfile:
+            writer = csv.DictWriter(csvfile)
+            writer.writerow(results)
 
 
 
@@ -180,7 +191,6 @@ def parse_pb(pb):
                     results[kk] = vvv.value[0].decode("utf-8")
                 else:
                     results[kk] = vvv.value[0]
-    print (results)
     return results
 
 
