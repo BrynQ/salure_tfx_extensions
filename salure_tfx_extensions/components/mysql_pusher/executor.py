@@ -74,12 +74,12 @@ class Executor(base_executor.BaseExecutor):
         #         split_uris.append((split, uri))
 
         with self._make_beam_pipeline() as pipeline:
-
             data = (pipeline
                     | 'ReadPredictionLogs' >> beam.io.ReadFromTFRecord(
                         predictions_uri,
                         coder=beam.coders.ProtoCoder(prediction_log_pb2.PredictionLog))
                     | 'ParsePredictionLogs' >> beam.Map(parse_predictlog))
+                    # | 'write file' >> beam.io.WriteToText(files_output))
                     # | 'Log PredictionLogs' >> beam.Map(absl.logging.info))
                     # | 'ParsePredictionLogs' >> beam.Map(protobuf_to_dict))
 
@@ -159,24 +159,27 @@ def parse_predictlog(pb):
 
     if predict_val is None:
         ValueError("Encountered response tensor with unknown value")
+
     example = pb.predict_log.request.inputs["examples"].string_val[0]
     example = tf.train.Example.FromString(example)
+
     results = parse_pb(example)
     results['score'] = predict_val
-    print (results)
-
-    csv_file = "prediction.csv"
-    directory = os.path.dirname(csv_file)
+    fieldnames = ['looncomponent_extern_nummer', 'medewerker_id', 'boekjaar', 'periode', 'werkgever_id', 'cao_code',
+                  'bedrag', 'type_medewerker', 'type_contract', 'hoofddienstverband', 'part_time_contract',
+                  'full_time_contract', 'trainee_time_contract', 'temp_contract', 'dagen_per_week', 'uren_per_week',
+                  'fte', 'fte_ma', 'fte_di', 'fte_wo', 'fte_do', 'fte_vr', 'new_rooster', 'expired_rooster', 'score']
+    base_dir = os.getcwd()
+    directory = _data_filepath = os.path.join(base_dir, "prediction.csv")
     if not os.path.exists(directory):
-        with open(csv_file, 'w') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=list(results.keys()))
+        with open(directory, 'w', newline='') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerow(results)
     else:
-        with open(csv_file, 'a') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=list(results.keys()))
+        with open(directory, 'a', newline='') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writerow(results)
-
 
 
 # protobuf_to_dict is from https://github.com/benhodgson/protobuf-to-dict
@@ -186,7 +189,9 @@ def parse_pb(pb):
     for f, v in pb.features.ListFields():
         for kk, vv in v.items():
             for kkk, vvv in vv.ListFields():
-                if type(vvv.value[0]) == bytes:
+                if len(vvv.value) == 0:
+                    results[kk] = ''
+                elif type(vvv.value[0]) == bytes:
                     results[kk] = vvv.value[0].decode("utf-8")
                 else:
                     results[kk] = vvv.value[0]
