@@ -30,10 +30,10 @@ setup(
         # 'tensorflow>=1.15.0',
         # 'beam-nuggets>=0.15.1,<0.16',
         'tensorflow==2.4.0',
-        'PyMySQL>=0.9.3,<0.10',
-        'scikit-learn>=0.23,<0.24',
-        'tensorflow-datasets>=3.0,<4.0',
+        # 'scikit-learn>=0.23,<0.24',
+        # 'tensorflow-datasets>=3.0,<4.0',
         'pandas>=0.25,<2',
+        'PyMySQL>=0.9.3,<0.10',
     ],
     zip_safe=False
 )
