@@ -48,7 +48,9 @@ pipelines:
 #          caches:
 #            - docker
           services:
-            - docker
+            docker:
+              memory: 2048
+#          size: 2x
           script:
             - export $(cat VERSION | xargs)
             - export IMAGE_NAME=salure/$DOCKER_IMAGE_NAME
