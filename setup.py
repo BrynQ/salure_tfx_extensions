@@ -34,7 +34,6 @@ setup(
         'scikit-learn>=0.23,<0.24',
         'tensorflow-datasets>=3.0,<4.0',
         'pandas>=0.25,<2',
-        # 'pandas-tfrecords>=0.1.4,<0.2',
     ],
     zip_safe=False
 )
