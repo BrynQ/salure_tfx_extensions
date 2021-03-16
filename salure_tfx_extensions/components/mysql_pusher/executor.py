@@ -51,7 +51,7 @@ class Executor(base_executor.BaseExecutor):
         # predictions_path = os.path.join(predictions.uri, _PREDICTION_LOGS_DIR_NAME)
         predictions_path = predictions.uri
         predictions_uri = io_utils.all_files_pattern(predictions_path)
-
+        print(f"Json format prediction results saved to {predictions_path}")
         # custom_fn = udf_utils.get_fn(exec_properties, 'custom_export_fn')
 
         # custom_fn = import_utils.import_func_from_source(exec_properties[_MODULE_FILE_KEY], CUSTOM_EXPORT_FN)
@@ -74,7 +74,7 @@ class Executor(base_executor.BaseExecutor):
         #         split_uris.append((split, uri))
 
         with self._make_beam_pipeline() as pipeline:
-            data = (pipeline
+            _ = (pipeline
                     | 'ReadPredictionLogs' >> beam.io.ReadFromTFRecord(
                         predictions_uri,
                         coder=beam.coders.ProtoCoder(prediction_log_pb2.PredictionLog))
@@ -170,21 +170,6 @@ def parse_predictlog(pb):
 
     results = parse_pb(example)
     results['score'] = predict_val
-    # fieldnames = ['looncomponent_extern_nummer', 'medewerker_id', 'boekjaar', 'periode', 'werkgever_id', 'cao_code',
-    #               'bedrag', 'type_medewerker', 'type_contract', 'hoofddienstverband', 'part_time_contract',
-    #               'full_time_contract', 'trainee_time_contract', 'temp_contract', 'dagen_per_week', 'uren_per_week',
-    #               'fte', 'fte_ma', 'fte_di', 'fte_wo', 'fte_do', 'fte_vr', 'new_rooster', 'expired_rooster', 'score']
-    # base_dir = os.getcwd()
-    # directory = _data_filepath = os.path.join(base_dir, "prediction.csv")
-    # if not os.path.exists(directory):
-    #     with open(directory, 'w', newline='') as csvfile:
-    #         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-    #         writer.writeheader()
-    #         writer.writerow(results)
-    # else:
-    #     with open(directory, 'a', newline='') as csvfile:
-    #         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-    #         writer.writerow(results)
     return results
 
 
