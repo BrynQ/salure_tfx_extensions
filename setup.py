@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 # IMPORTANT: ALSO UPDATE IN 'VERSION' FILE FOR CI DOCKER BUILD
 VERSION_MAJOR = '0'
 VERSION_MINOR = '0'
-VERSION_PATCH = '150'
+VERSION_PATCH = '151'
 
 
 with open('README.md') as f:
@@ -15,7 +15,7 @@ setup(
         VERSION_MAJOR,
         VERSION_MINOR,
         VERSION_PATCH),
-    python_requires='>=3.5',
+    python_requires='>=3.7',
     description='TFX components, helper functions and pipeline definition, developed by Salure',
     long_description=long_description,
     long_description_content_type='text/markdown',
