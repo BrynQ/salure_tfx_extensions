@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 # IMPORTANT: ALSO UPDATE IN 'VERSION' FILE FOR CI DOCKER BUILD
 VERSION_MAJOR = '0'
 VERSION_MINOR = '0'
-VERSION_PATCH = '151'
+VERSION_PATCH = '152'
 
 
 with open('README.md') as f:
@@ -28,8 +28,8 @@ setup(
         # 'tfx>={}'.format(version.TFX_VERSION),
         'beam-nuggets>=0.15.1,<0.16',
         # 'tensorflow-datasets>=3.0,<4.0',
-        'tfx>=0.27.0,<0.28.0',
-        'tensorflow==2.4.0',
+        'tfx>=0.22.0,<0.23.0',
+        # 'tensorflow==2.4.0',
         'pandas>=0.25,<2',
         'PyMySQL>=0.9.3,<0.10',
         'kfp>=0.4,<0.5',

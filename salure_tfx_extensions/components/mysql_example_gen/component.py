@@ -41,8 +41,7 @@ from tfx.proto import example_gen_pb2
 #     }
 
 
-# class MySQLExampleGen(component._QueryBasedExampleGen):
-class MySQLExampleGen(component.QueryBasedExampleGen):
+class MySQLExampleGen(component._QueryBasedExampleGen):
     # class MySQLExampleGen(BaseComponent):
 
     SPEC_CLASS = QueryBasedExampleGenSpec

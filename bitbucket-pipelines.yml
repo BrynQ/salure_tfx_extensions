@@ -49,7 +49,6 @@ pipelines:
 #            - docker
           services:
             - docker
-#          size: 2x
           script:
             - export $(cat VERSION | xargs)
             - export IMAGE_NAME=salure/$DOCKER_IMAGE_NAME
@@ -59,8 +58,3 @@ pipelines:
             - docker build -t $IMAGE_NAME_FULL .
             - docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
             - docker push $IMAGE_NAME_FULL
-
-definitions:
-  services:
-    docker:
-      memory: 2048
