@@ -19,11 +19,11 @@ from tfx.utils import import_utils
 from google.protobuf.message import Message
 from google.protobuf import json_format
 from google.protobuf.descriptor import FieldDescriptor
-import csv
 
 _TELEMETRY_DESCRIPTORS = ['MySQLPusher']
 CUSTOM_EXPORT_FN = 'custom_export_fn'
 _MODULE_FILE_KEY = 'module_file'
+_PREDICTION_LOGS_FILE_NAME = 'prediction_logs'
 
 
 class Executor(base_executor.BaseExecutor):
@@ -78,7 +78,12 @@ class Executor(base_executor.BaseExecutor):
                     | 'ReadPredictionLogs' >> beam.io.ReadFromTFRecord(
                         predictions_uri,
                         coder=beam.coders.ProtoCoder(prediction_log_pb2.PredictionLog))
-                    | 'ParsePredictionLogs' >> beam.Map(parse_predictlog))
+                    | 'ParsePredictionLogs' >> beam.Map(parse_predictlog)
+                    | 'WritePredictionLogs' >> beam.io.WriteToText(
+                        file_path_prefix=os.path.join(predictions_path, _PREDICTION_LOGS_FILE_NAME),
+                        num_shards=1,
+                        file_name_suffix=".json")
+                    )
                     # | 'write file' >> beam.io.WriteToText(files_output))
                     # | 'Log PredictionLogs' >> beam.Map(absl.logging.info))
                     # | 'ParsePredictionLogs' >> beam.Map(protobuf_to_dict))
@@ -165,21 +170,22 @@ def parse_predictlog(pb):
 
     results = parse_pb(example)
     results['score'] = predict_val
-    fieldnames = ['looncomponent_extern_nummer', 'medewerker_id', 'boekjaar', 'periode', 'werkgever_id', 'cao_code',
-                  'bedrag', 'type_medewerker', 'type_contract', 'hoofddienstverband', 'part_time_contract',
-                  'full_time_contract', 'trainee_time_contract', 'temp_contract', 'dagen_per_week', 'uren_per_week',
-                  'fte', 'fte_ma', 'fte_di', 'fte_wo', 'fte_do', 'fte_vr', 'new_rooster', 'expired_rooster', 'score']
-    base_dir = os.getcwd()
-    directory = _data_filepath = os.path.join(base_dir, "prediction.csv")
-    if not os.path.exists(directory):
-        with open(directory, 'w', newline='') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerow(results)
-    else:
-        with open(directory, 'a', newline='') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writerow(results)
+    # fieldnames = ['looncomponent_extern_nummer', 'medewerker_id', 'boekjaar', 'periode', 'werkgever_id', 'cao_code',
+    #               'bedrag', 'type_medewerker', 'type_contract', 'hoofddienstverband', 'part_time_contract',
+    #               'full_time_contract', 'trainee_time_contract', 'temp_contract', 'dagen_per_week', 'uren_per_week',
+    #               'fte', 'fte_ma', 'fte_di', 'fte_wo', 'fte_do', 'fte_vr', 'new_rooster', 'expired_rooster', 'score']
+    # base_dir = os.getcwd()
+    # directory = _data_filepath = os.path.join(base_dir, "prediction.csv")
+    # if not os.path.exists(directory):
+    #     with open(directory, 'w', newline='') as csvfile:
+    #         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    #         writer.writeheader()
+    #         writer.writerow(results)
+    # else:
+    #     with open(directory, 'a', newline='') as csvfile:
+    #         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    #         writer.writerow(results)
+    return results
 
 
 # protobuf_to_dict is from https://github.com/benhodgson/protobuf-to-dict
