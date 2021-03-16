@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 # IMPORTANT: ALSO UPDATE IN 'VERSION' FILE FOR CI DOCKER BUILD
 VERSION_MAJOR = '0'
 VERSION_MINOR = '0'
-VERSION_PATCH = '130'
+VERSION_PATCH = '150'
 
 
 with open('README.md') as f:
@@ -26,14 +26,13 @@ setup(
     package_data={'salure_tfx_extensions': ['proto/*.proto']},
     install_requires=[
         # 'tfx>={}'.format(version.TFX_VERSION),
-        'tfx>=0.27.0,<0.28.0',
-        # 'tensorflow>=1.15.0',
-        # 'beam-nuggets>=0.15.1,<0.16',
-        'tensorflow==2.4.0',
-        # 'scikit-learn>=0.23,<0.24',
+        'beam-nuggets>=0.15.1,<0.16',
         # 'tensorflow-datasets>=3.0,<4.0',
+        'tfx>=0.27.0,<0.28.0',
+        'tensorflow==2.4.0',
         'pandas>=0.25,<2',
         'PyMySQL>=0.9.3,<0.10',
+        'kfp>=0.4,<0.5',
     ],
     zip_safe=False
 )
