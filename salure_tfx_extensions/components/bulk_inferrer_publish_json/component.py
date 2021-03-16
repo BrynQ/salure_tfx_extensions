@@ -16,14 +16,14 @@
 from typing import Any, Dict, Optional, Text, Union
 
 from tfx import types
-from salure_tfx_extensions.components.bulk_inferrer import executor
+from salure_tfx_extensions.components.bulk_inferrer_publish_json import executor
 # from tfx.dsl.components.base import base_component
 # from tfx.dsl.components.base import executor_spec
 from tfx.components.base import base_component
 from tfx.components.base import executor_spec
 from tfx.proto import bulk_inferrer_pb2
 from tfx.types import standard_artifacts
-from salure_tfx_extensions.types.standard_component_specs import BulkInferrerSpec
+from tfx.types.standard_component_specs import BulkInferrerSpec
 
 
 class BulkInferrer(base_component.BaseComponent):

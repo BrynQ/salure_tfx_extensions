@@ -20,7 +20,7 @@ from absl import logging
 import apache_beam as beam
 import tensorflow as tf
 from tfx import types
-from tfx.components.bulk_inferrer import prediction_to_example_utils
+from salure_tfx_extensions.components.bulk_inferrer_publish_json import prediction_to_example_utils
 from tfx.components.util import model_utils
 from tfx.components.util import tfxio_utils
 from tfx.dsl.components.base import base_executor
@@ -251,7 +251,7 @@ class Executor(base_executor.BaseExecutor):
             | 'WritePredictionLogs' >> beam.io.WriteToText(
                     file_path_prefix=os.path.join(inference_result.uri, _PREDICTION_LOGS_FILE_NAME),
                     num_shards=1,
-                    file_name_suffix=".json"))
+                    file_name_suffix=".json")
         )
 
     if output_examples:
