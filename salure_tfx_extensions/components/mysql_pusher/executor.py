@@ -14,7 +14,7 @@ from tfx.utils import io_utils
 from tfx.utils import path_utils
 # from tfx_bsl.tfxio import tf_example_record
 from tfx_bsl.tfxio import tf_example_record
-from tfx.components.bulk_inferrer.executor import _PREDICTION_LOGS_DIR_NAME
+# from tfx.components.bulk_inferrer.executor import _PREDICTION_LOGS_FILE_NAME
 from tfx.utils import import_utils
 from google.protobuf.message import Message
 from google.protobuf import json_format
@@ -48,7 +48,7 @@ class Executor(base_executor.BaseExecutor):
         self._log_startup(input_dict, output_dict, exec_properties)
 
         predictions = artifact_utils.get_single_instance(input_dict['inference_result'])
-        # predictions_path = os.path.join(predictions.uri, _PREDICTION_LOGS_DIR_NAME)
+        # predictions_path = os.path.join(predictions.uri, _PREDICTION_LOGS_FILE_NAME)
         predictions_path = predictions.uri
         predictions_uri = io_utils.all_files_pattern(predictions_path)
         print(f"Json format prediction results saved to {predictions_path}")
