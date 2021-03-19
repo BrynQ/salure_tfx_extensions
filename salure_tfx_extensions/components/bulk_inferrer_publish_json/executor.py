@@ -23,7 +23,7 @@ from tfx import types
 from salure_tfx_extensions.components.bulk_inferrer_publish_json import prediction_to_example_utils
 from tfx.components.util import model_utils
 from tfx.components.util import tfxio_utils
-from tfx.dsl.components.base import base_executor
+from tfx.components.base import base_executor
 from tfx.proto import bulk_inferrer_pb2
 from tfx.proto import example_gen_pb2
 from tfx.types import artifact_utils
