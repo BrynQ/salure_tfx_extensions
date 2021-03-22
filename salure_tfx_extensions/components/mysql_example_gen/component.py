@@ -9,7 +9,8 @@ from salure_tfx_extensions.proto import mysql_config_pb2
 
 from tfx.components.example_gen import component
 from tfx.components.example_gen import utils
-from tfx.components.base import executor_spec
+# from tfx.components.base import executor_spec # THis is only for tfx 0.22.0, in tfx>0.27.0 use tfx.dsl.components.base
+from tfx.dsl.components.base import executor_spec
 import tfx.types as types
 from tfx.types import standard_artifacts
 from tfx.types.component_spec import ExecutionParameter, ChannelParameter
