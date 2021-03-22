@@ -145,6 +145,8 @@ class Executor(base_executor.BaseExecutor):
           exec_properties[standard_component_specs.OUTPUT_EXAMPLE_SPEC_KEY],
           output_example_spec)
 
+    print(output_example_spec)
+
     self._run_model_inference(
         data_spec, output_example_spec,
         input_dict[standard_component_specs.EXAMPLES_KEY], output_examples,
@@ -240,14 +242,19 @@ class Executor(base_executor.BaseExecutor):
         data_list.append(data)
 
       if inference_result:
-        _ = (
+        data = (
             data_list
             | 'FlattenInferenceResult' >> beam.Flatten(pipeline=pipeline)
             # | 'WritePredictionLogs' >> beam.io.WriteToTFRecord(
             #     os.path.join(inference_result.uri, _PREDICTION_LOGS_FILE_NAME),
             #     file_name_suffix='.gz',
             #     coder=beam.coders.ProtoCoder(prediction_log_pb2.PredictionLog))
-            | 'ParsePredictionLogs' >> beam.Map(parse_predictlog)
+            | 'ParsePredictionLogs' >> beam.Map(parse_predictlog))
+
+        _ = (data
+             | 'Log json rows' >> beam.Map(logging.info))
+
+        _ = (data
             | 'WritePredictionLogs' >> beam.io.WriteToText(
                     file_path_prefix=os.path.join(inference_result.uri, _PREDICTION_LOGS_FILE_NAME),
                     num_shards=1,
