@@ -202,7 +202,7 @@ class _WriteMySQLDoFn(beam.DoFn):
             ]
         )
 
-        query = f"INSERT INTO {self._config['database']}.{self._table}({column_str}) VALUES({value_str});"
+        query = f"INSERT INTO {self.mysql_config['database']}.{self.table_name}({column_str}) VALUES({value_str});"
 
         self._queries.append(query)
 
