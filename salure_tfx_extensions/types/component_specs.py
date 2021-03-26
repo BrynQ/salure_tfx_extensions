@@ -8,6 +8,7 @@ from tfx.types import standard_artifacts
 from tfx.types.artifact import Artifact
 from salure_tfx_extensions.types import standard_artifacts as stfxe_artifacts
 from tfx.proto import example_gen_pb2
+from salure_tfx_extensions.proto import mysql_config_pb2
 
 
 class BaseSpec(ComponentSpec):
@@ -30,7 +31,7 @@ class MySQLPusherSpec(ComponentSpec):
 
     PARAMETERS = {
         # 'module_file': ExecutionParameter(type=(bytes, Text)),
-        'connection_config': ExecutionParameter(type=(bytes, Text))
+        'connection_config': ExecutionParameter(type=mysql_config_pb2.MySQLConnConfig)
     }
 
     INPUTS = {
