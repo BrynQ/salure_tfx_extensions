@@ -83,8 +83,8 @@ class Executor(base_executor.BaseExecutor):
                         coder=beam.coders.ProtoCoder(prediction_log_pb2.PredictionLog))
                     | 'ParsePredictionLogs' >> beam.Map(parse_predictlog))
 
-            _ = (data
-                    | 'Log Parsing results' >> beam.Map(absl.logging.info))
+            # _ = (data
+            #         | 'Log Parsing results' >> beam.Map(absl.logging.info))
 
 
             _ = (data
@@ -202,7 +202,7 @@ class _WriteMySQLDoFn(beam.DoFn):
             ]
         )
 
-        query = f"INSERT INTO {self.mysql_config['database']}.{self.table_name}({column_str}) VALUES({value_str});"
+        query = f"INSERT INTO {self.mysql_config['database']}.{self.table_name} ({column_str}) VALUES({value_str});"
 
         self._queries.append(query)
 
@@ -212,6 +212,8 @@ class _WriteMySQLDoFn(beam.DoFn):
             cursor = client.cursor()
 
             final_query = "\n".join(self._queries)
+
+            absl.logging.info(final_query)
 
             cursor.execute(final_query)
             self._queries.clear()
