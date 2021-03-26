@@ -74,11 +74,16 @@ class Executor(base_executor.BaseExecutor):
         #         split_uris.append((split, uri))
 
         with self._make_beam_pipeline() as pipeline:
-            _ = (pipeline
+            data = (pipeline
                     | 'ReadPredictionLogs' >> beam.io.ReadFromTFRecord(
                         predictions_uri,
                         coder=beam.coders.ProtoCoder(prediction_log_pb2.PredictionLog))
-                    | 'ParsePredictionLogs' >> beam.Map(parse_predictlog)
+                    | 'ParsePredictionLogs' >> beam.Map(parse_predictlog))
+
+            _ = (data
+                    | 'Log Parsing results' >> beam.Map(absl.logging.info))
+
+            _ = (data
                     | 'WritePredictionLogs' >> beam.io.WriteToText(
                         file_path_prefix=os.path.join(predictions_path, _PREDICTION_LOGS_FILE_NAME),
                         num_shards=1,
