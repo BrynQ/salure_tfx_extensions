@@ -29,7 +29,8 @@ class MySQLPusherSpec(ComponentSpec):
     """Salure_tfx_extensions MySQLPusher spec"""
 
     PARAMETERS = {
-        'module_file': ExecutionParameter(type=(bytes, Text)),
+        # 'module_file': ExecutionParameter(type=(bytes, Text)),
+        'connection_config': ExecutionParameter(type=(bytes, Text))
     }
 
     INPUTS = {

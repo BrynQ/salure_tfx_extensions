@@ -4,10 +4,13 @@ import os
 import absl
 import apache_beam as beam
 import tensorflow as tf
-from typing import Any, Dict, List, Text
+import pymysql
+from typing import Any, Dict, List, Text, Optional
 from tfx import types
 from tfx.components.base import base_executor
 from tfx.types import artifact_utils
+from tfx.proto import example_gen_pb2
+from salure_tfx_extensions.proto import mysql_config_pb2
 from tensorflow_serving.apis import prediction_log_pb2
 from tfx.components.util import udf_utils
 from tfx.utils import io_utils
@@ -83,6 +86,10 @@ class Executor(base_executor.BaseExecutor):
             _ = (data
                     | 'Log Parsing results' >> beam.Map(absl.logging.info))
 
+
+            _ = (data
+                    | 'Write To MySQL db' >> _ExampleToMySQL(exec_properties))
+
             _ = (data
                     | 'WritePredictionLogs' >> beam.io.WriteToText(
                         file_path_prefix=os.path.join(predictions_path, _PREDICTION_LOGS_FILE_NAME),
@@ -144,6 +151,75 @@ class Executor(base_executor.BaseExecutor):
 #             | 'Write' >> beam.io.WriteToTFRecord(
 #                 os.path.join(output_split_path, DEFAULT_FILE_NAME),
 #                 file_name_suffix='.gz'))
+
+@beam.ptransform_fn
+@beam.typehints.with_input_types(beam.Pipeline)
+def _ExampleToMySQL(
+        pipeline: beam.Pipeline,
+        exec_properties: Dict[Text, any],
+        table_name: Optional[Text] = 'ml_test'):
+    # conn_config = example_gen_pb2.CustomConfig()
+    # json_format.Parse(exec_properties['custom_config'], conn_config)
+
+    mysql_config = mysql_config_pb2.MySQLConnConfig()
+    json_format.Parse(exec_properties['connection_config'], mysql_config)
+    # conn_config.custom_config.Unpack(mysql_config)
+
+    return (pipeline
+            | 'WriteMySQLDoFN' >> beam.ParDo(_WriteMySQLDoFn(mysql_config, table_name)))
+
+
+class _WriteMySQLDoFn(beam.DoFn):
+    """Inspired by:
+    https://github.com/esakik/beam-mysql-connector/blob/master/beam_mysql/connector/io.py"""
+
+    def __init__(
+            self,
+            mysql_config: mysql_config_pb2.MySQLConnConfig,
+            table_name
+    ):
+        super(_WriteMySQLDoFn, self).__init__()
+
+        self.mysql_config = json_format.MessageToDict(mysql_config)
+        self.table_name = table_name
+
+    def start_bundle(self):
+        self._queries = []
+
+    def process(self, element, *args, **kwargs):
+        columns = []
+        values = []
+
+        for column, value in element.items():
+            columns.append(column)
+            values.append(value)
+
+        column_str = ", ".join(columns)
+        value_str = ", ".join(
+            [
+                f"{'NULL' if value is None else value}" if isinstance(value, (type(None), int, float)) else f"'{value}'"
+                for value in values
+            ]
+        )
+
+        query = f"INSERT INTO {self._config['database']}.{self._table}({column_str}) VALUES({value_str});"
+
+        self._queries.append(query)
+
+    def finish_bundle(self):
+        if len(self._queries):
+            client = pymysql.connect(**self.mysql_config)
+            cursor = client.cursor()
+
+            final_query = "\n".join(self._queries)
+
+            cursor.execute(final_query)
+            self._queries.clear()
+
+            cursor.close()
+            client.close()
+
+
 
 def parse_predictlog(pb):
     predict_val = None

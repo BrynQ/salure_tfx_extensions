@@ -23,7 +23,8 @@ class MySQLPusher(base_component.BaseComponent):
 
     def __init__(self,
                  inference_result: types.Channel,
-                 module_file: str,
+                 # module_file: str,
+                 connection_config,
                  instance_name: Optional[Text] = None):
         """
         This code gets run, when you define the component in the pipeline definition
@@ -32,7 +33,8 @@ class MySQLPusher(base_component.BaseComponent):
 
         spec = MySQLPusherSpec(
             inference_result=inference_result,
-            module_file=module_file
+            connection_config=connection_config,
+            # module_file=module_file
         )
 
         super(MySQLPusher, self).__init__(spec=spec, instance_name=instance_name)
