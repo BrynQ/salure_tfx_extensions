@@ -206,25 +206,21 @@ class _WriteMySQLDoFn(beam.DoFn):
 
         self._column_str = "(" + ", ".join(columns) + ")"
 
-    #         query = f"INSERT INTO {self.mysql_config['database']}.{self.table_name} ({column_str}) VALUES ({value_str});"
-    #         self._queries.append(query)
-
     def finish_bundle(self):
         if len(self._values):
-            #             print (self._values)
             client = pymysql.connect(**self.mysql_config)
             cursor = client.cursor()
 
             value_str = ", ".join(self._values)
             query = f"INSERT INTO {self.mysql_config['database']}.{self.table_name} {self._column_str} VALUES {value_str};"
 
-            #             final_query = "\n".join(self._queries)
-            absl.logging.info(query)
             cursor.execute(query)
             self._values.clear()
             self._column_str = ""
+            client.commit()
             cursor.close()
             client.close()
+
 
 def parse_predictlog(pb):
     predict_val = None
