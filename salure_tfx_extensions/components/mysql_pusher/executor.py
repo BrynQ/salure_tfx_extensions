@@ -1,5 +1,6 @@
 """MySQLPusher executor, will push the provided inference result to the database"""
 
+from collections import OrderedDict
 import os
 import absl
 import apache_beam as beam
@@ -184,7 +185,8 @@ class _WriteMySQLDoFn(beam.DoFn):
         self.table_name = table_name
 
     def start_bundle(self):
-        self._queries = []
+        self._column_str = []
+        self._values = []
 
     def process(self, element, *args, **kwargs):
         columns = []
@@ -194,34 +196,35 @@ class _WriteMySQLDoFn(beam.DoFn):
             columns.append(column)
             values.append(value)
 
-        column_str = ", ".join(columns)
         value_str = ", ".join(
             [
                 f"{'NULL' if value is None else value}" if isinstance(value, (type(None), int, float)) else f"'{value}'"
                 for value in values
             ]
         )
+        self._values.append("(" + value_str + ")")
 
-        query = f"INSERT INTO {self.mysql_config['database']}.{self.table_name} ({column_str}) VALUES ({value_str});"
+        self._column_str = "(" + ", ".join(columns) + ")"
 
-        self._queries.append(query)
+    #         query = f"INSERT INTO {self.mysql_config['database']}.{self.table_name} ({column_str}) VALUES ({value_str});"
+    #         self._queries.append(query)
 
     def finish_bundle(self):
-        if len(self._queries):
+        if len(self._values):
+            #             print (self._values)
             client = pymysql.connect(**self.mysql_config)
             cursor = client.cursor()
 
-            final_query = "\n".join(self._queries)
+            value_str = ", ".join(self._values)
+            query = f"INSERT INTO {self.mysql_config['database']}.{self.table_name} {self._column_str} VALUES {value_str};"
 
-            absl.logging.info(final_query)
-
-            cursor.execute(final_query)
-            self._queries.clear()
-
+            #             final_query = "\n".join(self._queries)
+            absl.logging.info(query)
+            cursor.execute(query)
+            self._values.clear()
+            self._column_str = ""
             cursor.close()
             client.close()
-
-
 
 def parse_predictlog(pb):
     predict_val = None
@@ -253,7 +256,8 @@ def parse_predictlog(pb):
 
     results = parse_pb(example)
     results['score'] = predict_val
-    return results
+
+    return OrderedDict(sorted(results.items(), key=lambda t: t[0]))
 
 
 # protobuf_to_dict is from https://github.com/benhodgson/protobuf-to-dict
