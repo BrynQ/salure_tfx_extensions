@@ -104,7 +104,8 @@ class _ReadMySQLDoFn(beam.DoFn):
                         a[col_name] = field
                     # TODO: this not the right output (most likely, since examples arriving at transform are empty)
                     # TODO: change output to column_name -> value dict
-                    # print(a)
+                    print("output of yield of _ReadMySQLDoFn:")
+                    print(a)
                     yield a
             # except:
             #     raise
