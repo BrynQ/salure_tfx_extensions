@@ -118,7 +118,7 @@ class _ReadMySQLDoFn(beam.DoFn):
 @beam.typehints.with_output_types(tf.train.Example)
 def _MySQLToExample(
         pipeline: beam.Pipeline,
-        input_dict: Dict[Text, List[types.Artifact]],
+        # input_dict: Dict[Text, List[types.Artifact]],
         exec_properties: Dict[Text, any],
         split_pattern: Text) -> beam.pvalue.PCollection:
     conn_config = example_gen_pb2.CustomConfig()
