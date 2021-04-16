@@ -32,7 +32,7 @@ pipelines:
             - export IMAGE_NAME=salure/$DOCKER_IMAGE_NAME
             - export IMAGE_NAME_FULL=$IMAGE_NAME:$VERSION_MAJOR.$VERSION_MINOR.$VERSION_HOTFIX
             - export IMAGE_NAME_MINOR=$IMAGE_NAME:$VERSION_MAJOR.$VERSION_MINOR
-            - printf "FROM tensorflow/tfx:$TFX_VERSION\nRUN pip install scikit-learn==$SKLEARN_VERSION\nCOPY . /salure_tfx_extensions\nRUN pip install salure-preprocessors\nRUN pip install /salure_tfx_extensions" > Dockerfile
+            - printf "FROM tensorflow/tfx:$TFX_VERSION\nRUN pip install scikit-learn==$SKLEARN_VERSION\nCOPY . /salure_tfx_extensions\nRUN pip install salure-preprocessors\nRUN pip install /salure_tfx_extensions\nENTRYPOINT [\"/opt/apache/beam/boot\", \"--no_pipeline_type_check\"]" > Dockerfile
             - docker build -t $IMAGE_NAME_FULL .
             - docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
             - docker tag $IMAGE_NAME_FULL $IMAGE_NAME_MINOR
@@ -54,7 +54,7 @@ pipelines:
             - export IMAGE_NAME=salure/$DOCKER_IMAGE_NAME
             - export IMAGE_NAME_FULL=$IMAGE_NAME:$VERSION_MAJOR.$VERSION_MINOR.$VERSION_HOTFIX
             - export IMAGE_NAME_MINOR=$IMAGE_NAME:$VERSION_MAJOR.$VERSION_MINOR
-            - printf "FROM tensorflow/tfx:$TFX_VERSION\nRUN pip install scikit-learn==$SKLEARN_VERSION\nCOPY . /salure_tfx_extensions\nRUN pip install salure-preprocessors\nRUN pip install /salure_tfx_extensions" > Dockerfile
+            - printf "FROM tensorflow/tfx:$TFX_VERSION\nRUN pip install scikit-learn==$SKLEARN_VERSION\nCOPY . /salure_tfx_extensions\nRUN pip install salure-preprocessors\nRUN pip install /salure_tfx_extensions\nENTRYPOINT [\"/opt/apache/beam/boot\", \"--no_pipeline_type_check\"]" > Dockerfile
             - docker build -t $IMAGE_NAME_FULL .
             - docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
             - docker push $IMAGE_NAME_FULL
