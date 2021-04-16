@@ -74,8 +74,8 @@ def _deserialize_conn_config(conn_config: mysql_config_pb2.MySQLConnConfig) -> p
 #     return tf.train.Example(features=tf.train.Features(feature=feature))
 
 
-@beam.typehints.with_input_types(Text)
-@beam.typehints.with_output_types(beam.typehints.Iterable[Dict[Text, Any]])
+# @beam.typehints.with_input_types(Text)
+# @beam.typehints.with_output_types(beam.typehints.Iterable[Dict[Text, Any]])
 class _ReadMySQLDoFn(beam.DoFn):
 
     def __init__(self,
