@@ -106,7 +106,7 @@ class _ReadMySQLDoFn(beam.DoFn):
                     # TODO: change output to column_name -> value dict
                     print("output of yield of _ReadMySQLDoFn:")
                     print(a)
-                    yield a
+                    yield [a]
             # except:
             #     raise
             finally:
