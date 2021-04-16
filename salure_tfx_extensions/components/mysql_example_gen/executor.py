@@ -14,10 +14,48 @@ from tfx import types
 from tfx.components.example_gen import base_example_gen_executor
 from tfx.proto import example_gen_pb2
 from salure_tfx_extensions.proto import mysql_config_pb2
-from tfx.components.example_gen.utils import dict_to_example
+# from tfx.components.example_gen.utils import dict_to_example
 # from beam_nuggets.io import relational_db
 
 _DEFAULT_ENCODING = 'utf-8'
+
+
+def dict_to_example(instance) -> tf.train.Example:
+    """Converts dict to tf example."""
+    feature = {}
+    for key, value in instance.items():
+        # TODO(jyzhao): support more types.
+        if value is None:
+            feature[key] = tf.train.Feature()
+        elif isinstance(value, six.integer_types):
+            feature[key] = tf.train.Feature(
+                int64_list=tf.train.Int64List(value=[value]))
+        elif isinstance(value, float):
+            feature[key] = tf.train.Feature(
+                float_list=tf.train.FloatList(value=[value]))
+        elif isinstance(value, six.text_type) or isinstance(value, str):
+            feature[key] = tf.train.Feature(
+                bytes_list=tf.train.BytesList(
+                    value=[value.encode(_DEFAULT_ENCODING)]))
+        elif isinstance(value, list):
+            if not value:
+                feature[key] = tf.train.Feature()
+            elif isinstance(value[0], six.integer_types):
+                feature[key] = tf.train.Feature(
+                    int64_list=tf.train.Int64List(value=value))
+            elif isinstance(value[0], float):
+                feature[key] = tf.train.Feature(
+                    float_list=tf.train.FloatList(value=value))
+            elif isinstance(value[0], six.text_type) or isinstance(value[0], str):
+                feature[key] = tf.train.Feature(
+                    bytes_list=tf.train.BytesList(
+                        value=[v.encode(_DEFAULT_ENCODING) for v in value]))
+            else:
+                raise RuntimeError('Column type `list of {}` is not supported.'.format(
+                    type(value[0])))
+        else:
+            raise RuntimeError('Column type {} is not supported.'.format(type(value)))
+    return tf.train.Example(features=tf.train.Features(feature=feature))
 
 
 def _deserialize_conn_config(conn_config: mysql_config_pb2.MySQLConnConfig) -> pymysql.Connection:
@@ -83,7 +121,7 @@ class _ReadMySQLDoFn(beam.DoFn):
         super(_ReadMySQLDoFn, self).__init__()
         self.mysql_config = json_format.MessageToDict(mysql_config)
 
-    def process(self, query: Text) -> Dict[Text, Any]:
+    def process(self, query: Text):
         client = pymysql.connect(**self.mysql_config)
         cursor = client.cursor()
         cursor.execute(query)
