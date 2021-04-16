@@ -6,5 +6,3 @@ RUN pip install tensorflow==2.3.0
 
 COPY . /salure_tfx_extensions
 RUN pip install /salure_tfx_extensions
-
-ENTRYPOINT ["/opt/apache/beam/boot", "--no_pipeline_type_check"]
