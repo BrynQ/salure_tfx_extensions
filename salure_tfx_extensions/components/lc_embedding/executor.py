@@ -91,8 +91,9 @@ class Executor(base_executor.BaseExecutor):
         train_output_examples_uri = os.path.join(artifact_utils.get_single_uri(output_dict['output_data']), 'train')
         eval_output_examples_uri = os.path.join(artifact_utils.get_single_uri(output_dict['output_data']), 'eval')
 
+        mapping_file = os.path.join(mapping_uri, 'grouping_strategy.csv')
         with self._make_beam_pipeline() as pipeline:
-            mapping_table = pipeline | beam.io.ReadFromText(mapping_uri + '\grouping_strategy.csv')
+            mapping_table = pipeline | beam.io.ReadFromText(mapping_file)
             train_data = (
                     pipeline
                     | 'ReadData' >> beam.io.ReadFromTFRecord(file_pattern=io_utils.all_files_pattern(input_examples_uri))
@@ -104,7 +105,7 @@ class Executor(base_executor.BaseExecutor):
                     )
 
         with self._make_beam_pipeline() as pipeline:
-            mapping_table = pipeline | beam.io.ReadFromText(mapping_uri + '\grouping_strategy.csv')
+            mapping_table = pipeline | beam.io.ReadFromText(mapping_file)
             eval_data = (
                     pipeline
                     | 'ReadData' >> beam.io.ReadFromTFRecord(file_pattern=io_utils.all_files_pattern(eval_input_examples_uri))
