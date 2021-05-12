@@ -23,7 +23,7 @@ class LCEmbedding(base_component.BaseComponent):
 
         if not output_data:
             examples_artifact = standard_artifacts.Examples()
-            examples_artifact.split_names = input_data.get()[0].split_names
+            # examples_artifact.split_names = input_data.get()[0].split_names
             output_data = channel_utils.as_channel([examples_artifact])
 
         spec = LCEmbeddingSpec(input_data=input_data,
