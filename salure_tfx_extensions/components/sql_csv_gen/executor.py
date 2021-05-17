@@ -15,6 +15,7 @@ from tfx.dsl.components.base import base_executor
 from tfx.proto import example_gen_pb2
 from tfx.types import artifact_utils
 from tfx.utils import proto_utils
+from io import StringIO
 
 _DEFAULT_ENCODING = 'utf-8'
 
