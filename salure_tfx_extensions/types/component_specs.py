@@ -42,6 +42,23 @@ class LCEmbeddingSpec(ComponentSpec):
         'output_data': ChannelParameter(type=standard_artifacts.Examples),
     }
 
+class CSVEmbeddingSpec(ComponentSpec):
+    """ComponentSpec for Custom TFX Hello World Component."""
+
+    PARAMETERS = {
+      # These are parameters that will be passed in the call to create an instance of this component.
+        'name': ExecutionParameter(type=Text)
+    }
+    INPUTS = {
+        # This will be a dictionary with input artifacts, including URIs
+        'input_data': ChannelParameter(type=standard_artifacts.Examples),
+        'mapping_data': ChannelParameter(type=standard_artifacts.Examples)
+    }
+    OUTPUTS = {
+        # This will be a dictionary which this component will populate
+        'output_data': ChannelParameter(type=standard_artifacts.Examples),
+    }
+
 class MySQLPusherSpec(ComponentSpec):
     """Salure_tfx_extensions MySQLPusher spec"""
 
