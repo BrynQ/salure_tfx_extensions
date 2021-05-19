@@ -3,7 +3,7 @@
 from salure_tfx_extensions.components.sql_csv_gen import executor
 from salure_tfx_extensions.proto import mysql_config_pb2
 from typing import Optional, Text
-from tfx.types import Artifact, Channel
+from tfx.types import Channel
 from tfx.types.standard_component_specs import QueryBasedExampleGenSpec
 from tfx.components.example_gen import component
 from tfx.components.example_gen import utils

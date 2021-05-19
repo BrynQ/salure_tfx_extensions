@@ -1,52 +1,19 @@
 """Salure TFX MySQLExampleGen Component"""
 
 from typing import Optional, Text
-from tfx.types import Artifact, Channel
+from tfx.types import Channel
 from tfx.types.standard_component_specs import QueryBasedExampleGenSpec
-
+from tfx.components.example_gen import component
+from tfx.components.example_gen import utils
+from tfx.dsl.components.base import executor_spec
+from tfx.proto import example_gen_pb2
 from salure_tfx_extensions.components.mysql_example_gen import executor
 from salure_tfx_extensions.proto import mysql_config_pb2
 
-from tfx.components.example_gen import component
-from tfx.components.example_gen import utils
-# from tfx.components.base import executor_spec # THis is only for tfx 0.22.0, in tfx>0.27.0 use tfx.dsl.components.base
-from tfx.dsl.components.base import executor_spec
-import tfx.types as types
-from tfx.types import standard_artifacts
-from tfx.types.component_spec import ExecutionParameter, ChannelParameter
-from tfx.components.base.base_component import BaseComponent
-from tfx.proto import example_gen_pb2
-
-
-# class MySQLExampleGenSpec(types.ComponentSpec):
-#     """ComponentSpec for the MySQLExampleGen Component"""
-#
-#     PARAMETERS = {
-#         'conn_config':
-#             ExecutionParameter(type=mysql_config_pb2.MySQLConnConfig),
-#         'query':
-#             ExecutionParameter(type=Text),
-#         'input_config':
-#             ExecutionParameter(type=example_gen_pb2.Input, optional=True),
-#         'output_config':
-#             ExecutionParameter(type=example_gen_pb2.Output, optional=True),
-#         'custom_config':
-#             ExecutionParameter(type=example_gen_pb2.CustomConfig, optional=True),
-#         'instance_name':
-#             ExecutionParameter(type=Text, optional=True),
-#     }
-#     INPUTS = {}
-#     OUTPUTS = {
-#         'examples':
-#             ChannelParameter(type=standard_artifacts.Examples),
-#     }
-
 
 class MySQLExampleGen(component.QueryBasedExampleGen):
-    # class MySQLExampleGen(BaseComponent):
 
     SPEC_CLASS = QueryBasedExampleGenSpec
-    # SPEC_CLASS = MySQLExampleGenSpec
     EXECUTOR_SPEC = executor_spec.ExecutorClassSpec(executor.Executor)
 
     def __init__(self,
@@ -82,24 +49,11 @@ class MySQLExampleGen(component.QueryBasedExampleGen):
             raise ValueError('Required host field in connection config should be set.')
 
         input_config = input_config or utils.make_default_input_config(query)
-
         custom_config = example_gen_pb2.CustomConfig()
         custom_config.custom_config.Pack(conn_config)
-
-        output_config = output_config or utils.make_default_output_config(
-            input_config)
-
-        # spec = MySQLExampleGenSpec(
-        #     conn_config=conn_config,
-        #     query=query,
-        #     input_config=input_config,
-        #     output_config=output_config,
-        #     custom_config=custom_config,
-        #     instance_name=instance_name
-        # )
+        output_config = output_config or utils.make_default_output_config(input_config)
 
         super(MySQLExampleGen, self).__init__(
-            # spec=spec,
             input_config=input_config,
             output_config=output_config,
             custom_config=custom_config,

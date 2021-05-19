@@ -163,9 +163,6 @@ def parse_predictlog(pb):
 
     return OrderedDict(sorted(results.items(), key=lambda t: t[0]))
 
-
-# protobuf_to_dict is from https://github.com/benhodgson/protobuf-to-dict
-
 def parse_pb(pb):
     results = {}
     for f, v in pb.features.ListFields():

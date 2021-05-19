@@ -1,4 +1,4 @@
-"""Salure TFX LC Embedding Component"""
+"""Custom LC Embedding Component"""
 
 from tfx import types
 from tfx.types import standard_artifacts, channel_utils
@@ -7,9 +7,10 @@ from typing import Optional, Text
 from salure_tfx_extensions.components.lc_embedding import executor
 from salure_tfx_extensions.types.component_specs import LCEmbeddingSpec
 
+
 class LCEmbedding(base_component.BaseComponent):
     """
-    Embedding for the LC with a mapping file
+    Embedding the input data with an LC mapping file in csv format
     """
 
     SPEC_CLASS = LCEmbeddingSpec
@@ -23,7 +24,6 @@ class LCEmbedding(base_component.BaseComponent):
 
         if not output_data:
             examples_artifact = standard_artifacts.Examples()
-            # examples_artifact.split_names = input_data.get()[0].split_names
             output_data = channel_utils.as_channel([examples_artifact])
 
         spec = LCEmbeddingSpec(input_data=input_data,

@@ -1,13 +1,12 @@
-"""Standard Component specs for the salure_tfx_extensions library"""
+"""Custom TFX Component specs for the salure_tfx_extensions library"""
 
 from typing import Text
-
 from tfx.types import ComponentSpec
 from tfx.types.component_spec import ChannelParameter, ExecutionParameter
 from tfx.types import standard_artifacts
 from tfx.types.artifact import Artifact
-from salure_tfx_extensions.types import standard_artifacts as stfxe_artifacts
 from tfx.proto import example_gen_pb2
+from salure_tfx_extensions.types import standard_artifacts as stfxe_artifacts
 from salure_tfx_extensions.proto import mysql_config_pb2
 
 
