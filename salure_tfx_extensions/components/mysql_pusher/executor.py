@@ -101,8 +101,14 @@ class _WriteMySQLDoFn(beam.DoFn):
         values = []
 
         for column, value in element.items():
-            columns.append(column)
-            values.append(value)
+            if column in ['periode', 'temp_contract', 'new_rooster', 'cao_code', 'hoofddienstverband', 'medewerker_id',
+                          'fte_wo', 'part_time_contract', 'fte_vr', 'fte_di', 'looncomponent_extern_nummer', 'fte',
+                          'type_contract', 'dagen_per_week', 'fte_do', 'fte_ma', 'werkgever_id', 'type_medewerker',
+                          'boekjaar', 'expired_rooster', 'bedrag', 'trainee_time_contract', 'uren_per_week',
+                          'full_time_contract', 'score']:
+            #TODO: Change this when new sql table is created for the inference results
+                columns.append(column)
+                values.append(value)
 
         value_str = ", ".join(
             [
