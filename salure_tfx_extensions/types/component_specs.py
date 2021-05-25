@@ -29,7 +29,7 @@ class LCEmbeddingSpec(ComponentSpec):
 
     PARAMETERS = {
       # These are parameters that will be passed in the call to create an instance of this component.
-        'name': ExecutionParameter(type=Text),
+      #   'name': ExecutionParameter(type=Text),
         'mapping_file_path':ExecutionParameter(type=(str, Text))
     }
     INPUTS = {
@@ -46,7 +46,7 @@ class CSVEmbeddingSpec(ComponentSpec):
 
     PARAMETERS = {
       # These are parameters that will be passed in the call to create an instance of this component.
-        'name': ExecutionParameter(type=Text)
+      #   'name': ExecutionParameter(type=Text)
     }
     INPUTS = {
         # This will be a dictionary with input artifacts, including URIs
