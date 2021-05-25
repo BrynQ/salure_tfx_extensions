@@ -41,7 +41,7 @@ def wcmapping(input_data, mapping_table):
     fieldnames = mapping_table[0].split(',')
     dict_tmp = {}
     dict_tmp_field = ['hours_days_km', 'costs', 'is_fixed', 'is_variable', 'declaration', 'allowance', 'travel_related',
-                      'company_car', 'overtime', 'leave', 'health', 'insurance', 'pension', 'overig']
+                      'company_car', 'overtime', 'leaves', 'health', 'insurance', 'pension', 'overig']
     data = tf.io.parse_single_example(input_data, feature_description)
     idx = fieldnames.index(key)
     lc_number = data[key].numpy()
