@@ -41,6 +41,22 @@ class LCEmbeddingSpec(ComponentSpec):
         'output_data': ChannelParameter(type=standard_artifacts.Examples),
     }
 
+class CopyFileSpec(types.ComponentSpec):
+    """ComponentSpec for Custom TFX Hello World Component."""
+
+    PARAMETERS = {
+      # These are parameters that will be passed in the call to create an instance of this component.
+#         'name': ExecutionParameter(type=Text),
+        'input_path':ExecutionParameter(type=(str, Text)),
+        'output_path':ExecutionParameter(type=(str, Text))
+    }
+    INPUTS = {
+        # This will be a dictionary with input artifacts, including URIs
+    }
+    OUTPUTS = {
+        # This will be a dictionary which this component will populate
+    }
+
 class CSVEmbeddingSpec(ComponentSpec):
     """ComponentSpec for Custom TFX Hello World Component."""
 
