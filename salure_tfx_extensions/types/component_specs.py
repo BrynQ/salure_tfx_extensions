@@ -41,7 +41,7 @@ class LCEmbeddingSpec(ComponentSpec):
         'output_data': ChannelParameter(type=standard_artifacts.Examples),
     }
 
-class CopyFileSpec(types.ComponentSpec):
+class CopyFileSpec(ComponentSpec):
     """ComponentSpec for Custom TFX Hello World Component."""
 
     PARAMETERS = {
