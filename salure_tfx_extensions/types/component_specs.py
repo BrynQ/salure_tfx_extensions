@@ -57,6 +57,20 @@ class CopyFileSpec(ComponentSpec):
         # This will be a dictionary which this component will populate
     }
 
+class CsvToExampleSpec(ComponentSpec):
+    """Transform component spec."""
+
+    PARAMETERS = {
+      'feature_description': ExecutionParameter(type=(str, Text)),
+        'input_path': ExecutionParameter(type=(str, Text))
+    }
+    INPUTS = {
+    }
+    OUTPUTS = {
+      'examples':
+          ChannelParameter(type=standard_artifacts.Examples)
+    }
+
 class CSVEmbeddingSpec(ComponentSpec):
     """ComponentSpec for Custom TFX Hello World Component."""
 
