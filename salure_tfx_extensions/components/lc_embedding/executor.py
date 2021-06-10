@@ -21,9 +21,8 @@ feature_description = {
         "fte_vr":tf.io.FixedLenFeature([], tf.float32, default_value=0.0),
         "fte_wo":tf.io.FixedLenFeature([], tf.float32, default_value=0.0),
         "full_time_contract":tf.io.FixedLenFeature([], tf.int64, default_value=0),
-        # 	"hoofddienstverband":tf.io.SparseFeature([], tf.string, default_value=''),
-        "looncomponent_extern_nummer":tf.io.FixedLenFeature([], tf.int64, default_value=0),
-        "medewerker_id":tf.io.FixedLenFeature([], tf.int64, default_value=0),
+        "looncomponent_extern_nummer":tf.io.FixedLenFeature([], tf.string, default_value=''),
+        "medewerker_id":tf.io.FixedLenFeature([], tf.string, default_value=''),
         "new_rooster":tf.io.FixedLenFeature([], tf.int64, default_value=0),
         "part_time_contract":tf.io.FixedLenFeature([], tf.int64, default_value=0),
         "periode":tf.io.FixedLenFeature([], tf.int64, default_value=0),
@@ -32,7 +31,7 @@ feature_description = {
         "type_contract":tf.io.FixedLenFeature([], tf.int64, default_value=0),
         "type_medewerker":tf.io.FixedLenFeature([], tf.string, default_value=''),
         "uren_per_week":tf.io.FixedLenFeature([], tf.float32, default_value=0.0),
-        "werkgever_id":tf.io.FixedLenFeature([], tf.int64, default_value=0)
+        "werkgever_id":tf.io.FixedLenFeature([], tf.string, default_value='')
         }
 
 
