@@ -107,11 +107,13 @@ class MySQLPusherSpec(ComponentSpec):
     """Salure_tfx_extensions MySQLPusher spec"""
 
     PARAMETERS = {
+        # 'module_file': ExecutionParameter(type=(bytes, Text)),
         'connection_config': ExecutionParameter(type=mysql_config_pb2.MySQLConnConfig)
     }
 
     INPUTS = {
         'inference_result': ChannelParameter(type=standard_artifacts.InferenceResult),
+        'percentile_values': ChannelParameter(type=standard_artifacts.Examples)
     }
 
     OUTPUTS = dict()
