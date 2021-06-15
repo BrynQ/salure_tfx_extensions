@@ -63,11 +63,9 @@ class PercentileComponentSpec(types.ComponentSpec):
     PARAMETERS = {
       # These are parameters that will be passed in the call to create an instance of this component.
         'num_quantiles': ExecutionParameter(type=Text),
-        'quantile_key': ExecutionParameter(type=Text),
     }
     INPUTS = {
-        # This will be a dictionary with input artifacts, including URIs
-        'input_data': ChannelParameter(type=standard_artifacts.Examples),
+        'inference_result': ChannelParameter(type=standard_artifacts.InferenceResult),
     }
     OUTPUTS = {
         # This will be a dictionary which this component will populate
@@ -109,7 +107,6 @@ class MySQLPusherSpec(ComponentSpec):
     """Salure_tfx_extensions MySQLPusher spec"""
 
     PARAMETERS = {
-        # 'module_file': ExecutionParameter(type=(bytes, Text)),
         'connection_config': ExecutionParameter(type=mysql_config_pb2.MySQLConnConfig)
     }
 
