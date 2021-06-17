@@ -1,6 +1,8 @@
-from tfx.components.base.base_component import BaseComponent
 from tfx.dsl.components.base import executor_spec
+from tfx import types
 from typing import Optional, Text
+from tfx.types import standard_artifacts, channel_utils
+from tfx.components.base.base_component import BaseComponent
 from salure_tfx_extensions.components.percentile import executor
 from salure_tfx_extensions.types.component_specs import PercentileComponentSpec
 

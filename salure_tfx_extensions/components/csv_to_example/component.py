@@ -5,6 +5,7 @@ from tfx.components.base.base_component import BaseComponent
 from tfx.dsl.components.base import executor_spec
 from typing import Optional, Text
 
+from tfx.utils import json_utils
 
 class CsvToExampleComponent(BaseComponent):
 
