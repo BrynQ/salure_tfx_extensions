@@ -57,7 +57,7 @@ class CopyFileSpec(ComponentSpec):
         # This will be a dictionary which this component will populate
     }
 
-class PercentileComponentSpec(types.ComponentSpec):
+class PercentileComponentSpec(ComponentSpec):
     """ComponentSpec for Custom TFX Hello World Component."""
 
     PARAMETERS = {
