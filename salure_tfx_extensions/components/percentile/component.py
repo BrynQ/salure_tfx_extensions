@@ -8,7 +8,7 @@ from salure_tfx_extensions.types.component_specs import PercentileComponentSpec
 class PercentileComponent(BaseComponent):
 
     SPEC_CLASS = PercentileComponentSpec
-    EXECUTOR_SPEC = executor_spec.ExecutorClassSpec(PercentileComponentExecutor)
+    EXECUTOR_SPEC = executor_spec.ExecutorClassSpec(executor.Executor)
 
 
     def __init__(self, inference_result: types.Channel,
