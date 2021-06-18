@@ -1,18 +1,4 @@
-# Lint as: python2, python3
-# Copyright 2019 Google LLC. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-"""TFX CsvExampleGen component definition."""
+"""Custom TFX CsvExampleGen component definition."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -31,10 +17,10 @@ from tfx.types import artifact_utils
 
 
 class CsvExampleGen(component.FileBasedExampleGen):  # pylint: disable=protected-access
-  """Official TFX CsvExampleGen component.
+  """Custom TFX CsvExampleGen component with dtype definition for specific columns.
 
   The csv examplegen component takes csv data, and generates train
-  and eval examples for downsteam components.
+  and eval examples for downstream components.
 
   The csv examplegen encodes column values to tf.Example int/float/byte feature.
   For the case when there's missing cells, the csv examplegen uses:

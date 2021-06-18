@@ -1,3 +1,5 @@
+"""Custom TFX Component to Calculate the Threshold for Autoencoder"""
+
 from tfx.dsl.components.base import executor_spec
 from tfx import types
 from typing import Optional, Text

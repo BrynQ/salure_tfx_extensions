@@ -1,3 +1,5 @@
+"""MySQLPusher executor to calculate the threshold"""
+
 from tensorflow_serving.apis import prediction_log_pb2
 from tfx.components.base import base_executor
 import apache_beam as beam

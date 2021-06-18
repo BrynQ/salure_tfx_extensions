@@ -1,3 +1,5 @@
+"""Component to Analyze the results"""
+
 from tfx import types
 from tfx.dsl.components.base import base_component
 from tfx.dsl.components.base import executor_spec

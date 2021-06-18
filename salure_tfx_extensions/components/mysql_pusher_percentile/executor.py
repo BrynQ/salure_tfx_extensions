@@ -1,4 +1,5 @@
-"""MySQLPusher executor, will push the provided inference result to the database"""
+"""MySQLPusher executor to to Analyze the results"""
+
 
 from collections import OrderedDict
 import os
