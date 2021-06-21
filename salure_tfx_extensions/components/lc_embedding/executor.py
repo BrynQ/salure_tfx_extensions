@@ -5,35 +5,8 @@ import apache_beam as beam
 import tensorflow as tf
 from tfx.components.base import base_executor
 from tfx.types import artifact_utils
-from tfx.utils import io_utils
-
-
-feature_description = {
-        "bedrag":tf.io.FixedLenFeature([], tf.float32, default_value=0.0),
-        "boekjaar":tf.io.FixedLenFeature([], tf.int64, default_value=0),
-        "cao_code":tf.io.FixedLenFeature([], tf.string, default_value=''),
-        "dagen_per_week":tf.io.FixedLenFeature([], tf.float32, default_value=0.0),
-        "expired_rooster":tf.io.FixedLenFeature([], tf.int64, default_value=0),
-        "fte":tf.io.FixedLenFeature([], tf.float32, default_value=0.0),
-        "fte_di":tf.io.FixedLenFeature([], tf.float32, default_value=0.0),
-        "fte_do":tf.io.FixedLenFeature([], tf.float32, default_value=0.0),
-        "fte_ma":tf.io.FixedLenFeature([], tf.float32, default_value=0.0),
-        "fte_vr":tf.io.FixedLenFeature([], tf.float32, default_value=0.0),
-        "fte_wo":tf.io.FixedLenFeature([], tf.float32, default_value=0.0),
-        "full_time_contract":tf.io.FixedLenFeature([], tf.int64, default_value=0),
-        "looncomponent_extern_nummer":tf.io.FixedLenFeature([], tf.string, default_value=''),
-        "medewerker_id":tf.io.FixedLenFeature([], tf.string, default_value=''),
-        "new_rooster":tf.io.FixedLenFeature([], tf.int64, default_value=0),
-        "part_time_contract":tf.io.FixedLenFeature([], tf.int64, default_value=0),
-        "periode":tf.io.FixedLenFeature([], tf.int64, default_value=0),
-        "temp_contract":tf.io.FixedLenFeature([], tf.int64, default_value=0),
-        "trainee_time_contract":tf.io.FixedLenFeature([], tf.int64, default_value=0),
-        "type_contract":tf.io.FixedLenFeature([], tf.int64, default_value=0),
-        "type_medewerker":tf.io.FixedLenFeature([], tf.string, default_value=''),
-        "uren_per_week":tf.io.FixedLenFeature([], tf.float32, default_value=0.0),
-        "werkgever_id":tf.io.FixedLenFeature([], tf.string, default_value='')
-        }
-
+from tfx.utils import io_utils, json_utils
+import json
 
 def wcmapping(input_data, mapping_table):
     key = "looncomponent_extern_nummer"
@@ -89,6 +62,13 @@ class Executor(base_executor.BaseExecutor):
 
         train_output_examples_uri = os.path.join(artifact_utils.get_single_uri(output_dict['output_data']), 'train')
         eval_output_examples_uri = os.path.join(artifact_utils.get_single_uri(output_dict['output_data']), 'eval')
+
+        with open(json_utils.loads(exec_properties['feature_description']), "rb") as read_file:
+            feature_description = json.load(read_file)
+
+        keys = [k for k in feature_description.keys()]  # list of all keys in the dict
+        values = [eval(v) for v in feature_description.values()]  # list of all values in the dict
+        feature_description = dict(zip(keys, values))  # update the dict with values without quotes
 
         mapping_file = os.path.join(mapping_uri, 'grouping_strategy.csv')
         with self._make_beam_pipeline() as pipeline:

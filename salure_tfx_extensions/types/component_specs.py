@@ -30,7 +30,8 @@ class LCEmbeddingSpec(ComponentSpec):
     PARAMETERS = {
       # These are parameters that will be passed in the call to create an instance of this component.
       #   'name': ExecutionParameter(type=Text),
-        'mapping_file_path':ExecutionParameter(type=(str, Text))
+        'mapping_file_path':ExecutionParameter(type=(str, Text)),
+        'feature_description': ExecutionParameter(type=(str, Text))  # new parameter for reading f_desc_custom.json
     }
     INPUTS = {
         # This will be a dictionary with input artifacts, including URIs
