@@ -21,7 +21,7 @@ class LCEmbedding(base_component.BaseComponent):
                  mapping_file_path: Optional[Text] = None,
                  output_data: types.Channel = None,
                  instance_name: Optional[Text] = None,
-                 feature_description: Optional[Text] = None): # new parameter to read feature_description_custom.json
+                 feature_description: Optional[Text] = None):  # new parameter to read f_desc_emb.json
 
         if not output_data:
             examples_artifact = standard_artifacts.Examples()

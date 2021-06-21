@@ -76,7 +76,7 @@ class Executor(base_executor.BaseExecutor):
             train_data = (
                     pipeline
                     | 'ReadData' >> beam.io.ReadFromTFRecord(file_pattern=io_utils.all_files_pattern(input_examples_uri))
-                    | 'Mapping Wage Components' >> beam.Map(wcmapping, beam.pvalue.AsList(mapping_table))
+                    | 'Mapping Wage Components' >> beam.Map(wcmapping, beam.pvalue.AsList(mapping_table), feature_description = feature_description)
                     | 'SerializeExample' >> beam.Map(lambda x: x.SerializeToString())
                     | 'WriteAugmentedData' >> beam.io.WriteToTFRecord(
                                                 os.path.join(train_output_examples_uri, "wagecomponent_embedded_data"),
@@ -88,7 +88,7 @@ class Executor(base_executor.BaseExecutor):
             eval_data = (
                     pipeline
                     | 'ReadData' >> beam.io.ReadFromTFRecord(file_pattern=io_utils.all_files_pattern(eval_input_examples_uri))
-                    | 'Mapping Wage Components' >> beam.Map(wcmapping, beam.pvalue.AsList(mapping_table))
+                    | 'Mapping Wage Components' >> beam.Map(wcmapping, beam.pvalue.AsList(mapping_table), feature_description = feature_description)
                     | 'SerializeExample' >> beam.Map(lambda x: x.SerializeToString())
                     | 'WriteAugmentedData' >> beam.io.WriteToTFRecord(
                                                 os.path.join(eval_output_examples_uri, "wagecomponent_embedded_data"),

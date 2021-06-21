@@ -31,7 +31,7 @@ class LCEmbeddingSpec(ComponentSpec):
       # These are parameters that will be passed in the call to create an instance of this component.
       #   'name': ExecutionParameter(type=Text),
         'mapping_file_path':ExecutionParameter(type=(str, Text)),
-        'feature_description': ExecutionParameter(type=(str, Text))  # new parameter for reading f_desc_custom.json
+        'feature_description': ExecutionParameter(type=(str, Text))  # new parameter for reading f_desc_emb.json
     }
     INPUTS = {
         # This will be a dictionary with input artifacts, including URIs
@@ -77,7 +77,7 @@ class CsvToExampleSpec(ComponentSpec):
     """Transform component spec."""
 
     PARAMETERS = {
-      'feature_description': ExecutionParameter(type=(str, Text)),
+      'feature_description': ExecutionParameter(type=(str, Text)),  # new parameter for reading f_desc_upl.json
         'input_path': ExecutionParameter(type=(str, Text))
     }
     INPUTS = {
@@ -87,8 +87,8 @@ class CsvToExampleSpec(ComponentSpec):
           ChannelParameter(type=standard_artifacts.Examples)
     }
 
-class CSVEmbeddingSpec(ComponentSpec):
-    """ComponentSpec for Custom TFX Hello World Component."""
+class UploadedfilesEmbeddingSpec(ComponentSpec):
+    """ComponentSpec for Custom TFX UploadedfilesEmbedding Component."""
 
     PARAMETERS = {
       # These are parameters that will be passed in the call to create an instance of this component.
