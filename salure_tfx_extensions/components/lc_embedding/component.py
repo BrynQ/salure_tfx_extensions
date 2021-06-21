@@ -20,14 +20,15 @@ class LCEmbedding(base_component.BaseComponent):
                  input_data: types.Channel = None,
                  mapping_file_path: Optional[Text] = None,
                  output_data: types.Channel = None,
-                 instance_name: Optional[Text] = None):
+                 instance_name: Optional[Text] = None,
+                 feature_description: Optional[Text] = None): # new parameter to read feature_description_custom.json
 
         if not output_data:
             examples_artifact = standard_artifacts.Examples()
             output_data = channel_utils.as_channel([examples_artifact])
 
-        spec = LCEmbeddingSpec(input_data=input_data,
-                                         mapping_file_path = mapping_file_path,
-                                         output_data=output_data)
+        spec = CsvEmbeddingComponentSpec(input_data=input_data,
+                                         feature_description=json_utils.dumps(feature_description),
+                                         mapping_file_path=mapping_file_path, output_data=output_data)
 
         super(LCEmbedding, self).__init__(spec=spec, instance_name=instance_name)
