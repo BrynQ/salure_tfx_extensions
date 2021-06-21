@@ -5,53 +5,14 @@ import apache_beam as beam
 import tensorflow as tf
 from tfx.components.base import base_executor
 from tfx.types import artifact_utils
-from tfx.utils import io_utils
+from tfx.utils import io_utils, json_utils
 import pandas as pd
+import json
 
 
-feature_description = {
-	"bedrag":tf.io.FixedLenFeature([], tf.float32, default_value=0.0),
-	"boekjaar":tf.io.FixedLenFeature([], tf.int64, default_value=0),
-	"cao_code":tf.io.FixedLenFeature([], tf.string, default_value=''),
-	"dagen_per_week":tf.io.FixedLenFeature([], tf.float32, default_value=0.0),
-	"expired_rooster":tf.io.FixedLenFeature([], tf.int64, default_value=0),
-	"fte":tf.io.FixedLenFeature([], tf.float32, default_value=0.0),
-	"fte_di":tf.io.FixedLenFeature([], tf.float32, default_value=0.0),
-	"fte_do":tf.io.FixedLenFeature([], tf.float32, default_value=0.0),
-	"fte_ma":tf.io.FixedLenFeature([], tf.float32, default_value=0.0),
-	"fte_vr":tf.io.FixedLenFeature([], tf.float32, default_value=0.0),
-	"fte_wo":tf.io.FixedLenFeature([], tf.float32, default_value=0.0),
-	"full_time_contract":tf.io.FixedLenFeature([], tf.int64, default_value=0),
-	"looncomponent_extern_nummer":tf.io.FixedLenFeature([], tf.string, default_value=''),
-	"medewerker_id":tf.io.FixedLenFeature([], tf.string, default_value=''),
-	"new_rooster":tf.io.FixedLenFeature([], tf.int64, default_value=0),
-	"part_time_contract":tf.io.FixedLenFeature([], tf.int64, default_value=0),
-	"periode":tf.io.FixedLenFeature([], tf.int64, default_value=0),
-	"temp_contract":tf.io.FixedLenFeature([], tf.int64, default_value=0),
-	"trainee_time_contract":tf.io.FixedLenFeature([], tf.int64, default_value=0),
-	"type_contract":tf.io.FixedLenFeature([], tf.int64, default_value=0),
-	"type_medewerker":tf.io.FixedLenFeature([], tf.string, default_value=''),
-	"uren_per_week":tf.io.FixedLenFeature([], tf.float32, default_value=0.0),
-	"werkgever_id":tf.io.FixedLenFeature([], tf.string, default_value=''),
-    'hours_days_km':tf.io.FixedLenFeature([], tf.int64, default_value=0),
-    'costs':tf.io.FixedLenFeature([], tf.int64, default_value=0),
-    'is_fixed':tf.io.FixedLenFeature([], tf.int64, default_value=0),
-    'is_variable':tf.io.FixedLenFeature([], tf.int64, default_value=0),
-    'declaration':tf.io.FixedLenFeature([], tf.int64, default_value=0),
-    'allowance':tf.io.FixedLenFeature([], tf.int64, default_value=0),
-    'travel_related':tf.io.FixedLenFeature([], tf.int64, default_value=0),
-    'company_car':tf.io.FixedLenFeature([], tf.int64, default_value=0),
-    'overtime':tf.io.FixedLenFeature([], tf.int64, default_value=0),
-    'leaves':tf.io.FixedLenFeature([], tf.int64, default_value=0),
-    'health':tf.io.FixedLenFeature([], tf.int64, default_value=0),
-    'insurance':tf.io.FixedLenFeature([], tf.int64, default_value=0),
-    'pension':tf.io.FixedLenFeature([], tf.int64, default_value=0),
-    'overig':tf.io.FixedLenFeature([], tf.int64, default_value=0)
-}
-
-
-def uploadedfilesmapping(input_data, mapping_uri):
+def uploadedfilesmapping(input_data, mapping_uri, feature_description):
     df = pd.read_csv(os.path.join(mapping_uri, 'uploaded_files.csv'))
+
     df['medewerker_id'] = df['medewerker_id'].apply(lambda x: str(x)[0:-2] if str(x)[-2:] == str(".0") else str(x))
     df['looncomponent_extern_nummer'] = df['looncomponent_extern_nummer'].apply(
         lambda x: str(x)[0:-2] if str(x)[-2:] == str(".0") else str(x))
@@ -66,9 +27,9 @@ def uploadedfilesmapping(input_data, mapping_uri):
                          ]['adjusted_amount']
 
     if adjusted_amount.shape[0] > 0:
-        data['adjusted_amount'] = tf.constant(adjusted_amount.values[0])
+        data['adjusted_amount'] = tf.constant(adjusted_amount.values[0], dtype=tf.float32)
     else:
-        data['adjusted_amount'] = tf.constant(0)
+        data['adjusted_amount'] = tf.constant(0, dtype=tf.float32)
 
     feature = {}
     for key, value in data.items():
@@ -94,12 +55,22 @@ class Executor(base_executor.BaseExecutor):
         train_output_examples_uri = os.path.join(artifact_utils.get_single_uri(output_dict['output_data']), 'train')
         eval_output_examples_uri = os.path.join(artifact_utils.get_single_uri(output_dict['output_data']), 'eval')
 
+        # read the external f_desc_emb.json and save its contents to a dictionary
+        with open(json_utils.loads(exec_properties['feature_description']), "rb") as read_file:
+            feature_description = json.load(read_file)
+
+        # extract values of dict into list, remove quotes with eval() and then put values without quotes back in dict
+        keys = [k for k in feature_description.keys()]  # list of all keys in the dict
+        values = [eval(v) for v in feature_description.values()]  # list of all values in the dict
+        feature_description = dict(zip(keys, values))  # update the dict with values without quotes
+
         with beam.Pipeline() as pipeline:
             train_data = (
                     pipeline
                     | 'ReadData' >> beam.io.ReadFromTFRecord(
                 file_pattern=io_utils.all_files_pattern(input_examples_uri))
-                    | 'Mapping Wage Components' >> beam.Map(uploadedfilesmapping, mapping_uri)
+                    | 'Mapping Wage Components' >> beam.Map(uploadedfilesmapping, mapping_uri,
+                                                            feature_description=feature_description)
                     | 'SerializeExample' >> beam.Map(lambda x: x.SerializeToString())
                     | 'WriteAugmentedData' >> beam.io.WriteToTFRecord(
                 os.path.join(train_output_examples_uri, "uploadedfiles_embedded_data"), file_name_suffix='.gz'))
@@ -109,7 +80,8 @@ class Executor(base_executor.BaseExecutor):
                     pipeline
                     | 'ReadData' >> beam.io.ReadFromTFRecord(
                 file_pattern=io_utils.all_files_pattern(eval_input_examples_uri))
-                    | 'Mapping Wage Components' >> beam.Map(uploadedfilesmapping, mapping_uri)
+                    | 'Mapping Wage Components' >> beam.Map(uploadedfilesmapping, mapping_uri,
+                                                            feature_description=feature_description)
                     | 'SerializeExample' >> beam.Map(lambda x: x.SerializeToString())
                     | 'WriteAugmentedData' >> beam.io.WriteToTFRecord(
                 os.path.join(eval_output_examples_uri, "uploadedfiles_embedded_data"), file_name_suffix='.gz'))
