@@ -6,7 +6,7 @@ from tfx.dsl.components.base import base_component, executor_spec
 from typing import Optional, Text
 from salure_tfx_extensions.components.lc_embedding import executor
 from salure_tfx_extensions.types.component_specs import LCEmbeddingSpec
-
+from tfx.utils import json_utils
 
 class LCEmbedding(base_component.BaseComponent):
     """
@@ -20,14 +20,14 @@ class LCEmbedding(base_component.BaseComponent):
                  input_data: types.Channel = None,
                  mapping_file_path: Optional[Text] = None,
                  output_data: types.Channel = None,
-                 instance_name: Optional[Text] = None,
-                 feature_description: Optional[Text] = None):
+                 feature_description: Optional[Text] = None,
+                 instance_name: Optional[Text] = None):
 
         if not output_data:
             examples_artifact = standard_artifacts.Examples()
             output_data = channel_utils.as_channel([examples_artifact])
 
-        spec = CsvEmbeddingComponentSpec(input_data=input_data,
+        spec = LCEmbeddingSpec(input_data=input_data,
                                          feature_description=json_utils.dumps(feature_description),
                                          mapping_file_path=mapping_file_path, output_data=output_data)
 

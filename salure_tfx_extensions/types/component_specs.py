@@ -77,7 +77,7 @@ class CsvToExampleSpec(ComponentSpec):
     """Transform component spec."""
 
     PARAMETERS = {
-      'feature_description': ExecutionParameter(type=(str, Text)),  # new parameter for reading f_desc_upl.json
+      'feature_description': ExecutionParameter(type=(str, Text)),
         'input_path': ExecutionParameter(type=(str, Text))
     }
     INPUTS = {
@@ -92,7 +92,7 @@ class UploadedfilesEmbeddingSpec(ComponentSpec):
 
     PARAMETERS = {
       # These are parameters that will be passed in the call to create an instance of this component.
-      #   'name': ExecutionParameter(type=Text)
+        'feature_description': ExecutionParameter(type=(str, Text)),  # new parameter for reading f_desc_upl.json
     }
     INPUTS = {
         # This will be a dictionary with input artifacts, including URIs
