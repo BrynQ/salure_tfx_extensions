@@ -8,7 +8,7 @@ from tfx.types import artifact_utils
 from tfx.utils import io_utils, json_utils
 import json
 
-def wcmapping(input_data, mapping_table):
+def wcmapping(input_data, mapping_table, feature_description):
     key = "looncomponent_extern_nummer"
     fieldnames = mapping_table[0].split(',')
     dict_tmp = {}
@@ -16,7 +16,7 @@ def wcmapping(input_data, mapping_table):
                       'company_car', 'overtime', 'leaves', 'health', 'insurance', 'pension', 'overig']
     data = tf.io.parse_single_example(input_data, feature_description)
     idx = fieldnames.index(key)
-    lc_number = data[key].numpy()
+    lc_number = data[key].numpy().decode("utf-8")
 
     for i in range(1, len(mapping_table)):
         mapping_datarow = mapping_table[i].split(',')
@@ -66,9 +66,9 @@ class Executor(base_executor.BaseExecutor):
         with open(json_utils.loads(exec_properties['feature_description']), "rb") as read_file:
             feature_description = json.load(read_file)
 
-        keys = [k for k in feature_description.keys()]  # list of all keys in the dict
-        values = [eval(v) for v in feature_description.values()]  # list of all values in the dict
-        feature_description = dict(zip(keys, values))  # update the dict with values without quotes
+        keys = [k for k in feature_description.keys()]
+        values = [eval(v) for v in feature_description.values()]
+        feature_description = dict(zip(keys, values))
 
         mapping_file = os.path.join(mapping_uri, 'grouping_strategy.csv')
         with self._make_beam_pipeline() as pipeline:
