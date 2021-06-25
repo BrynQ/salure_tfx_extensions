@@ -76,7 +76,7 @@ class Executor(base_executor.BaseExecutor):
 def _ExampleToMySQL(
         pipeline: beam.Pipeline,
         exec_properties: Dict[Text, any],
-        table_name: Optional[Text] = 'ml_test'):
+        table_name: Optional[Text] = 'payroll_ml_results'):
     mysql_config = mysql_config_pb2.MySQLConnConfig()
     json_format.Parse(exec_properties['connection_config'], mysql_config)
 
@@ -107,10 +107,30 @@ class _WriteMySQLDoFn(beam.DoFn):
         values = []
 
         for column, value in element.items():
-            if column in ['periode', 'cao_code', 'medewerker_id', 'looncomponent_extern_nummer',
-                          'werkgever_id', 'boekjaar', 'bedrag', 'score', 'predict_label']:
-                columns.append(column)
-                values.append(value)
+            if column not in ['periode', 'medewerker_id', 'looncomponent_extern_nummer',
+                              'werkgever_id', 'boekjaar', 'bedrag', 'score', 'predict_label']:
+                continue
+            elif column == 'periode':
+                col = 'period'
+            elif column == 'boekjaar':
+                col = 'year'
+            elif column == 'looncomponent_extern_nummer':
+                col = 'wagecomponent_id'
+            elif column == 'werkgever_id':
+                col = 'employer_id'
+            elif column == 'medewerker_id':
+                col = 'employee_id'
+            elif column == 'bedrag':
+                col = 'amount'
+            elif column == 'predict_label':
+                col = 'label'
+            elif column == 'score':
+                col = 'score'
+            elif column =='salary_processing_plan_id':
+                col =='salary_processing_plan_id'
+
+            columns.append(col)
+            values.append(value)
 
         value_str = ", ".join(
             [
