@@ -127,7 +127,7 @@ class _WriteMySQLDoFn(beam.DoFn):
             elif column == 'score':
                 col = 'score'
             elif column =='salary_processing_plan_id':
-                col =='salary_processing_plan_id'
+                col ='salary_processing_plan_id'
 
             columns.append(col)
             values.append(value)
