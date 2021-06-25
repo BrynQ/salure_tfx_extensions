@@ -17,7 +17,7 @@ class UploadedfilesEmbeddingComponent(base_component.BaseComponent):
                  mapping_data: types.Channel = None,
                  output_data: types.Channel = None,
                  instance_name: Optional[Text] = None,
-                 feature_description: Optional[Text] = None):  # new parameter to read f_desc_upl.json
+                 feature_description: Optional[Text] = None):
         if not output_data:
             examples_artifact = standard_artifacts.Examples()
             output_data = channel_utils.as_channel([examples_artifact])

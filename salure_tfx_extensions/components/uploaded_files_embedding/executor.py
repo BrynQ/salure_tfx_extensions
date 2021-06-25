@@ -18,8 +18,8 @@ def uploadedfilesmapping(input_data, mapping_uri, feature_description):
         lambda x: str(x)[0:-2] if str(x)[-2:] == str(".0") else str(x))
     data = tf.io.parse_single_example(input_data, feature_description)
 
-    medewerker_id = data['medewerker_id'].numpy()
-    looncomponent_extern_nummer = data['looncomponent_extern_nummer'].numpy()
+    medewerker_id = data['medewerker_id'].numpy().decode("utf-8")
+    looncomponent_extern_nummer = data['looncomponent_extern_nummer'].numpy().decode("utf-8")
     adjusted_amount = df[(df['medewerker_id'] == str(medewerker_id)) & \
                          (df['looncomponent_extern_nummer'] == str(looncomponent_extern_nummer)) & \
                          (df['boekjaar'] == data['boekjaar'].numpy()) & \
@@ -55,14 +55,12 @@ class Executor(base_executor.BaseExecutor):
         train_output_examples_uri = os.path.join(artifact_utils.get_single_uri(output_dict['output_data']), 'train')
         eval_output_examples_uri = os.path.join(artifact_utils.get_single_uri(output_dict['output_data']), 'eval')
 
-        # read the external f_desc_emb.json and save its contents to a dictionary
         with open(json_utils.loads(exec_properties['feature_description']), "rb") as read_file:
             feature_description = json.load(read_file)
 
-        # extract values of dict into list, remove quotes with eval() and then put values without quotes back in dict
-        keys = [k for k in feature_description.keys()]  # list of all keys in the dict
-        values = [eval(v) for v in feature_description.values()]  # list of all values in the dict
-        feature_description = dict(zip(keys, values))  # update the dict with values without quotes
+        keys = [k for k in feature_description.keys()]
+        values = [eval(v) for v in feature_description.values()]
+        feature_description = dict(zip(keys, values))
 
         with beam.Pipeline() as pipeline:
             train_data = (
