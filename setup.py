@@ -23,7 +23,7 @@ setup(
     package_data={'salure_tfx_extensions': ['proto/*.proto']},
     install_requires=[
         'beam-nuggets>=0.15.1,<0.16',
-        'tfx>=0.27.0,<0.28.0',
+        'tfx==1.0.0rc1',
         'pandas>=0.25,<2',
         'PyMySQL>=0.9.3,<0.10',
         'kfp>=0.4,<0.5',
