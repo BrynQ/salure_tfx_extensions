@@ -14,7 +14,7 @@ from tfx.proto import example_gen_pb2
 class SQLCSVExampleGen(component.QueryBasedExampleGen):
 
     SPEC_CLASS = QueryBasedExampleGenSpec
-    EXECUTOR_SPEC = executor_spec.ExecutorClassSpec(executor.Executor)
+    EXECUTOR_SPEC = executor_spec.BeamExecutorSpec(executor.Executor)
 
     def __init__(self,
                  conn_config: mysql_config_pb2.MySQLConnConfig,

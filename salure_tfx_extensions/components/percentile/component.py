@@ -28,4 +28,4 @@ class PercentileComponent(BaseComponent):
                                        num_quantiles = num_quantiles,
                                        percentile_values=percentile_values)
 
-        super(PercentileComponent, self).__init__(spec=spec, instance_name=instance_name)
+        super(PercentileComponent, self).__init__(spec=spec)

@@ -29,4 +29,4 @@ class MySQLPusher(base_component.BaseComponent):
             connection_config=connection_config,
         )
 
-        super(MySQLPusher, self).__init__(spec=spec, instance_name=instance_name)
+        super(MySQLPusher, self).__init__(spec=spec)

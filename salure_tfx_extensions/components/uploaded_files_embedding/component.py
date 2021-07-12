@@ -16,8 +16,7 @@ class UploadedfilesEmbeddingComponent(base_component.BaseComponent):
     def __init__(self, input_data: types.Channel = None,
                  mapping_data: types.Channel = None,
                  output_data: types.Channel = None,
-                 feature_description: Optional[Text] = None,
-                 instance_name: Optional[Text] = None):
+                 feature_description: Optional[Text] = None):
         if not output_data:
             examples_artifact = standard_artifacts.Examples()
             output_data = channel_utils.as_channel([examples_artifact])
@@ -25,4 +24,4 @@ class UploadedfilesEmbeddingComponent(base_component.BaseComponent):
         spec = UploadedfilesEmbeddingSpec(input_data=input_data, mapping_data=mapping_data,
                                                    output_data=output_data,
                                                    feature_description=json_utils.dumps(feature_description))
-        super(UploadedfilesEmbeddingComponent, self).__init__(spec=spec, instance_name=instance_name)
+        super(UploadedfilesEmbeddingComponent, self).__init__(spec=spec)

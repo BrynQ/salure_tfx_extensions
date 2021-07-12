@@ -48,7 +48,7 @@ class CsvExampleGen(component.FileBasedExampleGen):  # pylint: disable=protected
     feature is `tf.train.Feature(bytes_list=tf.train.BytesList(value=[]))`.
   """
 
-  EXECUTOR_SPEC = executor_spec.ExecutorClassSpec(executor.Executor)
+  EXECUTOR_SPEC = executor_spec.BeamExecutorSpec(executor.Executor)
 
   def __init__(
       self,
@@ -59,9 +59,7 @@ class CsvExampleGen(component.FileBasedExampleGen):  # pylint: disable=protected
       output_config: Optional[Union[example_gen_pb2.Output, Dict[Text,
                                                                  Any]]] = None,
       range_config: Optional[Union[range_config_pb2.RangeConfig,
-                                   Dict[Text, Any]]] = None,
-      example_artifacts: Optional[types.Channel] = None,
-      instance_name: Optional[Text] = None):
+                                   Dict[Text, Any]]] = None):
     """Construct a CsvExampleGen component.
 
     Args:
@@ -93,6 +91,4 @@ class CsvExampleGen(component.FileBasedExampleGen):  # pylint: disable=protected
         input_base=input_base,
         input_config=input_config,
         output_config=output_config,
-        range_config=range_config,
-        example_artifacts=example_artifacts,
-        instance_name=instance_name)
+        range_config=range_config)

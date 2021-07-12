@@ -26,7 +26,7 @@ setup(
         'tfx==1.0.0rc1',
         'pandas>=0.25,<2',
         'PyMySQL>=0.9.3,<0.10',
-        'kfp>=0.4,<0.5',
+        'kfp>=1.6,<2',
     ],
     zip_safe=False
 )

@@ -31,4 +31,4 @@ class LCEmbedding(base_component.BaseComponent):
                                          feature_description=json_utils.dumps(feature_description),
                                          mapping_file_path=mapping_file_path, output_data=output_data)
 
-        super(LCEmbedding, self).__init__(spec=spec, instance_name=instance_name)
+        super(LCEmbedding, self).__init__(spec=spec)
