@@ -20,9 +20,7 @@ class SQLCSVExampleGen(component.QueryBasedExampleGen):
                  conn_config: mysql_config_pb2.MySQLConnConfig,
                  query: Optional[Text] = None,
                  input_config: Optional[example_gen_pb2.Input] = None,
-                 output_config: Optional[example_gen_pb2.Output] = None,
-                 example_artifacts: Optional[Channel] = None,
-                 instance_name: Optional[Text] = None):
+                 output_config: Optional[example_gen_pb2.Output] = None):
 
         if bool(query) == bool(input_config):
             raise ValueError('Exactly one of query and input_config should be set.')
@@ -38,6 +36,4 @@ class SQLCSVExampleGen(component.QueryBasedExampleGen):
         super(SQLCSVExampleGen, self).__init__(
             input_config=input_config,
             output_config=output_config,
-            custom_config=custom_config,
-            example_artifacts=example_artifacts,
-            instance_name=instance_name)
+            custom_config=custom_config)
