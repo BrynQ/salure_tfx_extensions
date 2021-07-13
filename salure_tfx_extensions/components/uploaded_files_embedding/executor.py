@@ -1,4 +1,4 @@
-"""Custom LC Embedding Component Executor"""
+"""Custom Uploadedfiles Embedding Component Executor"""
 
 import os
 import apache_beam as beam
@@ -66,12 +66,12 @@ class Executor(base_executor.BaseExecutor):
             train_data = (
                     pipeline
                     | 'ReadData' >> beam.io.ReadFromTFRecord(
-                file_pattern=io_utils.all_files_pattern(input_examples_uri))
+                                                            file_pattern=io_utils.all_files_pattern(input_examples_uri))
                     | 'Mapping Wage Components' >> beam.Map(uploadedfilesmapping, mapping_uri,
                                                             feature_description=feature_description)
                     | 'SerializeExample' >> beam.Map(lambda x: x.SerializeToString())
                     | 'WriteAugmentedData' >> beam.io.WriteToTFRecord(
-                os.path.join(train_output_examples_uri, "uploadedfiles_embedded_data"), file_name_suffix='.gz'))
+                        os.path.join(train_output_examples_uri, "uploadedfiles_embedded_data"), file_name_suffix='.gz'))
 
         with beam.Pipeline() as pipeline:
             eval_data = (
@@ -82,4 +82,4 @@ class Executor(base_executor.BaseExecutor):
                                                             feature_description=feature_description)
                     | 'SerializeExample' >> beam.Map(lambda x: x.SerializeToString())
                     | 'WriteAugmentedData' >> beam.io.WriteToTFRecord(
-                os.path.join(eval_output_examples_uri, "uploadedfiles_embedded_data"), file_name_suffix='.gz'))
+                        os.path.join(eval_output_examples_uri, "uploadedfiles_embedded_data"), file_name_suffix='.gz'))
