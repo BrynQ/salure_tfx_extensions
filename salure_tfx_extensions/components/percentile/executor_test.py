@@ -89,8 +89,8 @@ class ExecutorTest(tf.test.TestCase):
                                     prediction_log_pb2.PredictionLog)
         self.assertTrue(results)
         # My adaptation of the test:
-        self.assertEqual(len(results[0].predict_log.response.outputs['output'].float_val, 1))
-        self.assertEqual(len(results[0].predict_log.request.inputs['examples'].string_val, 1))  #TODO: test the input example contents
+        self.assertEqual(len(results[0].predict_log.response.outputs['output'].float_val), 1)
+        self.assertEqual(len(results[0].predict_log.request.inputs['examples'].string_val), 1)  #TODO: test the input example contents
 
 
 if __name__ == '__main__':
