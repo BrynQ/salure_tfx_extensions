@@ -107,11 +107,15 @@ class _WriteMySQLDoFn(beam.DoFn):
         values = []
 
         for column, value in element.items():
-            if column not in ['periode', 'medewerker_id', 'looncomponent_extern_nummer',
-                              'werkgever_id', 'boekjaar', 'bedrag', 'score', 'predict_label']:
+            if column not in ['periode','periode_uitgevoerd','medewerker_id','looncomponent_extern_nummer',
+                          'werkgever_id','boekjaar','bedrag','score', 'predict_label','salarisverwerkingsplan_id']:
                 continue
             elif column == 'periode':
                 col = 'period'
+            elif column == 'periode_uitgevoerd':
+                col = 'periode_uitgevoerd'
+            elif column == 'salarisverwerkingsplan_id':
+                col = 'salarisverwerkingsplan_id'
             elif column == 'boekjaar':
                 col = 'year'
             elif column == 'looncomponent_extern_nummer':
@@ -126,8 +130,6 @@ class _WriteMySQLDoFn(beam.DoFn):
                 col = 'label'
             elif column == 'score':
                 col = 'score'
-            elif column =='salary_processing_plan_id':
-                col ='salary_processing_plan_id'
 
             columns.append(col)
             values.append(value)

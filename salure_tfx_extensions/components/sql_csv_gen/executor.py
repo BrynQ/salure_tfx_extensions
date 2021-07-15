@@ -57,9 +57,9 @@ class _ReadMySQLDoFn(beam.DoFn):
                     df_uploaded_file = pd.concat([df_uploaded_file, uploaded_files_temp], sort=True)
 
                 df_uploaded_file['boekjaar'] = df_uploaded_file['payment_date'].dt.year
-                df_uploaded_file['periode'] = df_uploaded_file['payment_date'].dt.month
+                df_uploaded_file['periode_uitgevoerd'] = df_uploaded_file['payment_date'].dt.month
                 df_uploaded_file = df_uploaded_file[
-                    ["Medewerkerscode", "Componentcode", "Waarde", "boekjaar", "periode"]]
+                    ["Medewerkerscode", "Componentcode", "Waarde", "boekjaar", "periode_uitgevoerd"]]
                 df_uploaded_file = df_uploaded_file.rename(columns={"Medewerkerscode": "medewerker_id",
                                                                     "Componentcode": "looncomponent_extern_nummer",
                                                                     "Waarde": "adjusted_amount"})
@@ -67,7 +67,7 @@ class _ReadMySQLDoFn(beam.DoFn):
                     "str")
                 df_uploaded_file.medewerker_id = df_uploaded_file.medewerker_id.astype("str")
                 df_uploaded_file = df_uploaded_file.groupby(['medewerker_id', 'looncomponent_extern_nummer',
-                                                             'boekjaar', 'periode'])[
+                                                             'boekjaar', 'periode_uitgevoerd'])[
                     'adjusted_amount'].sum().reset_index()
                 df_uploaded_file.to_csv(os.path.join(self.output_uri, 'uploaded_files.csv'),
                                         index=False,

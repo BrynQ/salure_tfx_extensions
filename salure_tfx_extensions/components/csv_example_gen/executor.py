@@ -52,7 +52,7 @@ class _ParsedCsvToTfExample(beam.DoFn):
     result = []
     for column_info in column_infos:
       # pylint: disable=g-long-lambda
-      if column_info.name in ['medewerker_id', 'looncomponent_extern_nummer','werkgever_id']:
+      if column_info.name in ['medewerker_id', 'looncomponent_extern_nummer','werkgever_id','salarisverwerkingsplan_id']:
         handler_fn = _bytes_handler
       elif column_info.type == csv_decoder.ColumnType.INT:
         handler_fn = _int_handler

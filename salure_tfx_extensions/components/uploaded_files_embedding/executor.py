@@ -23,7 +23,7 @@ def uploadedfilesmapping(input_data, mapping_uri, feature_description):
     adjusted_amount = df[(df['medewerker_id'] == str(medewerker_id)) & \
                          (df['looncomponent_extern_nummer'] == str(looncomponent_extern_nummer)) & \
                          (df['boekjaar'] == data['boekjaar'].numpy()) & \
-                         (df['periode'] == data['periode'].numpy())
+                         (df['periode_uitgevoerd'] == data['periode_uitgevoerd'].numpy())
                          ]['adjusted_amount']
 
     if adjusted_amount.shape[0] > 0:
