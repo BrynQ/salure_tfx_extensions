@@ -10,12 +10,7 @@ import pandas as pd
 import json
 
 
-def uploadedfilesmapping(input_data, mapping_uri, feature_description):
-    df = pd.read_csv(os.path.join(mapping_uri, 'uploaded_files.csv'))
-
-    df['medewerker_id'] = df['medewerker_id'].apply(lambda x: str(x)[0:-2] if str(x)[-2:] == str(".0") else str(x))
-    df['looncomponent_extern_nummer'] = df['looncomponent_extern_nummer'].apply(
-        lambda x: str(x)[0:-2] if str(x)[-2:] == str(".0") else str(x))
+def uploadedfilesmapping(input_data, mapping_uri, feature_description, df):
     data = tf.io.parse_single_example(input_data, feature_description)
 
     medewerker_id = data['medewerker_id'].numpy().decode("utf-8")
@@ -41,6 +36,7 @@ def uploadedfilesmapping(input_data, mapping_uri, feature_description):
             feature[key] = tf.train.Feature(bytes_list=tf.train.BytesList(value=[value.numpy()]))
     return tf.train.Example(features=tf.train.Features(feature=feature))
 
+
 class Executor(base_executor.BaseExecutor):
 
     def Do(self, input_dict, output_dict, exec_properties):
@@ -62,13 +58,22 @@ class Executor(base_executor.BaseExecutor):
         values = [eval(v) for v in feature_description.values()]
         feature_description = dict(zip(keys, values))
 
+        # Set up the Dataframe
+        df = pd.read_csv(os.path.join(mapping_uri, 'uploaded_files.csv'))
+        df['medewerker_id'] = df['medewerker_id'].apply(lambda x: str(x)[0:-2] if str(x)[-2:] == str(".0") else str(x))
+        df['looncomponent_extern_nummer'] = df['looncomponent_extern_nummer'].apply(
+            lambda x: str(x)[0:-2] if str(x)[-2:] == str(".0") else str(x))
+
         with beam.Pipeline() as pipeline:
             train_data = (
                     pipeline
                     | 'ReadData' >> beam.io.ReadFromTFRecord(
-                                                            file_pattern=io_utils.all_files_pattern(input_examples_uri))
-                    | 'Mapping Wage Components' >> beam.Map(uploadedfilesmapping, mapping_uri,
-                                                            feature_description=feature_description)
+                        file_pattern=io_utils.all_files_pattern(input_examples_uri))
+                    | 'Mapping Wage Components' >> beam.Map(
+                        uploadedfilesmapping,
+                        mapping_uri,
+                        feature_description=feature_description,
+                        df=df)
                     | 'SerializeExample' >> beam.Map(lambda x: x.SerializeToString())
                     | 'WriteAugmentedData' >> beam.io.WriteToTFRecord(
                         os.path.join(train_output_examples_uri, "uploadedfiles_embedded_data"), file_name_suffix='.gz'))
@@ -77,9 +82,12 @@ class Executor(base_executor.BaseExecutor):
             eval_data = (
                     pipeline
                     | 'ReadData' >> beam.io.ReadFromTFRecord(
-                file_pattern=io_utils.all_files_pattern(eval_input_examples_uri))
-                    | 'Mapping Wage Components' >> beam.Map(uploadedfilesmapping, mapping_uri,
-                                                            feature_description=feature_description)
+                        file_pattern=io_utils.all_files_pattern(eval_input_examples_uri))
+                    | 'Mapping Wage Components' >> beam.Map(
+                        uploadedfilesmapping,
+                        mapping_uri,
+                        feature_description=feature_description,
+                        df=df)
                     | 'SerializeExample' >> beam.Map(lambda x: x.SerializeToString())
                     | 'WriteAugmentedData' >> beam.io.WriteToTFRecord(
                         os.path.join(eval_output_examples_uri, "uploadedfiles_embedded_data"), file_name_suffix='.gz'))
