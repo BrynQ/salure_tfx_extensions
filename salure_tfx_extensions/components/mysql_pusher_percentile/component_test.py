@@ -17,18 +17,20 @@ class ComponentTest(tf.test.TestCase):
         self._prediction_log = channel_utils.as_channel([standard_artifacts.InferenceResult()])
         self._percentile_values = channel_utils.as_channel([standard_artifacts.Examples()])
         self._connection_config = mysql_config_pb2.MySQLConnConfig(
-                                            host='10.10.0.7',  # it does not check the connection here...
-                                            port=3306,  # maybe read the parameters from a json file?
-                                            user='mlwizardxueming',
-                                            password='the_Albaphet',
-                                            database='sc_medux')
+                                            host="10.10.0.7",
+                                            port=3306,
+                                            user="mlwizardxueming",
+                                            password="the_Albaphet",
+                                            database="sc_medux")
+        self._table_name = "ml_results"
 
     def testConstructPusherPercentiles(self):
         pusher = MySQLPusher(
             inference_result=self._prediction_log,
             percentile_values=self._percentile_values,
             connection_config=self._connection_config,
-            instance_name='pusher_percentile')
+            table_name=self._table_name,
+            instance_name="pusher_percentile")
         self.assertEqual(
             standard_artifacts.InferenceResult.TYPE_NAME,
             pusher.inputs['inference_result'].type_name)

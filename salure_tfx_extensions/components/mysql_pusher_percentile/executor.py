@@ -1,12 +1,11 @@
-"""MySQLPusher executor to to Analyze the results"""
-
+"""MySQLPusher executor, will push the provided inference result with the percentile values to the database"""
 
 from collections import OrderedDict
 import os
 import apache_beam as beam
 import tensorflow as tf
 import pymysql
-from typing import Any, Dict, List, Text, Optional
+from typing import Any, Dict, List, Text
 from tfx import types
 from tfx.components.base import base_executor
 from tfx.types import artifact_utils
@@ -24,7 +23,7 @@ _PREDICTION_LOGS_FILE_NAME = 'prediction_logs'
 
 class Executor(base_executor.BaseExecutor):
     """
-    Executor that loads in Inference results and calculated percentile values,
+    Executor that loads in inference results and calculated percentile values,
     return the input files with a label to the results.
     """
 
@@ -63,8 +62,7 @@ class Executor(base_executor.BaseExecutor):
                  | 'WritePredictionLogs' >> beam.io.WriteToText(
                         file_path_prefix=os.path.join(predictions_path, _PREDICTION_LOGS_FILE_NAME),
                         num_shards=1,
-                        file_name_suffix=".json")
-                 )
+                        file_name_suffix=".json"))
             print(f"Json format prediction results saved to {predictions_path, _PREDICTION_LOGS_FILE_NAME}")
 
             _ = (data
@@ -75,10 +73,10 @@ class Executor(base_executor.BaseExecutor):
 @beam.typehints.with_input_types(beam.Pipeline)
 def _ExampleToMySQL(
         pipeline: beam.Pipeline,
-        exec_properties: Dict[Text, any],
-        table_name: Optional[Text] = 'payroll_ml_results'):
+        exec_properties: Dict[Text, any]):
     mysql_config = mysql_config_pb2.MySQLConnConfig()
     json_format.Parse(exec_properties['connection_config'], mysql_config)
+    table_name = exec_properties['table_name']
 
     return (pipeline
             | 'WriteMySQLDoFN' >> beam.ParDo(_WriteMySQLDoFn(mysql_config, table_name)))
@@ -88,13 +86,10 @@ class _WriteMySQLDoFn(beam.DoFn):
     """Inspired by:
     https://github.com/esakik/beam-mysql-connector/blob/master/beam_mysql/connector/io.py"""
 
-    def __init__(
-            self,
-            mysql_config: mysql_config_pb2.MySQLConnConfig,
-            table_name
-    ):
+    def __init__(self,
+                 mysql_config: mysql_config_pb2.MySQLConnConfig,
+                 table_name):
         super(_WriteMySQLDoFn, self).__init__()
-
         self.mysql_config = json_format.MessageToDict(mysql_config)
         self.table_name = table_name
 
@@ -107,13 +102,14 @@ class _WriteMySQLDoFn(beam.DoFn):
         values = []
 
         for column, value in element.items():
-            if column not in ['periode','periode_uitgevoerd','medewerker_id','looncomponent_extern_nummer',
-                          'werkgever_id','boekjaar','bedrag','score', 'predict_label','salarisverwerkingsplan_id']:
+            if column not in ['periode', 'periode_uitgevoerd', 'medewerker_id', 'looncomponent_extern_nummer',
+                              'werkgever_id', 'boekjaar', 'bedrag', 'score', 'predict_label',
+                              'salarisverwerkingsplan_id']:
                 continue
             elif column == 'periode':
                 col = 'period'
             elif column == 'periode_uitgevoerd':
-                col = 'periode_uitgevoerd'
+                col = 'period_executed'
             elif column == 'salarisverwerkingsplan_id':
                 col = 'salarisverwerkingsplan_id'
             elif column == 'boekjaar':
@@ -145,11 +141,10 @@ class _WriteMySQLDoFn(beam.DoFn):
 
     def finish_bundle(self):
         if len(self._values):
-            client = pymysql.connect(**self.mysql_config)
-            cursor = client.cursor()
-
             value_str = ", ".join(self._values)
             query = f"INSERT INTO {self.mysql_config['database']}.{self.table_name} {self._column_str} VALUES {value_str};"
+            client = pymysql.connect(**self.mysql_config)
+            cursor = client.cursor()
             cursor.execute(query)
             self._values.clear()
             self._column_str = ""
@@ -208,7 +203,6 @@ def parse_predictlog(pb, percentile_values):
     results = parse_pb(example)
     results['score'] = predict_val
     results['predict_label'] = predict_label
-
     return OrderedDict(sorted(results.items(), key=lambda t: t[0]))
 
 

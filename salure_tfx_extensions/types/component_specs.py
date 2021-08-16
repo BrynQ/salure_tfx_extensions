@@ -108,8 +108,8 @@ class MySQLPusherSpec(ComponentSpec):
     """Salure_tfx_extensions MySQLPusher spec"""
 
     PARAMETERS = {
-        # 'module_file': ExecutionParameter(type=(bytes, Text)),
-        'connection_config': ExecutionParameter(type=mysql_config_pb2.MySQLConnConfig)
+        'connection_config': ExecutionParameter(type=mysql_config_pb2.MySQLConnConfig),
+        'table_name': ExecutionParameter(type=(str, Text))
     }
 
     INPUTS = {
