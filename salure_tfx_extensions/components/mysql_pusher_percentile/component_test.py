@@ -23,6 +23,7 @@ class ComponentTest(tf.test.TestCase):
                                             password="the_Albaphet",
                                             database="sc_medux")
         self._table_name = "ml_results"
+        self._inference_id = "inference_id"
 
     def testConstructPusherPercentiles(self):
         pusher = MySQLPusher(
@@ -30,6 +31,7 @@ class ComponentTest(tf.test.TestCase):
             percentile_values=self._percentile_values,
             connection_config=self._connection_config,
             table_name=self._table_name,
+            inference_id=self._inference_id,
             instance_name="pusher_percentile")
         self.assertEqual(
             standard_artifacts.InferenceResult.TYPE_NAME,

@@ -26,6 +26,7 @@ class ExecutorTest(tf.test.TestCase):
         self._percentile_values = standard_artifacts.Examples()
         self._percentile_values.uri = os.path.join(self._source_data_dir, "percentile_values")
         self._table_name = "ml_results"
+        self._inference_id = "inference_id"
         self._input_dict = {
             'inference_result': [self._prediction_logs],
             'percentile_values': [self._percentile_values],
@@ -39,7 +40,8 @@ class ExecutorTest(tf.test.TestCase):
                 user='mlwizardxueming',
                 password='the_Albaphet',
                 database='sc_medux')),
-            'table_name': self._table_name
+            'table_name': self._table_name,
+            'inference_id': self._inference_id
         }
 
     def removeFiles(self, directory, pattern):

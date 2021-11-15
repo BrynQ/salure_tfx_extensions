@@ -20,13 +20,15 @@ class MySQLPusher(base_component.BaseComponent):
                  percentile_values: types.Channel,
                  connection_config,
                  table_name,
+                 inference_id,
                  instance_name: Optional[Text] = None):
 
         spec = MySQLPusherSpec(
             inference_result=inference_result,
             percentile_values=percentile_values,
             connection_config=connection_config,
-            table_name=table_name
+            table_name=table_name,
+            inference_id=inference_id
         )
 
         super(MySQLPusher, self).__init__(spec=spec, instance_name=instance_name)

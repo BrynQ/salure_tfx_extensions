@@ -77,9 +77,10 @@ def _ExampleToMySQL(
     mysql_config = mysql_config_pb2.MySQLConnConfig()
     json_format.Parse(exec_properties['connection_config'], mysql_config)
     table_name = exec_properties['table_name']
+    inference_id = exec_properties['inference_id']
 
     return (pipeline
-            | 'WriteMySQLDoFN' >> beam.ParDo(_WriteMySQLDoFn(mysql_config, table_name)))
+            | 'WriteMySQLDoFN' >> beam.ParDo(_WriteMySQLDoFn(mysql_config, table_name, inference_id)))
 
 
 class _WriteMySQLDoFn(beam.DoFn):
@@ -88,10 +89,12 @@ class _WriteMySQLDoFn(beam.DoFn):
 
     def __init__(self,
                  mysql_config: mysql_config_pb2.MySQLConnConfig,
-                 table_name):
+                 table_name,
+                 inference_id):
         super(_WriteMySQLDoFn, self).__init__()
         self.mysql_config = json_format.MessageToDict(mysql_config)
         self.table_name = table_name
+        self.inference_id = inference_id
 
     def start_bundle(self):
         self._column_str = []
@@ -130,6 +133,8 @@ class _WriteMySQLDoFn(beam.DoFn):
             columns.append(col)
             values.append(value)
 
+        columns.append('inference_id')
+        values.append(self.inference_id)
         value_str = ", ".join(
             [
                 f"{'NULL' if value is None else value}" if isinstance(value, (type(None), int, float)) else f"'{value}'"

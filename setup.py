@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 # IMPORTANT: ALSO UPDATE IN 'VERSION' FILE FOR CI DOCKER BUILD
 VERSION_MAJOR = '0'
 VERSION_MINOR = '1'
-VERSION_PATCH = '31'
+VERSION_PATCH = '32'
 
 
 with open('README.md') as f:

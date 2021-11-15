@@ -109,7 +109,8 @@ class MySQLPusherSpec(ComponentSpec):
 
     PARAMETERS = {
         'connection_config': ExecutionParameter(type=mysql_config_pb2.MySQLConnConfig),
-        'table_name': ExecutionParameter(type=(str, Text))
+        'table_name': ExecutionParameter(type=(str, Text)),
+        'inference_id': ExecutionParameter(type=(str, Text))
     }
 
     INPUTS = {
