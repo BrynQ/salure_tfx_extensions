@@ -120,6 +120,19 @@ class MySQLPusherSpec(ComponentSpec):
 
     OUTPUTS = dict()
 
+class CsvToExampleSpec(ComponentSpec):
+    """Transform component spec."""
+
+    PARAMETERS = {
+      'feature_description': ExecutionParameter(type=(str, Text)),
+        'input_path': ExecutionParameter(type=(str, Text))
+    }
+    INPUTS = {
+    }
+    OUTPUTS = {
+      'examples':
+          ChannelParameter(type=standard_artifacts.Examples)
+    }
 
 class SKLearnTrainerSpec(ComponentSpec):
     """Salure_tfx_extensions SKLearnTrainer spec"""
