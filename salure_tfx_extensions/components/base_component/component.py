@@ -1,8 +1,10 @@
 from typing import Optional, Text, Dict, Any, Union
 
 from tfx import types
-from tfx.components.base import base_component
-from tfx.components.base import executor_spec
+# from tfx.components.base import base_component
+# from tfx.components.base import executor_spec
+from tfx.dsl.components.base import base_component
+from tfx.dsl.components.base import executor_spec
 from tfx.types import standard_artifacts
 from tfx.types import artifact_utils
 from tfx.proto import example_gen_pb2
