@@ -1,6 +1,6 @@
 tfx>=0.27.0,<0.28.0
 tensorflow==2.3.0
 tensorflow-datasets==3.2.1
-PyMySQL>=0.9.3,<0.10
+PyMySQL>=1,<2
 pandas>=0.25,<2
 kfp>=0.4,<0.5
