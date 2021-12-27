@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 # IMPORTANT: ALSO UPDATE IN 'VERSION' FILE FOR CI DOCKER BUILD
 VERSION_MAJOR = '0'
 VERSION_MINOR = '1'
-VERSION_PATCH = '33'
+VERSION_PATCH = '34'
 
 
 with open('README.md') as f:
@@ -25,7 +25,7 @@ setup(
         'beam-nuggets>=0.15.1,<0.16',
         'tfx>=0.27.0,<0.28.0',
         'pandas>=0.25,<2',
-        'PyMySQL>=0.9.3,<0.10',
+        'PyMySQL>=1,<2',
         'kfp>=0.4,<0.5',
     ],
     zip_safe=False
