@@ -32,6 +32,9 @@ setup(
         'pyzmq>=22.0.0',
         'ptyprocess>=0.7.0',
         'prompt_toolkit>=3.0.0',
+        'oauthlib>=3.1.0',
+        'requests-oauthlib>=1.3.0',
+        'importlib-metadata>=3.4.0',
         "scipy>=1.4.1"
     ],
     zip_safe=False
