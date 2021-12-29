@@ -23,8 +23,7 @@ setup(
     package_data={'salure_tfx_extensions': ['proto/*.proto']},
     install_requires=[
         'beam-nuggets>=0.15.1,<0.16',
-        'tfx>=0.27.0,<0.28.0',
-        'tensorflow>=2.6.0'
+        'tfx>=0.27.0,<0.28.0'
     ],
     zip_safe=False
 )
