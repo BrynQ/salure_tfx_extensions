@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 # IMPORTANT: ALSO UPDATE IN 'VERSION' FILE FOR CI DOCKER BUILD
 VERSION_MAJOR = '0'
 VERSION_MINOR = '2'
-VERSION_PATCH = '3'
+VERSION_PATCH = '5'
 
 
 with open('README.md') as f:
@@ -24,8 +24,10 @@ setup(
     install_requires=[
         'beam-nuggets>=0.15.1,<0.16',
         'tfx>=0.27.0,<0.28.0',
+        'tensorflow>=2.6.0',
         'pandas>=0.25,<2',
         'PyMySQL>=1,<2',
+        'salure-helpers==15.9.0',
         'kfp>=0.4,<0.5'
     ],
     zip_safe=False
