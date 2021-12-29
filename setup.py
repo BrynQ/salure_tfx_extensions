@@ -2,8 +2,8 @@ from setuptools import setup, find_packages
 
 # IMPORTANT: ALSO UPDATE IN 'VERSION' FILE FOR CI DOCKER BUILD
 VERSION_MAJOR = '0'
-VERSION_MINOR = '1'
-VERSION_PATCH = '35'
+VERSION_MINOR = '2'
+VERSION_PATCH = '1'
 
 
 with open('README.md') as f:
@@ -28,11 +28,7 @@ setup(
         'tensorflow-datasets==3.2.1',
         'pandas>=0.25,<2',
         'PyMySQL>=1,<2',
-        'kfp>=0.4,<0.5',
-        'pyzmq>=22.0.0',
-        'ptyprocess>=0.7.0',
-        'prompt_toolkit>=3.0.0',
-        "scipy>=1.4.1"
+        'kfp>=0.4,<0.5'
     ],
     zip_safe=False
 )
