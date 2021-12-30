@@ -1,2 +1,0 @@
-DEFAULT_SKLEARN_MODEL_NAME = 'model.joblib'
-DEFAULT_TFRECORD_FILE_NAME = 'data_tfrecord'
