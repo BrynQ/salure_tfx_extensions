@@ -1,0 +1,14 @@
+name: CI/CD
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - main
+
+jobs:
+  build:
+    if: github.event_name == 'workflow_dispatch' || contains(toJSON(github.event.commits.*.modified), 'VERSION')
+    uses: BrynQ/ci_pipeline/.github/workflows/docker_build.yml@main
+    secrets: inherit
