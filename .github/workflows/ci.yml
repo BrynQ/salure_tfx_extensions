@@ -6,8 +6,11 @@ on:
     branches:
       - master
       - main
+    paths:
+      - 'VERSION'
 
 jobs:
   build:
+    name: Build and Push Docker Image
     uses: BrynQ/ci_pipeline/.github/workflows/docker_build.yml@main
     secrets: inherit
